@@ -1,0 +1,66 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/*
+!Builds/.gitkeep
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Unity generated project files under client projects
+Client/*/*.csproj
+Client/*/*.sln
+Client/*/*.sln.DotSettings.user
+Client/*/.vs/
+Client/*/.idea/
+Client/*/.vscode/
+Client/*/.vsconfig
+
+# Unity cache and crash artifacts
+sysinfo.txt
+*.stackdump
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity asset store tools and local package cache
+Assets/AssetStoreTools*
+Client/*/Assets/AssetStoreTools*
+
+# Visual Studio / Rider / VS Code local state
+.vs/
+.idea/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.DotSettings.user
+
+# .NET build outputs
+bin/
+obj/
+TestResults/
+*.nupkg
+
+# Logs and local environment files
+*.log
+*.tmp
+*.temp
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
