@@ -66,6 +66,7 @@ Online Action RPG Tech Demo/
     系统架构设计.md
     协议设计.md
     迭代模块规划.md
+    资产来源与许可.md
     工程巡检报告-2026-08-13.md
     Bug记录簿.md
     性能验证记录.md
@@ -111,6 +112,7 @@ Client/UnityProject/
 - [系统架构设计](Docs/系统架构设计.md)
 - [协议设计](Docs/协议设计.md)
 - [迭代模块规划](Docs/迭代模块规划.md)
+- [资产来源与许可](Docs/资产来源与许可.md)
 - [工程巡检报告](Docs/工程巡检报告-2026-08-13.md)
 - [Bug 记录簿](Docs/Bug记录簿.md)
 - [性能验证记录](Docs/性能验证记录.md)
