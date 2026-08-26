@@ -6,19 +6,21 @@
 
 ## 当前状态
 
-项目处于工程启动早期：文档骨架和 Unity 客户端工程已建立，服务端工程仍是占位目录，联网功能尚未实现。
+项目处于工程启动早期：文档骨架和 Unity 客户端工程已建立，服务端最小 WebSocket Ping / Pong 已完成 smoke test 验证。Unity 客户端联网面板尚未实现。
 
 已完成：
 
 - 项目立项、架构、协议和迭代规划文档。
 - Unity 客户端工程目录统一为 `Client/UnityProject/`。
+- C# / .NET 服务端最小工程：`Server/OnlineRpgServer/`。
+- 服务端 `PingReq -> PingRes` WebSocket 通信验证。
+- PowerShell smoke test：`Tools/SmokeTests/Test-ServerPing.ps1`。
 - Git 基线配置，包括 Unity / .NET `.gitignore` 和 `.gitattributes`。
 - 工程巡检报告与 Bug / 性能记录模板。
 
 未完成：
 
-- C# / .NET 服务端工程。
-- WebSocket Ping / Pong 通信验证。
+- Unity 客户端 WebSocket 调试面板。
 - 登录、大厅、房间、加载、战斗和同步功能。
 - Windows Build、性能记录和演示视频。
 
@@ -48,9 +50,9 @@ MVP 只追求一条小而完整、可解释、可演示的商业客户端流程�
 | 客户端 | Unity `6000.3.20f1` + C# | 已创建 URP 客户端工程 |
 | 渲染管线 | URP | 适合轻量动作 Demo 和性能验证 |
 | 输入 | Unity Input System | 已在客户端包清单中启用 |
-| 服务端 | C# / .NET Console，待创建 | MVP 先降低服务端复杂度 |
-| 网络 | WebSocket，待实现 | 第一版优先可读、可调试、可演示 |
-| 协议 | JSON，待实现 | 后续可扩展 MessagePack / Protobuf |
+| 服务端 | C# / .NET `net9.0` | 已创建最小 WebSocket 服务端 |
+| 网络 | WebSocket | 服务端 Ping / Pong 已验证，Unity 客户端待接入 |
+| 协议 | JSON | 当前已用于 `PingReq / PingRes` |
 | 资源 | Addressables，待接入 | 用于展示异步加载和资源所有权 |
 
 ## 目录结构
@@ -60,7 +62,7 @@ Online Action RPG Tech Demo/
   Client/
     UnityProject/              # Unity 客户端工程
   Server/
-    OnlineRpgServer/           # C# / .NET 服务端工程，占位中
+    OnlineRpgServer/           # C# / .NET 服务端工程
   Docs/
     项目立项书.md
     系统架构设计.md
@@ -96,13 +98,28 @@ Client/UnityProject/
 
 ## 运行状态
 
-当前还没有完整运行链路。
+当前还没有完整客户端运行链路，但服务端最小通信验证已通过。
 
-下一步迭代 0 的最小验收目标是：
+启动服务端：
 
-- 创建 `Server/OnlineRpgServer/` 的 .NET 服务端工程。
-- 实现 WebSocket 连接。
-- 定义 `PingReq / PingRes`。
+```powershell
+dotnet run --project Server\OnlineRpgServer\OnlineRpgServer.csproj
+```
+
+服务端启动后执行 smoke test：
+
+```powershell
+Tools\SmokeTests\Test-ServerPing.ps1
+```
+
+已验证返回：
+
+```json
+{"ok":true,"url":"ws://localhost:5050/ws","requestId":"smoke-test-001","responseType":"PingRes","code":0}
+```
+
+迭代 0 剩余验收目标：
+
 - 客户端能连接本地服务端并显示 RTT。
 - 断开服务端后客户端能显示断线状态。
 
@@ -126,4 +143,4 @@ Client/UnityProject/
 
 ## 当前推荐下一步
 
-进入迭代 0：项目骨架与通信验证。先跑通本地服务端与 Unity 客户端的 Ping / Pong，再开始登录和大厅功能。
+继续迭代 0：在 Unity 中创建最小网络调试面板，连接 `ws://localhost:5050/ws`，发送 `PingReq` 并显示 RTT / 协议日志 / 断线状态。
