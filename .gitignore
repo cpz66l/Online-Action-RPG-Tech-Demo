@@ -60,6 +60,10 @@ TestResults/
 .env
 .env.*
 
+# Local-only learning / mentoring notes
+Docs/开发日志/
+Docs/导师手册.md
+
 # OS files
 .DS_Store
 Thumbs.db

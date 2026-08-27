@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using OnlineRpgServer.Account;
 using OnlineRpgServer.Protocol;
 
 // 服务端入口：当前迭代只负责最小 WebSocket Ping / Pong 验证。
@@ -21,6 +22,7 @@ builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Information);
 
 var app = builder.Build();  //生成真正可运行的WebApplication
 var logger = app.Logger;    //拿到日志对象
+var accountService = new AccountService();  //实例化账号服务器
 
 // 固定本地开发端口，方便 Unity 客户端和 smoke test 使用同一个地址。
 app.Urls.Add("http://localhost:5050");
@@ -56,7 +58,7 @@ app.Map("/ws", async context =>
     logger.LogInformation("Client connected: {ConnectionId}", connectionId);
 
     // 当前连接的主循环：持续收消息、构造响应、发回客户端。
-    await HandleConnectionAsync(socket, connectionId, logger, context.RequestAborted);
+    await HandleConnectionAsync(socket, connectionId, logger, accountService,context.RequestAborted);
 
     logger.LogInformation("Client disconnected: {ConnectionId}", connectionId);
 });
@@ -68,6 +70,7 @@ static async Task HandleConnectionAsync(
     WebSocket socket,
     string connectionId,
     ILogger logger,
+    AccountService accountService,
     CancellationToken cancellationToken)
 {
     // 当前只做小包 JSON 协议验证，4KB 足够；后续大包/分片再扩展。
@@ -76,7 +79,7 @@ static async Task HandleConnectionAsync(
     while (socket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
     {
         // 统一接收完整的一条 Text Message。返回 null 表示客户端主动断开。
-        var result = await ReceiveTextAsync(socket, buffer, cancellationToken);
+        var result = await ReceiveTextAsync(socket, buffer, cancellationToken);//将客户端发来的数据进行处理
 
         if (result is null)
         {
@@ -85,9 +88,10 @@ static async Task HandleConnectionAsync(
 
         logger.LogInformation("Recv {ConnectionId}: {Message}", connectionId, result);
 
-        // 业务分发点：目前只识别 PingReq，后续会扩展成 ProtocolRouter。
-        var response = BuildResponse(result, logger);
-        await SendTextAsync(socket, response, cancellationToken);
+        // 业务分发点：
+        var response = BuildResponse(result, logger, accountService);//根据不同数据业务创建不同的响应
+
+        await SendTextAsync(socket, response, cancellationToken);//将响应发回
 
         logger.LogInformation("Send {ConnectionId}: {Message}", connectionId, response);
     }
@@ -132,7 +136,7 @@ static async Task SendTextAsync(WebSocket socket, string message, CancellationTo
     await socket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken);
 }
 
-static string BuildResponse(string rawMessage, ILogger logger)
+static string BuildResponse(string rawMessage, ILogger logger, AccountService accountService)
 {
     try
     {
@@ -144,10 +148,15 @@ static string BuildResponse(string rawMessage, ILogger logger)
             return JsonSerializer.Serialize(CreateErrorResponse(null, 1001, "Invalid protocol envelope."));
         }
 
-        // 当前只有调试协议 PingReq。后续登录/房间/战斗消息会从这里拆到独立 Router。
         return envelope.Type switch
         {
+            //心跳请求
             "PingReq" => JsonSerializer.Serialize(CreatePingResponse(envelope)),
+            //注册请求
+            "RegisterReq" => JsonSerializer.Serialize(CreateRegisterResponse(envelope, accountService)),
+            //登录请求
+            "LoginReq" => JsonSerializer.Serialize(CreateLoginResponse(envelope, accountService)),
+            //错误请求
             _ => JsonSerializer.Serialize(CreateErrorResponse(envelope.RequestId, 1001, $"Unsupported message type: {envelope.Type}"))
         };
     }
@@ -158,6 +167,9 @@ static string BuildResponse(string rawMessage, ILogger logger)
     }
 }
 
+//业务分发
+
+//心跳响应
 static object CreatePingResponse(ProtocolEnvelope request)
 {
     // clientTime 原样带回，客户端可以用“收到响应时间 - 发出请求时间”计算 RTT。
@@ -166,12 +178,14 @@ static object CreatePingResponse(ProtocolEnvelope request)
 
     return new
     {
+        //信封的包装内容，每个信封必备
         msgId = DebugMessageIds.PingRes,
         type = "PingRes",
         requestId = request.RequestId,
         code = 0,
         message = "OK",
         serverTime,
+        //具体的业务数据
         payload = new PingResponsePayload
         {
             ClientTime = clientTime,
@@ -180,6 +194,79 @@ static object CreatePingResponse(ProtocolEnvelope request)
     };
 }
 
+//注册响应
+static object CreateRegisterResponse(ProtocolEnvelope request, AccountService accountService)
+{
+    //处理注册请求，转换Payload的数据内容
+    RegisterRequestPayload? payload = request.Payload.Deserialize<RegisterRequestPayload>();
+    
+    if (payload is null)
+    {
+        return CreateErrorResponse(request.RequestId, 1001, "Invalid RegisterReq payload.");
+    }
+
+    var result = accountService.Register(payload.Username, payload.Password, payload.Nickname);
+
+    if (!result.Success)
+    {
+        return CreateErrorResponse(request.RequestId, result.Code, result.Message);
+    }
+
+    return new
+    {
+        //信封的包装内容，每个信封必备
+        msgId = AccountMessageIds.RegisterRes,
+        type = "RegisterRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        //具体的业务数据
+        payload = new RegisterResponsePayload
+        {
+            PlayerId = result.PlayerId,
+            Nickname = result.Nickname
+        }
+    };
+}
+
+//登录响应
+static object CreateLoginResponse(ProtocolEnvelope request, AccountService accountService)
+{
+    LoginRequestPayload? payload = request.Payload.Deserialize<LoginRequestPayload>();
+
+    if (payload is null)
+    {
+        return CreateErrorResponse(request.RequestId, 1001, "Invalid LoginReq payload.");
+    }
+
+    var result = accountService.Login(payload.Username, payload.Password);
+
+    if (!result.Success)
+    {
+        return CreateErrorResponse(request.RequestId, result.Code, result.Message);
+    }
+
+    return new
+    {
+        //信封的包装内容，每个信封必备
+        msgId = AccountMessageIds.LoginRes,
+        type = "LoginRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        //具体的业务数据
+        payload = new LoginResponsePayload
+        {
+            Token = result.Token,
+            PlayerId = result.PlayerId,
+            Nickname = result.Nickname
+        }
+    };
+}
+
+//错误响应
 static object CreateErrorResponse(string? requestId, int code, string message)
 {
     // 错误响应也保留 requestId，方便客户端把错误和原请求对应起来。
