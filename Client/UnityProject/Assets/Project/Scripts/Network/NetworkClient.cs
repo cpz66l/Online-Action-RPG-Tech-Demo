@@ -15,6 +15,8 @@ namespace OnlineActionRpg.Client.Network
 
     public sealed class NetworkClient : MonoBehaviour
     {
+        public event Action<string> TextMessageReceived;
+
         private readonly object _stateLock = new object();
 
         private INetworkTransport _transport;   //接口实现多态，可能是WebSocket或UDP/KCP
@@ -111,6 +113,38 @@ namespace OnlineActionRpg.Client.Network
             }
         }
 
+        //通用发送方法
+        public async Task SendJsonAsync(string json)
+        {
+            if (!IsConnected)
+            {
+                SetError("Cannot send message: network is not connected.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                SetError("Cannot send empty message.");
+                return;
+            }
+
+            lock (_stateLock)
+            {
+                _lastSentJson = json;
+                _lastError = string.Empty;
+            }
+
+            try
+            {
+                await _transport.SendTextAsync(json, _lifetimeCts.Token);
+            }
+            catch (Exception ex)
+            {
+                SetError(ex.Message);
+            }
+        }
+
+        //发送心跳
         public async Task SendPingAsync()
         {
             if (!IsConnected)
@@ -154,6 +188,7 @@ namespace OnlineActionRpg.Client.Network
             }
         }
 
+        //用于Unity主线程在update里获取网络当前快照
         public NetworkClientSnapshot GetSnapshot()
         {
             lock (_stateLock)
@@ -168,6 +203,7 @@ namespace OnlineActionRpg.Client.Network
                 };
             }
         }
+
 
         private void HandleConnected()
         {
@@ -197,6 +233,9 @@ namespace OnlineActionRpg.Client.Network
             {
                 _lastReceivedJson = json;
             }
+
+            TextMessageReceived?.Invoke(json);
+            //WebSocket受到消息后触发事件传到NetworkClient后再触发事件传到AccountMessages
 
             if (envelope == null || string.IsNullOrEmpty(envelope.type))
             {
