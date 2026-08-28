@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using OnlineRpgServer.Account;
 using OnlineRpgServer.Protocol;
+using OnlineRpgServer.Room;
+using OnlineRpgServer.Connection;
 
 // 服务端入口：当前迭代只负责最小 WebSocket Ping / Pong 验证。
 // 后续登录、大厅、战斗同步都会建立在这条“连接 -> 收包 -> 分发 -> 回包”的链路上。
@@ -20,9 +22,13 @@ builder.Logging.AddSimpleConsole(options =>
 builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Information);
 
+
 var app = builder.Build();  //生成真正可运行的WebApplication
 var logger = app.Logger;    //拿到日志对象
-var accountService = new AccountService();  //实例化账号服务器
+var accountService = new AccountService();  //实例化账号服务
+var roomService = new RoomService();        //实例化房间服务
+var connectionRegistry = new ConnectionRegistry(); // 记录玩家和 WebSocket 连接的绑定关系
+
 
 // 固定本地开发端口，方便 Unity 客户端和 smoke test 使用同一个地址。
 app.Urls.Add("http://localhost:5050");
@@ -57,22 +63,32 @@ app.Map("/ws", async context =>
     var connectionId = Guid.NewGuid().ToString("N")[..8];
     logger.LogInformation("Client connected: {ConnectionId}", connectionId);
 
-    // 当前连接的主循环：持续收消息、构造响应、发回客户端。
-    await HandleConnectionAsync(socket, connectionId, logger, accountService,context.RequestAborted);
+    var connection = connectionRegistry.Add(connectionId, socket);
 
-    logger.LogInformation("Client disconnected: {ConnectionId}", connectionId);
+    try
+    {
+        // 当前连接的主循环：持续收消息、构造响应、发回客户端。
+        await HandleConnectionAsync(connection, logger, accountService, roomService, connectionRegistry, context.RequestAborted);
+    }
+    finally
+    {
+        connectionRegistry.Remove(connectionId);
+        logger.LogInformation("Client disconnected: {ConnectionId}", connectionId);
+    }
 });
 
 logger.LogInformation("OnlineRpgServer starting. WebSocket endpoint: ws://localhost:5050/ws");
 app.Run();//阻塞当前线程，让服务端一直运行监听请求。
 
 static async Task HandleConnectionAsync(
-    WebSocket socket,
-    string connectionId,
+    ClientConnection connection,
     ILogger logger,
     AccountService accountService,
+    RoomService roomService,
+    ConnectionRegistry connectionRegistry,
     CancellationToken cancellationToken)
 {
+    var socket = connection.Socket;
     // 当前只做小包 JSON 协议验证，4KB 足够；后续大包/分片再扩展。
     var buffer = new byte[4096];
 
@@ -86,14 +102,24 @@ static async Task HandleConnectionAsync(
             break;
         }
 
-        logger.LogInformation("Recv {ConnectionId}: {Message}", connectionId, result);
+        logger.LogInformation("Recv {ConnectionId}: {Message}", connection.ConnectionId, result);
 
         // 业务分发点：
-        var response = BuildResponse(result, logger, accountService);//根据不同数据业务创建不同的响应
+        var dispatchResult = BuildResponse(result,logger,accountService,roomService,connection.ConnectionId,connectionRegistry);
+        //先回复请求的响应
+        await connection.SendTextAsync(dispatchResult.ResponseJson, cancellationToken);
 
-        await SendTextAsync(socket, response, cancellationToken);//将响应发回
+        logger.LogInformation("Send {ConnectionId}: {Message}", connection.ConnectionId, dispatchResult.ResponseJson);
 
-        logger.LogInformation("Send {ConnectionId}: {Message}", connectionId, response);
+        //如果是与房间相关的响应，则再进房间状态的广播
+        if (dispatchResult.RoomStateToNotify is not null)
+        {
+            await BroadcastRoomStateAsync(
+                dispatchResult.RoomStateToNotify,
+                connectionRegistry,
+                logger,
+                cancellationToken);
+        }
     }
 }
 
@@ -129,14 +155,20 @@ static async Task<string?> ReceiveTextAsync(WebSocket socket, byte[] buffer, Can
     }
 }
 
-static async Task SendTextAsync(WebSocket socket, string message, CancellationToken cancellationToken)
+/*static async Task SendTextAsync(WebSocket socket, string message, CancellationToken cancellationToken)
 {
     // 当前协议格式是 JSON 文本，所以按 UTF-8 发送 WebSocket Text Message。
     var bytes = Encoding.UTF8.GetBytes(message);
     await socket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken);
-}
+}*/
 
-static string BuildResponse(string rawMessage, ILogger logger, AccountService accountService)
+static MessageDispatchResult BuildResponse(
+    string rawMessage,
+    ILogger logger,
+    AccountService accountService,
+    RoomService roomService,
+    string connectionId,
+    ConnectionRegistry connectionRegistry)
 {
     try
     {
@@ -145,26 +177,39 @@ static string BuildResponse(string rawMessage, ILogger logger, AccountService ac
 
         if (envelope is null || string.IsNullOrWhiteSpace(envelope.Type))
         {
-            return JsonSerializer.Serialize(CreateErrorResponse(null, 1001, "Invalid protocol envelope."));
+            return ToDispatchResult(CreateErrorResponse(null, 1001, "Invalid protocol envelope."));
         }
 
         return envelope.Type switch
         {
             //心跳请求
-            "PingReq" => JsonSerializer.Serialize(CreatePingResponse(envelope)),
+            "PingReq" => ToDispatchResult(CreatePingResponse(envelope)),
             //注册请求
-            "RegisterReq" => JsonSerializer.Serialize(CreateRegisterResponse(envelope, accountService)),
+            "RegisterReq" => ToDispatchResult(CreateRegisterResponse(envelope, accountService)),
             //登录请求
-            "LoginReq" => JsonSerializer.Serialize(CreateLoginResponse(envelope, accountService)),
-            //错误请求
-            _ => JsonSerializer.Serialize(CreateErrorResponse(envelope.RequestId, 1001, $"Unsupported message type: {envelope.Type}"))
+            "LoginReq" => ToDispatchResult(CreateLoginResponse(envelope, accountService, connectionId, connectionRegistry)),
+            //进入大厅请求
+            "EnterLobbyReq" => ToDispatchResult(CreateEnterLobbyResponse(envelope, accountService, roomService)),
+            //创建房间请求：除了给请求者回包，还要把新的房间状态广播给房间成员
+            "CreateRoomReq" => CreateCreateRoomDispatchResult(envelope, accountService, roomService),
+            //加入房间请求：除了给请求者回包，还要通知房间内其他玩家成员列表变了
+            "JoinRoomReq" => CreateJoinRoomDispatchResult(envelope, accountService, roomService),
+            //离开房间请求：除了给请求者回包，还要通知留下来的玩家房主/成员列表变了
+            "LeaveRoomReq" => CreateLeaveRoomDispatchResult(envelope, accountService, roomService),
+            //未定义的响应
+            _ => ToDispatchResult(CreateErrorResponse(envelope.RequestId, 1001, $"Unsupported message type: {envelope.Type}"))
         };
     }
     catch (JsonException ex)
     {
         logger.LogWarning(ex, "Invalid JSON message.");
-        return JsonSerializer.Serialize(CreateErrorResponse(null, 1001, "Invalid JSON message."));
+        return ToDispatchResult(CreateErrorResponse(null, 1001, "Invalid JSON message."));
     }
+}
+
+static MessageDispatchResult ToDispatchResult(object response, RoomSnapshot? roomStateToNotify = null)
+{
+    return new MessageDispatchResult(JsonSerializer.Serialize(response), roomStateToNotify);
 }
 
 //业务分发
@@ -231,7 +276,11 @@ static object CreateRegisterResponse(ProtocolEnvelope request, AccountService ac
 }
 
 //登录响应
-static object CreateLoginResponse(ProtocolEnvelope request, AccountService accountService)
+static object CreateLoginResponse(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    string connectionId,
+    ConnectionRegistry connectionRegistry)
 {
     LoginRequestPayload? payload = request.Payload.Deserialize<LoginRequestPayload>();
 
@@ -245,6 +294,13 @@ static object CreateLoginResponse(ProtocolEnvelope request, AccountService accou
     if (!result.Success)
     {
         return CreateErrorResponse(request.RequestId, result.Code, result.Message);
+    }
+
+    var session = accountService.GetSession(result.Token);
+
+    if (session is not null)
+    {
+        connectionRegistry.BindSession(connectionId, session);
     }
 
     return new
@@ -266,6 +322,184 @@ static object CreateLoginResponse(ProtocolEnvelope request, AccountService accou
     };
 }
 
+//进入大厅响应
+static object CreateEnterLobbyResponse(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    RoomService roomService)
+{
+    //拿到请求携带的令牌，就得知请求者的身份了
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return CreateErrorResponse(request.RequestId, 1002, "Login token is required.");
+    }
+
+    //拉取房间列表
+    var rooms = roomService.GetRoomList()
+        .Select(RoomDto.FromSnapshot)
+        .ToList();
+
+    return new
+    {
+        msgId = LobbyMessageIds.EnterLobbyRes,
+        type = "EnterLobbyRes",
+        requestId = request.RequestId,
+        code = 0,
+        message = "OK",
+        serverTime = UnixTimeMilliseconds(),
+        payload = new EnterLobbyResponsePayload
+        {
+            PlayerInfo = new RoomPlayerDto
+            {
+                PlayerId = session.PlayerId,
+                Nickname = session.Nickname
+            },
+            Rooms = rooms
+        }
+    };
+}
+
+//创造房间分发结果
+static MessageDispatchResult CreateCreateRoomDispatchResult(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    RoomService roomService)
+{
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1002, "Login token is required."));
+    }
+
+    //拿到请求信封中的具体数据payload
+    CreateRoomRequestPayload? payload = request.Payload.Deserialize<CreateRoomRequestPayload>();
+
+    if (payload is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1001, "Invalid CreateRoomReq payload."));
+    }
+
+    var result = roomService.CreateRoom(session, payload.RoomName, payload.MaxPlayers);
+
+    if (!result.Success || result.Room is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, result.Code, result.Message));
+    }
+
+    var response = new
+    {
+        msgId = RoomMessageIds.CreateRoomRes,
+        type = "CreateRoomRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        payload = new CreateRoomResponsePayload
+        {
+            //不直接拿取result.Room，而是读取result.Room快照，避免修改服务器房间权威
+            Room = RoomDto.FromSnapshot(result.Room)
+        }
+    };
+
+    // 状态变更成功后，把同一份权威快照交给外层 HandleConnectionAsync 做 RoomStateNtf 广播。
+    return ToDispatchResult(response, result.Room);
+}
+
+//加入房间分发结果
+static MessageDispatchResult CreateJoinRoomDispatchResult(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    RoomService roomService)
+{
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1002, "Login token is required."));
+    }
+
+
+    JoinRoomRequestPayload? payload = request.Payload.Deserialize<JoinRoomRequestPayload>();
+
+    if (payload is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1001, "Invalid JoinRoomReq payload."));
+    }
+
+    //尝试加入房间，并获取行为结果
+    var result = roomService.JoinRoom(session, payload.RoomId);
+
+    if (!result.Success || result.Room is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, result.Code, result.Message));
+    }
+
+    var response = new
+    {
+        msgId = RoomMessageIds.JoinRoomRes,
+        type = "JoinRoomRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        payload = new JoinRoomResponsePayload
+        {
+            Room = RoomDto.FromSnapshot(result.Room)
+        }
+    };
+
+    return ToDispatchResult(response, result.Room);
+}
+
+//离开房间分发结果
+static MessageDispatchResult CreateLeaveRoomDispatchResult(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    RoomService roomService)
+{
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1002, "Login token is required."));
+    }
+
+    LeaveRoomRequestPayload? payload = request.Payload.Deserialize<LeaveRoomRequestPayload>();
+
+    if (payload is null || string.IsNullOrWhiteSpace(payload.RoomId))
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1001, "Invalid LeaveRoomReq payload."));
+    }
+
+    var result = roomService.LeaveRoom(session, payload.RoomId);
+
+    if (!result.Success)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, result.Code, result.Message));
+    }
+
+    var response = new
+    {
+        msgId = RoomMessageIds.LeaveRoomRes,
+        type = "LeaveRoomRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        payload = new LeaveRoomResponsePayload
+        {
+            RoomId = payload.RoomId,
+            Room = result.Room is null ? null : RoomDto.FromSnapshot(result.Room)
+        }
+    };
+
+    // result.Room 为 null 代表最后一名玩家离开、房间销毁；这时已经没有房间成员需要广播。
+    return ToDispatchResult(response, result.Room);
+}
+
 //错误响应
 static object CreateErrorResponse(string? requestId, int code, string message)
 {
@@ -282,6 +516,41 @@ static object CreateErrorResponse(string? requestId, int code, string message)
     };
 }
 
+//广播房间状态
+static async Task BroadcastRoomStateAsync(
+    RoomSnapshot room,
+    ConnectionRegistry connectionRegistry,
+    ILogger logger,
+    CancellationToken cancellationToken)
+{
+    var message = JsonSerializer.Serialize(new
+    {
+        msgId = RoomMessageIds.RoomStateNtf,
+        type = "RoomStateNtf",
+        serverTime = UnixTimeMilliseconds(),
+        payload = new RoomStateNotificationPayload
+        {
+            Room = RoomDto.FromSnapshot(room)
+        }
+    });
+
+    var playerIds = room.Players.Select(player => player.PlayerId);
+    var targets = connectionRegistry.GetConnectionsByPlayerIds(playerIds);
+
+    foreach (var target in targets)
+    {
+        try
+        {
+            await target.SendTextAsync(message, cancellationToken);
+            logger.LogInformation("Broadcast RoomStateNtf to {ConnectionId}: {Message}", target.ConnectionId, message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to broadcast RoomStateNtf to {ConnectionId}", target.ConnectionId);
+        }
+    }
+}
+
 static long? TryGetPayloadClientTime(JsonElement payload)
 {
     // 兼容两种写法：clientTime 可以放在信封顶层，也可以放在 payload 内。
@@ -296,3 +565,7 @@ static long? TryGetPayloadClientTime(JsonElement payload)
 }
 
 static long UnixTimeMilliseconds() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+sealed record MessageDispatchResult(
+    string ResponseJson,
+    RoomSnapshot? RoomStateToNotify);
