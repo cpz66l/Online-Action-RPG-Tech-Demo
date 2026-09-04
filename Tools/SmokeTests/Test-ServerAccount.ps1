@@ -144,6 +144,15 @@ try {
     $duplicateRegister = Invoke-AccountRequest -Socket $ws -MsgId 1001 -Type "RegisterReq" -Payload $registerPayload
     Assert-AccountResponse -Exchange $duplicateRegister -Scenario "duplicate register" -ExpectedType "ErrorRes" -ExpectedCode 2001
 
+    $duplicateRegisterNormalizedPayload = @{
+        username = "  " + $Username.ToUpperInvariant() + "  "
+        password = $Password
+        nickname = $Nickname + "Again"
+    }
+
+    $duplicateRegisterNormalized = Invoke-AccountRequest -Socket $ws -MsgId 1001 -Type "RegisterReq" -Payload $duplicateRegisterNormalizedPayload
+    Assert-AccountResponse -Exchange $duplicateRegisterNormalized -Scenario "duplicate register normalized username" -ExpectedType "ErrorRes" -ExpectedCode 2001
+
     $loginPayload = @{
         username = $Username
         password = $Password
@@ -184,6 +193,7 @@ try {
         scenarios = @(
             [pscustomobject]@{ name = "register success"; responseType = $register.Response.type; code = $register.Response.code }
             [pscustomobject]@{ name = "duplicate register"; responseType = $duplicateRegister.Response.type; code = $duplicateRegister.Response.code }
+            [pscustomobject]@{ name = "duplicate register normalized username"; responseType = $duplicateRegisterNormalized.Response.type; code = $duplicateRegisterNormalized.Response.code }
             [pscustomobject]@{ name = "login success"; responseType = $login.Response.type; code = $login.Response.code }
             [pscustomobject]@{ name = "wrong password"; responseType = $wrongLogin.Response.type; code = $wrongLogin.Response.code }
         )

@@ -1,7 +1,11 @@
-﻿using OnlineActionRpg.Client.Account;
+using System;
+using OnlineActionRpg.Client.Account;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
+using OnlineActionRpg.Client.Lobby;
+using OnlineActionRpg.Client.Network;
 
 namespace OnlineActionRpg.Client.UI
 {
@@ -9,9 +13,21 @@ namespace OnlineActionRpg.Client.UI
     // 登录成功后切换到 Lobby 占位面板，真正的大厅逻辑会放到后续迭代。
     public sealed class LoginPanel : MonoBehaviour
     {
+        private const string DefaultServerUrl = "ws://localhost:5050/ws";
+
+        [Header("Network")]
+        [SerializeField] private NetworkClient networkClient;
+        [SerializeField] private TMP_InputField serverUrlInput;
+        [SerializeField] private Button connectButton;
+        [SerializeField] private Button disconnectButton;
+        [SerializeField] private TMP_Text networkStateText;
+
         [Header("Account")]
         [SerializeField] private AccountClient accountClient;
         [SerializeField] private ClientSession session;
+
+        [Header("Lobby")]
+        [SerializeField] private LobbyClient lobbyClient;
 
         [Header("Input")]
         [SerializeField] private TMP_InputField usernameInput;
@@ -24,7 +40,7 @@ namespace OnlineActionRpg.Client.UI
 
         [Header("Panels")]
         [SerializeField] private GameObject loginPanelRoot;
-        [SerializeField] private GameObject lobbyPlaceholderRoot;
+        [SerializeField] private GameObject lobbyPanelRoot;
 
         [Header("Text")]
         [SerializeField] private TMP_Text statusText;
@@ -34,6 +50,11 @@ namespace OnlineActionRpg.Client.UI
 
         private void Awake()
         {
+            if (networkClient == null)
+            {
+                networkClient = FindFirstObjectByType<NetworkClient>();
+            }
+
             if (accountClient == null)
             {
                 accountClient = FindFirstObjectByType<AccountClient>();
@@ -42,6 +63,26 @@ namespace OnlineActionRpg.Client.UI
             if (session == null)
             {
                 session = FindFirstObjectByType<ClientSession>();
+            }
+
+            if (lobbyClient == null)
+            {
+                lobbyClient = FindFirstObjectByType<LobbyClient>();
+            }
+
+            if (serverUrlInput != null && string.IsNullOrWhiteSpace(serverUrlInput.text))
+            {
+                serverUrlInput.text = DefaultServerUrl;
+            }
+
+            if (connectButton != null)
+            {
+                connectButton.onClick.AddListener(OnConnectClicked);
+            }
+
+            if (disconnectButton != null)
+            {
+                disconnectButton.onClick.AddListener(OnDisconnectClicked);
             }
 
             if (registerButton != null)
@@ -60,18 +101,37 @@ namespace OnlineActionRpg.Client.UI
                 accountClient.LoginCompleted += HandleLoginCompleted;
             }
 
+            if (lobbyClient != null)
+            {
+                lobbyClient.EnterLobbyCompleted += HandleEnterLobbyCompleted;
+            }
+
             ShowLoginPanel();
-            SetStatus("请连接服务器，然后选择注册或登录");
+            SetStatus("请先连接服务器，然后选择注册或登录");
+            RefreshConnectionStateText();
             RefreshSessionText();
+            RefreshButtons();
         }
 
         private void Update()
         {
+            RefreshConnectionStateText();
             RefreshSessionText();
+            RefreshButtons();
         }
 
         private void OnDestroy()
         {
+            if (connectButton != null)
+            {
+                connectButton.onClick.RemoveListener(OnConnectClicked);
+            }
+
+            if (disconnectButton != null)
+            {
+                disconnectButton.onClick.RemoveListener(OnDisconnectClicked);
+            }
+
             if (registerButton != null)
             {
                 registerButton.onClick.RemoveListener(OnRegisterClicked);
@@ -87,12 +147,80 @@ namespace OnlineActionRpg.Client.UI
                 accountClient.RegisterCompleted -= HandleRegisterCompleted;
                 accountClient.LoginCompleted -= HandleLoginCompleted;
             }
+
+            if (lobbyClient != null)
+            {
+                lobbyClient.EnterLobbyCompleted -= HandleEnterLobbyCompleted;
+            }
         }
 
         //按下注册键注册
-        private async void OnRegisterClicked()
+        private async void OnConnectClicked()
         {
             if (_isWaitingResponse)
+            {
+                return;
+            }
+
+            if (networkClient == null)
+            {
+                SetStatus("连接失败。NetworkClient is missing.");
+                return;
+            }
+
+            string url = GetServerUrl();
+
+            if (!IsValidWebSocketUrl(url))
+            {
+                SetStatus("连接失败。服务器地址应类似 ws://localhost:5050/ws");
+                return;
+            }
+
+            SetWaiting(true);
+            SetStatus($"正在连接服务器：{url}");
+
+            await networkClient.ConnectAsync(url);
+
+            SetWaiting(false);
+            RefreshConnectionStateText();
+
+            if (networkClient.IsConnected)
+            {
+                SetStatus("服务器连接成功，可以注册或登录。");
+                return;
+            }
+
+            NetworkClientSnapshot snapshot = networkClient.GetSnapshot();
+            string error = string.IsNullOrEmpty(snapshot.LastError) ? "Unknown error." : snapshot.LastError;
+            SetStatus($"服务器连接失败。{error}");
+        }
+
+        private async void OnDisconnectClicked()
+        {
+            if (_isWaitingResponse)
+            {
+                return;
+            }
+
+            if (networkClient == null)
+            {
+                SetStatus("断开失败。NetworkClient is missing.");
+                return;
+            }
+
+            SetWaiting(true);
+            SetStatus("正在断开服务器连接...");
+
+            await networkClient.DisconnectAsync();
+
+            SetWaiting(false);
+            RefreshConnectionStateText();
+            SetStatus("服务器连接已断开。");
+        }
+
+        private async void OnRegisterClicked()
+        {
+            if (!CanSubmitAccountRequest())
             {
                 return;
             }
@@ -118,7 +246,7 @@ namespace OnlineActionRpg.Client.UI
         //按下登录键登录
         private async void OnLoginClicked()
         {
-            if (_isWaitingResponse)
+            if (!CanSubmitAccountRequest())
             {
                 return;
             }
@@ -162,9 +290,33 @@ namespace OnlineActionRpg.Client.UI
                 return;
             }
 
-            SetStatus($"注册成功。 欢迎, {result.Nickname}.");
+            SetStatus($"登录成功。欢迎, {result.Nickname}。正在进入大厅...");
             RefreshSessionText();
             ShowLobbyPlaceholder();
+            _ = EnterLobbyAfterLoginAsync();
+        }
+
+        private async Task EnterLobbyAfterLoginAsync()
+        {
+            if (lobbyClient == null)
+            {
+                SetStatus("进入大厅失败。LobbyClient is missing.");
+                return;
+            }
+
+            await lobbyClient.EnterLobbyAsync();
+        }
+
+        private void HandleEnterLobbyCompleted(EnterLobbyResult result)
+        {
+            if (!result.Success)
+            {
+                SetStatus($"进入大厅失败。 Code: {result.Code}, Message: {result.Message}");
+                return;
+            }
+
+            int roomCount = result.Rooms != null ? result.Rooms.Length : 0;
+            SetStatus($"进入大厅成功。当前房间数: {roomCount}");
         }
 
         private void ShowLoginPanel()
@@ -174,9 +326,9 @@ namespace OnlineActionRpg.Client.UI
                 loginPanelRoot.SetActive(true);
             }
 
-            if (lobbyPlaceholderRoot != null)
+            if (lobbyPanelRoot != null)
             {
-                lobbyPlaceholderRoot.SetActive(false);
+                lobbyPanelRoot.SetActive(false);
             }
         }
 
@@ -187,26 +339,94 @@ namespace OnlineActionRpg.Client.UI
                 loginPanelRoot.SetActive(false);
             }
 
-            if (lobbyPlaceholderRoot != null)
+            if (lobbyPanelRoot != null)
             {
-                lobbyPlaceholderRoot.SetActive(true);
+                lobbyPanelRoot.SetActive(true);
             }
         }
 
         private void SetWaiting(bool isWaiting)
         {
             _isWaitingResponse = isWaiting;
+            RefreshButtons();
+        }
 
-            //如果正在等待响应，则按钮不可交互
+        private bool CanSubmitAccountRequest()
+        {
+            if (_isWaitingResponse)
+            {
+                return false;
+            }
+
+            if (networkClient == null)
+            {
+                SetStatus("操作失败。NetworkClient is missing.");
+                return false;
+            }
+
+            if (!networkClient.IsConnected)
+            {
+                SetStatus("请先连接服务器。");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void RefreshButtons()
+        {
+            bool hasNetworkClient = networkClient != null;
+            NetworkConnectionState state = hasNetworkClient ? networkClient.State : NetworkConnectionState.Disconnected;
+            bool isConnected = hasNetworkClient && networkClient.IsConnected;
+            bool isConnecting = state == NetworkConnectionState.Connecting;
+            bool canInteract = !_isWaitingResponse;
+            bool canSubmitAccount = canInteract && isConnected;
+
             if (registerButton != null)
             {
-                registerButton.interactable = !isWaiting;
+                registerButton.interactable = canSubmitAccount;
             }
 
             if (loginButton != null)
             {
-                loginButton.interactable = !isWaiting;
+                loginButton.interactable = canSubmitAccount;
             }
+
+            if (connectButton != null)
+            {
+                connectButton.interactable = canInteract && hasNetworkClient && !isConnected && !isConnecting;
+            }
+
+            if (disconnectButton != null)
+            {
+                disconnectButton.interactable = canInteract && isConnected;
+            }
+
+            if (serverUrlInput != null)
+            {
+                serverUrlInput.interactable = canInteract && !isConnected && !isConnecting;
+            }
+        }
+
+        private void RefreshConnectionStateText()
+        {
+            if (networkStateText == null)
+            {
+                return;
+            }
+
+            if (networkClient == null)
+            {
+                networkStateText.text = "Server: Missing NetworkClient";
+                return;
+            }
+
+            NetworkClientSnapshot snapshot = networkClient.GetSnapshot();
+            string errorLine = string.IsNullOrEmpty(snapshot.LastError)
+                ? string.Empty
+                : $"\nError: {snapshot.LastError}";
+
+            networkStateText.text = $"Server: {snapshot.State}\nUrl: {GetServerUrl()}{errorLine}";
         }
 
         private void RefreshSessionText()
@@ -240,6 +460,22 @@ namespace OnlineActionRpg.Client.UI
         private static string GetInputText(TMP_InputField input)
         {
             return input != null ? input.text.Trim() : string.Empty;
+        }
+
+        private string GetServerUrl()
+        {
+            string url = GetInputText(serverUrlInput);
+            return string.IsNullOrWhiteSpace(url) ? DefaultServerUrl : url;
+        }
+
+        private static bool IsValidWebSocketUrl(string url)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+            {
+                return false;
+            }
+
+            return uri.Scheme == "ws" || uri.Scheme == "wss";
         }
 
         private static string CreateTokenPreview(string token)

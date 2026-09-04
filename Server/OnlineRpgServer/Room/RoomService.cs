@@ -138,25 +138,34 @@ public sealed class RoomService
                 return RoomOperationResult.Fail(RoomNotFound, "Room not found.");
             }
 
-            if (!room.PlayersById.Remove(session.PlayerId))
+            return RemovePlayerFromRoomInLock(room, session.PlayerId);
+        }
+    }
+
+    // 连接断开时使用：客户端可能没有机会主动发送 LeaveRoomReq，服务端仍要清理房间状态。
+    public RoomOperationResult LeaveRoomByPlayerId(string? playerId)
+    {
+        playerId = Normalize(playerId);
+
+        if (IsMissing(playerId))
+        {
+            return RoomOperationResult.Fail(InvalidArgument, "Player id is required.");
+        }
+
+        lock (_gate)
+        {
+            if (!_roomIdByPlayerId.TryGetValue(playerId, out string? roomId))
             {
-                return RoomOperationResult.Fail(InvalidRoomState, "Player is not in this room.");
+                return RoomOperationResult.Fail(InvalidRoomState, "Player is not in a room.");
             }
 
-            _roomIdByPlayerId.Remove(session.PlayerId);
-
-            if (room.PlayersById.Count == 0)
+            if (!_roomsById.TryGetValue(roomId, out RoomRecord? room))
             {
-                _roomsById.Remove(room.RoomId);
+                _roomIdByPlayerId.Remove(playerId);
                 return RoomOperationResult.Ok(null);
             }
 
-            if (room.OwnerPlayerId == session.PlayerId)
-            {
-                room.OwnerPlayerId = room.PlayersById.Values.First().PlayerId;
-            }
-
-            return RoomOperationResult.Ok(CreateSnapshot(room));
+            return RemovePlayerFromRoomInLock(room, playerId);
         }
     }
 
@@ -192,6 +201,31 @@ public sealed class RoomService
         {
             currentRoom.OwnerPlayerId = currentRoom.PlayersById.Values.First().PlayerId;
         }
+    }
+
+    private RoomOperationResult RemovePlayerFromRoomInLock(RoomRecord room, string playerId)
+    {
+        if (!room.PlayersById.Remove(playerId))
+        {
+            return RoomOperationResult.Fail(InvalidRoomState, "Player is not in this room.");
+        }
+
+        _roomIdByPlayerId.Remove(playerId);
+
+        //如果房间内没有任何玩家，则销毁房间
+        if (room.PlayersById.Count == 0)
+        {
+            _roomsById.Remove(room.RoomId);
+            return RoomOperationResult.Ok(null);
+        }
+
+        //将房主移交给剩余第一位玩家
+        if (room.OwnerPlayerId == playerId)
+        {
+            room.OwnerPlayerId = room.PlayersById.Values.First().PlayerId;
+        }
+
+        return RoomOperationResult.Ok(CreateSnapshot(room));
     }
 
     //小helper

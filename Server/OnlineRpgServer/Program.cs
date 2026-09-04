@@ -72,6 +72,8 @@ app.Map("/ws", async context =>
     }
     finally
     {
+        //连接中断，清理房间状态，广播给其他玩家
+        await HandleDisconnectRoomCleanupAsync(connection, roomService, connectionRegistry, logger);
         connectionRegistry.Remove(connectionId);
         logger.LogInformation("Client disconnected: {ConnectionId}", connectionId);
     }
@@ -549,6 +551,47 @@ static async Task BroadcastRoomStateAsync(
             logger.LogWarning(ex, "Failed to broadcast RoomStateNtf to {ConnectionId}", target.ConnectionId);
         }
     }
+}
+
+//处理断开连接时的房间清理逻辑
+static async Task HandleDisconnectRoomCleanupAsync(
+    ClientConnection connection,
+    RoomService roomService,
+    ConnectionRegistry connectionRegistry,
+    ILogger logger)
+{
+    //如果连接没有绑定玩家身份，则无需清理房间状态
+    if (!connection.HasPlayer)
+    {
+        return;
+    }
+
+    var result = roomService.LeaveRoomByPlayerId(connection.PlayerId);
+
+    if (!result.Success)
+    {
+        return;
+    }
+
+    if (result.Room is null)
+    {
+        logger.LogInformation(
+            "Player {PlayerId} disconnected and their room was destroyed.",
+            connection.PlayerId);
+        return;
+    }
+
+    logger.LogInformation(
+        "Player {PlayerId} disconnected; broadcasting remaining room state for {RoomId}.",
+        connection.PlayerId,
+        result.Room.RoomId);
+
+    //广播房间状态给剩余的玩家
+    await BroadcastRoomStateAsync(
+        result.Room,
+        connectionRegistry,
+        logger,
+        CancellationToken.None);
 }
 
 static long? TryGetPayloadClientTime(JsonElement payload)
