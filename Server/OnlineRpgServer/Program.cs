@@ -198,6 +198,10 @@ static MessageDispatchResult BuildResponse(
             "JoinRoomReq" => CreateJoinRoomDispatchResult(envelope, accountService, roomService),
             //离开房间请求：除了给请求者回包，还要通知留下来的玩家房主/成员列表变了
             "LeaveRoomReq" => CreateLeaveRoomDispatchResult(envelope, accountService, roomService),
+            //准备状态请求：除了给请求者回包，还要通知房间内所有玩家准备状态变了
+            "ReadyReq" => CreateReadyDispatchResult(envelope, accountService, roomService),
+            //开始战斗请求：成功后把房间推进到 Loading，并广播权威房间状态
+            "StartBattleReq" => CreateStartBattleDispatchResult(envelope, accountService, roomService),
             //未定义的响应
             _ => ToDispatchResult(CreateErrorResponse(envelope.RequestId, 1001, $"Unsupported message type: {envelope.Type}"))
         };
@@ -356,7 +360,8 @@ static object CreateEnterLobbyResponse(
             PlayerInfo = new RoomPlayerDto
             {
                 PlayerId = session.PlayerId,
-                Nickname = session.Nickname
+                Nickname = session.Nickname,
+                IsReady = false
             },
             Rooms = rooms
         }
@@ -499,6 +504,96 @@ static MessageDispatchResult CreateLeaveRoomDispatchResult(
     };
 
     // result.Room 为 null 代表最后一名玩家离开、房间销毁；这时已经没有房间成员需要广播。
+    return ToDispatchResult(response, result.Room);
+}
+
+//准备状态分发结果
+static MessageDispatchResult CreateReadyDispatchResult(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    RoomService roomService)
+{
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1002, "Login token is required."));
+    }
+
+    ReadyRequestPayload? payload = request.Payload.Deserialize<ReadyRequestPayload>();
+
+    if (payload is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1001, "Invalid ReadyReq payload."));
+    }
+
+    var result = roomService.SetReady(session, payload.RoomId, payload.IsReady);
+
+    if (!result.Success || result.Room is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, result.Code, result.Message));
+    }
+
+    var response = new
+    {
+        msgId = RoomMessageIds.ReadyRes,
+        type = "ReadyRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        payload = new ReadyResponsePayload
+        {
+            Room = RoomDto.FromSnapshot(result.Room)
+        }
+    };
+
+    return ToDispatchResult(response, result.Room);
+}
+
+//开始战斗分发结果
+static MessageDispatchResult CreateStartBattleDispatchResult(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    RoomService roomService)
+{
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1002, "Login token is required."));
+    }
+
+    StartBattleRequestPayload? payload = request.Payload.Deserialize<StartBattleRequestPayload>();
+
+    if (payload is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1001, "Invalid StartBattleReq payload."));
+    }
+
+    var result = roomService.StartBattle(session, payload.RoomId);
+
+    if (!result.Success || result.Room is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, result.Code, result.Message));
+    }
+
+    var response = new
+    {
+        msgId = RoomMessageIds.StartBattleRes,
+        type = "StartBattleRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        payload = new StartBattleResponsePayload
+        {
+            //调用RoomDto.FromSnapshot(result.Room)而不是直接使用result.Room，避免修改服务器房间权威状态
+            // RoomDto类的静态方法，用于实例化出一个新的RoomDto对象，并将房间快照转换为客户端可用的格式
+            Room = RoomDto.FromSnapshot(result.Room)
+        }
+    };
+
     return ToDispatchResult(response, result.Room);
 }
 

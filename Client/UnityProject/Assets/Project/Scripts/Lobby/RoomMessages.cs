@@ -17,6 +17,10 @@ namespace OnlineActionRpg.Client.Lobby
         public const int JoinRoomRes = 3104;
         public const int LeaveRoomReq = 3105;
         public const int LeaveRoomRes = 3106;
+        public const int ReadyReq = 3107;
+        public const int ReadyRes = 3108;
+        public const int StartBattleReq = 3109;
+        public const int StartBattleRes = 3110;
         public const int RoomStateNtf = 3199;
     }
 
@@ -66,6 +70,30 @@ namespace OnlineActionRpg.Client.Lobby
     public sealed class LeaveRoomResponseEnvelope : ProtocolEnvelope
     {
         public LeaveRoomResponsePayload payload;
+    }
+
+    [Serializable]
+    public sealed class ReadyRequestEnvelope : ProtocolEnvelope
+    {
+        public ReadyRequestPayload payload;
+    }
+
+    [Serializable]
+    public sealed class ReadyResponseEnvelope : ProtocolEnvelope
+    {
+        public ReadyResponsePayload payload;
+    }
+
+    [Serializable]
+    public sealed class StartBattleRequestEnvelope : ProtocolEnvelope
+    {
+        public StartBattleRequestPayload payload;
+    }
+
+    [Serializable]
+    public sealed class StartBattleResponseEnvelope : ProtocolEnvelope
+    {
+        public StartBattleResponsePayload payload;
     }
 
     [Serializable]
@@ -120,6 +148,31 @@ namespace OnlineActionRpg.Client.Lobby
     }
 
     [Serializable]
+    public sealed class ReadyRequestPayload
+    {
+        public string roomId;
+        public bool isReady;
+    }
+
+    [Serializable]
+    public sealed class ReadyResponsePayload
+    {
+        public RoomDto room;
+    }
+
+    [Serializable]
+    public sealed class StartBattleRequestPayload
+    {
+        public string roomId;
+    }
+
+    [Serializable]
+    public sealed class StartBattleResponsePayload
+    {
+        public RoomDto room;
+    }
+
+    [Serializable]
     public sealed class RoomStateNotificationPayload
     {
         public RoomDto room;
@@ -141,5 +194,6 @@ namespace OnlineActionRpg.Client.Lobby
     {
         public string playerId;
         public string nickname;
+        public bool isReady;
     }
 }

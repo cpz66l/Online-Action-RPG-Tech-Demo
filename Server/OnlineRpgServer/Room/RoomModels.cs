@@ -6,7 +6,8 @@ namespace OnlineRpgServer.Room;
 // 房间状态：等待房间，后续加入Ready/Loading/Battle
 public enum RoomState
 {
-    Waiting = 0
+    Waiting = 0,
+    Loading = 1,
 }
 
 // 服务端内存中的房间记录。
@@ -17,7 +18,6 @@ public sealed class RoomRecord
     public required string RoomName { get; init; }
     public required int MaxPlayers { get; init; }
     public required long CreatedAt { get; init; }
-
     public required string OwnerPlayerId { get; set; }
     public RoomState State { get; set; } = RoomState.Waiting;
 
@@ -33,6 +33,7 @@ public sealed class RoomPlayerRecord
     public required string PlayerId { get; init; }
     public required string Nickname { get; init; }
     public required long JoinedAt { get; init; }
+    public bool IsReady { get; set; }
 }
 
 // 给外部读取用的房间快照。
@@ -52,4 +53,5 @@ public sealed class RoomPlayerSnapshot
 {
     public required string PlayerId { get; init; }
     public required string Nickname { get; init; }
+    public required bool IsReady { get; init; }
 }

@@ -8,6 +8,7 @@ public sealed class RoomService
 {
     private const int Ok = 0;
     private const int InvalidArgument = 1001;   //无效参数
+    private const int Forbidden = 1003;          // 权限不足
     private const int RoomNotFound = 3001;      //未找到房间
     private const int RoomFull = 3002;          //房间已满
     private const int InvalidRoomState = 3003;  //无效房间状态
@@ -169,6 +170,101 @@ public sealed class RoomService
         }
     }
 
+    // 切换准备状态。
+    // 客户端只提交“我想准备 / 取消准备”的意图，服务端负责确认玩家是否真的在房间里。
+    public RoomOperationResult SetReady(PlayerSession session, string? roomId, bool isReady)
+    {
+        roomId = Normalize(roomId);
+
+        if (IsMissing(roomId))
+        {
+            return RoomOperationResult.Fail(InvalidArgument, "Room id is required.");
+        }
+
+        lock (_gate)
+        {
+            if (!_roomsById.TryGetValue(roomId, out RoomRecord? room))
+            {
+                return RoomOperationResult.Fail(RoomNotFound, "Room not found.");
+            }
+
+            if (room.State != RoomState.Waiting)
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "Room is not waiting.");
+            }
+
+            if (!room.PlayersById.TryGetValue(session.PlayerId, out RoomPlayerRecord? player))
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "Player is not in this room.");
+            }
+
+            // 当前 Demo 规则：房主不需要 Ready，房主负责 StartBattle。
+            // 如果后续希望“所有人包括房主都要准备”，这里可以放开。
+            if (room.OwnerPlayerId == session.PlayerId)
+            {
+                player.IsReady = false;
+                return RoomOperationResult.Ok(CreateSnapshot(room));
+            }
+
+            // 玩家切换准备状态，该权威状态存在room.PlayersById的字典中，RoomPlayerRecord。
+            player.IsReady = isReady;
+            // 返回玩家切换准备状态后的房间快照，通知所有人房间状态变化
+            return RoomOperationResult.Ok(CreateSnapshot(room));
+        }
+    }
+
+    // 房主请求开始战斗。
+    public RoomOperationResult StartBattle(PlayerSession session, string? roomId)
+    {
+        roomId = Normalize(roomId);
+
+        if (IsMissing(roomId))
+        {
+            return RoomOperationResult.Fail(InvalidArgument, "Room id is required.");
+        }
+
+        lock (_gate)
+        {
+            if (!_roomsById.TryGetValue(roomId, out RoomRecord? room))
+            {
+                return RoomOperationResult.Fail(RoomNotFound, "Room not found.");
+            }
+
+            if (!room.PlayersById.ContainsKey(session.PlayerId))
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "Player is not in this room.");
+            }
+
+            if (room.OwnerPlayerId != session.PlayerId)
+            {
+                return RoomOperationResult.Fail(Forbidden, "Only room owner can start battle.");
+            }
+
+            if (room.State != RoomState.Waiting)
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "Room is not waiting.");
+            }
+
+            if (room.PlayersById.Count < 2)
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "At least two players are required.");
+            }
+
+            //判断房间内的非房主玩家是否都已准备好
+            bool allGuestsReady = room.PlayersById.Values
+                .Where(player => player.PlayerId != room.OwnerPlayerId)
+                .All(player => player.IsReady);
+
+            if (!allGuestsReady)
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "All non-owner players must be ready.");
+            }
+
+            room.State = RoomState.Loading;
+            return RoomOperationResult.Ok(CreateSnapshot(room));
+        }
+    }
+
     //确保玩家不处于任何房间
     private void LeaveCurrentRoomIfNeeded(string playerId)
     {
@@ -249,7 +345,8 @@ public sealed class RoomService
                 .Select(player => new RoomPlayerSnapshot
                 {
                     PlayerId = player.PlayerId,
-                    Nickname = player.Nickname
+                    Nickname = player.Nickname,
+                    IsReady = player.IsReady
                 })
                 .ToList()
         };

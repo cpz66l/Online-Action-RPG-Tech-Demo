@@ -21,6 +21,8 @@ namespace OnlineActionRpg.Client.Lobby
         private string _pendingCreateRoomRequestId = string.Empty;
         private string _pendingJoinRoomRequestId = string.Empty;
         private string _pendingLeaveRoomRequestId = string.Empty;
+        private string _pendingReadyRequestId = string.Empty;
+        private string _pendingStartBattleRequestId = string.Empty;
 
         // SynchronizationContext 用于在 Unity 主线程上抛出事件，确保事件处理程序在主线程上执行。
         private SynchronizationContext _unityContext;
@@ -29,7 +31,8 @@ namespace OnlineActionRpg.Client.Lobby
         public event Action<RoomCommandResult> CreateRoomCompleted;
         public event Action<RoomCommandResult> JoinRoomCompleted;
         public event Action<RoomCommandResult> LeaveRoomCompleted;
-
+        public event Action<RoomCommandResult> ReadyCompleted;
+        public event Action<RoomCommandResult> StartBattleCompleted;
         // RoomStateNtf 是服务端主动推送，不对应某一次按钮点击。
         public event Action<RoomDto> RoomStateChanged;
 
@@ -202,6 +205,79 @@ namespace OnlineActionRpg.Client.Lobby
             await networkClient.SendJsonAsync(json);
         }
 
+        public async Task ReadyAsync(string roomId, bool isReady)
+        {
+            if (!EnsureReady(out int code, out string message))
+            {
+                RaiseReadyCompleted(RoomCommandResult.Fail(code, message));
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                RaiseReadyCompleted(RoomCommandResult.Fail(1001, "Room id is required."));
+                return;
+            }
+
+            long now = GetUnixTimeMilliseconds();
+            string requestId = Guid.NewGuid().ToString("N");
+
+            ReadyRequestEnvelope request = new ReadyRequestEnvelope
+            {
+                msgId = RoomMessageIds.ReadyReq,
+                type = "ReadyReq",
+                requestId = requestId,
+                token = session.Token,
+                clientTime = now,
+                payload = new ReadyRequestPayload
+                {
+                    roomId = roomId.Trim(),
+                    isReady = isReady
+                }
+            };
+
+            _pendingReadyRequestId = requestId;
+
+            string json = JsonUtility.ToJson(request);
+            await networkClient.SendJsonAsync(json);
+        }
+
+        public async Task StartBattleAsync(string roomId)
+        {
+            if (!EnsureReady(out int code, out string message))
+            {
+                RaiseStartBattleCompleted(RoomCommandResult.Fail(code, message));
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                RaiseStartBattleCompleted(RoomCommandResult.Fail(1001, "Room id is required."));
+                return;
+            }
+
+            long now = GetUnixTimeMilliseconds();
+            string requestId = Guid.NewGuid().ToString("N");
+
+            StartBattleRequestEnvelope request = new StartBattleRequestEnvelope
+            {
+                msgId = RoomMessageIds.StartBattleReq,
+                type = "StartBattleReq",
+                requestId = requestId,
+                token = session.Token,
+                clientTime = now,
+                payload = new StartBattleRequestPayload
+                {
+                    roomId = roomId.Trim()
+                }
+            };
+
+            _pendingStartBattleRequestId = requestId;
+
+            string json = JsonUtility.ToJson(request);
+            await networkClient.SendJsonAsync(json);
+        }
+
         //处理服务器发来的文本消息，根据消息类型分发到不同的处理方法
         private void HandleTextMessageReceived(string json)
         {
@@ -240,6 +316,18 @@ namespace OnlineActionRpg.Client.Lobby
             if (envelope.type == "RoomStateNtf")
             {
                 HandleRoomStateNotification(json);
+                return;
+            }
+
+            if (envelope.type == "ReadyRes")
+            {
+                HandleReadyResponse(json);
+                return;
+            }
+
+            if (envelope.type == "StartBattleRes")
+            {
+                HandleStartBattleResponse(json);
                 return;
             }
 
@@ -321,6 +409,40 @@ namespace OnlineActionRpg.Client.Lobby
                 response.payload.room));
         }
 
+        private void HandleReadyResponse(string json)
+        {
+            ReadyResponseEnvelope response = JsonUtility.FromJson<ReadyResponseEnvelope>(json);
+
+            if (response.requestId != _pendingReadyRequestId)
+            {
+                return;
+            }
+
+            _pendingReadyRequestId = string.Empty;
+
+            RaiseReadyCompleted(RoomCommandResult.Ok(
+                response.message,
+                response.payload.room.roomId,
+                response.payload.room));
+        }
+
+        private void HandleStartBattleResponse(string json)
+        {
+            StartBattleResponseEnvelope response = JsonUtility.FromJson<StartBattleResponseEnvelope>(json);
+
+            if (response.requestId != _pendingStartBattleRequestId)
+            {
+                return;
+            }
+
+            _pendingStartBattleRequestId = string.Empty;
+
+            RaiseStartBattleCompleted(RoomCommandResult.Ok(
+                response.message,
+                response.payload.room.roomId,
+                response.payload.room));
+        }
+
         //处理房间状态通知
         private void HandleRoomStateNotification(string json)
         {
@@ -334,7 +456,7 @@ namespace OnlineActionRpg.Client.Lobby
             RaiseRoomStateChanged(notification.payload.room);
         }
 
-        //处理错误响应
+        //处理错误响应,根据requestId判断是哪个请求的错误响应，并抛出对应的事件
         private void HandleErrorResponse(ProtocolEnvelope response)
         {
             if (response.requestId == _pendingEnterLobbyRequestId)
@@ -362,6 +484,19 @@ namespace OnlineActionRpg.Client.Lobby
             {
                 _pendingLeaveRoomRequestId = string.Empty;
                 RaiseLeaveRoomCompleted(RoomCommandResult.Fail(response.code, response.message));
+            }
+
+            if (response.requestId == _pendingReadyRequestId)
+            {
+                _pendingReadyRequestId = string.Empty;
+                RaiseReadyCompleted(RoomCommandResult.Fail(response.code, response.message));
+                return;
+            }
+
+            if (response.requestId == _pendingStartBattleRequestId)
+            {
+                _pendingStartBattleRequestId = string.Empty;
+                RaiseStartBattleCompleted(RoomCommandResult.Fail(response.code, response.message));
             }
         }
 
@@ -413,6 +548,16 @@ namespace OnlineActionRpg.Client.Lobby
         private void RaiseLeaveRoomCompleted(RoomCommandResult result)
         {
             RaiseOnMainThread(() => LeaveRoomCompleted?.Invoke(result));
+        }
+
+        private void RaiseReadyCompleted(RoomCommandResult result)
+        {
+            RaiseOnMainThread(() => ReadyCompleted?.Invoke(result));
+        }
+
+        private void RaiseStartBattleCompleted(RoomCommandResult result)
+        {
+            RaiseOnMainThread(() => StartBattleCompleted?.Invoke(result));
         }
 
         private void RaiseRoomStateChanged(RoomDto room)

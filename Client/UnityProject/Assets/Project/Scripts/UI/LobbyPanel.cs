@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using OnlineActionRpg.Client.Lobby;
+using OnlineActionRpg.Client.Account;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,8 +12,9 @@ namespace OnlineActionRpg.Client.UI
     // 读取输入、调用 LobbyClient、显示房间列表和当前房间状态。
     public sealed class LobbyPanel : MonoBehaviour
     {
-        [Header("Lobby Client")]
+        [Header("Client")]
         [SerializeField] private LobbyClient lobbyClient;
+        [SerializeField] private ClientSession session;
 
         [Header("Input")]
         [SerializeField] private TMP_InputField roomNameInput;
@@ -26,6 +28,8 @@ namespace OnlineActionRpg.Client.UI
         [SerializeField] private Button joinRoomButton;
         [SerializeField] private Button leaveRoomButton;
         [SerializeField] private Button creatCloseButton;
+        [SerializeField] private Button readyButton;
+        [SerializeField] private Button startBattleButton;
 
         [Header("Text")]
         [SerializeField] private TMP_Text lobbyStatusText;
@@ -45,6 +49,11 @@ namespace OnlineActionRpg.Client.UI
             if (lobbyClient == null)
             {
                 lobbyClient = FindFirstObjectByType<LobbyClient>();
+            }
+
+            if (session == null)
+            {
+                session = FindFirstObjectByType<ClientSession>();
             }
 
             if (refreshButton != null)
@@ -77,6 +86,16 @@ namespace OnlineActionRpg.Client.UI
                 leaveRoomButton.onClick.AddListener(OnLeaveRoomClicked);
             }
 
+            if (readyButton != null)
+            {
+                readyButton.onClick.AddListener(OnReadyClicked);
+            }
+
+            if (startBattleButton != null)
+            {
+                startBattleButton.onClick.AddListener(OnStartBattleClicked);
+            }
+
             if (lobbyClient != null)
             {
                 lobbyClient.EnterLobbyCompleted += HandleEnterLobbyCompleted;
@@ -84,6 +103,8 @@ namespace OnlineActionRpg.Client.UI
                 lobbyClient.JoinRoomCompleted += HandleJoinRoomCompleted;
                 lobbyClient.LeaveRoomCompleted += HandleLeaveRoomCompleted;
                 lobbyClient.RoomStateChanged += HandleRoomStateChanged;
+                lobbyClient.ReadyCompleted += HandleReadyCompleted;
+                lobbyClient.StartBattleCompleted += HandleStartBattleCompleted;
             }
 
 
@@ -134,6 +155,17 @@ namespace OnlineActionRpg.Client.UI
                 leaveRoomButton.onClick.RemoveListener(OnLeaveRoomClicked);
             }
 
+            if (readyButton != null)
+            {
+                readyButton.onClick.RemoveListener(OnReadyClicked);
+            }
+
+            if (startBattleButton != null)
+            {
+                startBattleButton.onClick.RemoveListener(OnStartBattleClicked);
+            }
+
+
             if (lobbyClient != null)
             {
                 lobbyClient.EnterLobbyCompleted -= HandleEnterLobbyCompleted;
@@ -141,6 +173,8 @@ namespace OnlineActionRpg.Client.UI
                 lobbyClient.JoinRoomCompleted -= HandleJoinRoomCompleted;
                 lobbyClient.LeaveRoomCompleted -= HandleLeaveRoomCompleted;
                 lobbyClient.RoomStateChanged -= HandleRoomStateChanged;
+                lobbyClient.ReadyCompleted -= HandleReadyCompleted;
+                lobbyClient.StartBattleCompleted -= HandleStartBattleCompleted;
             }
         }
 
@@ -231,6 +265,47 @@ namespace OnlineActionRpg.Client.UI
             SetStatus("Leaving room...");
 
             await lobbyClient.LeaveRoomAsync(roomId);
+        }
+
+        private async void OnReadyClicked()
+        {
+            if (!CanSendRequest())
+            {
+                return;
+            }
+
+            if (_currentRoom == null || string.IsNullOrWhiteSpace(_currentRoom.roomId))
+            {
+                SetStatus("Ready failed. You are not in a room.");
+                return;
+            }
+
+            RoomPlayerDto currentPlayer = FindCurrentPlayer();
+            bool nextReadyState = currentPlayer == null || !currentPlayer.isReady;
+
+            SetWaiting(true);
+            SetStatus(nextReadyState ? "Setting ready..." : "Canceling ready...");
+
+            await lobbyClient.ReadyAsync(_currentRoom.roomId, nextReadyState);
+        }
+
+        private async void OnStartBattleClicked()
+        {
+            if (!CanSendRequest())
+            {
+                return;
+            }
+
+            if (_currentRoom == null || string.IsNullOrWhiteSpace(_currentRoom.roomId))
+            {
+                SetStatus("Start battle failed. You are not in a room.");
+                return;
+            }
+
+            SetWaiting(true);
+            SetStatus("Starting battle...");
+
+            await lobbyClient.StartBattleAsync(_currentRoom.roomId);
         }
 
         private void OnCreateClicked()
@@ -352,6 +427,38 @@ namespace OnlineActionRpg.Client.UI
             await RefreshLobbyAfterRoomChangedAsync();
         }
 
+        private void HandleReadyCompleted(RoomCommandResult result)
+        {
+            SetWaiting(false);
+
+            if (!result.Success)
+            {
+                SetStatus($"Ready failed. Code: {result.Code}, Message: {result.Message}");
+                return;
+            }
+
+            _currentRoom = result.Room;
+            RefreshCurrentRoomText();
+
+            SetStatus("Ready state updated.");
+        }
+
+        private void HandleStartBattleCompleted(RoomCommandResult result)
+        {
+            SetWaiting(false);
+
+            if (!result.Success)
+            {
+                SetStatus($"Start battle failed. Code: {result.Code}, Message: {result.Message}");
+                return;
+            }
+
+            _currentRoom = result.Room;
+            RefreshCurrentRoomText();
+
+            SetStatus("Start battle success. Entering loading flow soon.");
+        }
+
         private void HandleRoomStateChanged(RoomDto room)
         {
             if (room == null)
@@ -362,7 +469,14 @@ namespace OnlineActionRpg.Client.UI
             _currentRoom = room;
             RefreshCurrentRoomText();
 
-            SetStatus($"Room state updated. RoomId: {room.roomId}");
+            if (string.Equals(room.state, "Loading", StringComparison.OrdinalIgnoreCase))
+            {
+                SetStatus("Room entered Loading. Scene loading will be handled in iteration 03.");
+            }
+            else
+            {
+                SetStatus($"Room state updated. RoomId: {room.roomId}");
+            }
         }
 
         private async System.Threading.Tasks.Task RefreshLobbyAfterRoomChangedAsync()
@@ -445,8 +559,12 @@ namespace OnlineActionRpg.Client.UI
                         continue;
                     }
 
-                    string ownerTag = player.playerId == _currentRoom.ownerPlayerId ? " (Owner)" : string.Empty;
-                    builder.AppendLine($"- {player.nickname} [{player.playerId}]{ownerTag}");
+                    string roleTag = player.playerId == _currentRoom.ownerPlayerId ? "Owner" : "Member";
+                    string readyTag = player.playerId == _currentRoom.ownerPlayerId
+                        ? "Host"
+                        : (player.isReady ? "Ready" : "Not Ready");
+
+                    builder.AppendLine($"- {player.nickname} [{player.playerId}]  {roleTag} / {readyTag}");
                 }
             }
 
@@ -458,6 +576,8 @@ namespace OnlineActionRpg.Client.UI
         {
             bool canClick = !_isWaitingResponse;
             bool inRoom = _currentRoom != null && !string.IsNullOrWhiteSpace(_currentRoom.roomId);
+            bool isWaitingRoom = IsCurrentRoomWaiting();
+            bool isOwner = IsCurrentPlayerOwner();
 
             if (refreshButton != null)
             {
@@ -477,6 +597,16 @@ namespace OnlineActionRpg.Client.UI
             if (leaveRoomButton != null)
             {
                 leaveRoomButton.interactable = canClick && inRoom;
+            }
+
+            if (readyButton != null)
+            {
+                readyButton.interactable = canClick && inRoom && isWaitingRoom && !isOwner;
+            }
+
+            if (startBattleButton != null)
+            {
+                startBattleButton.interactable = canClick && inRoom && isWaitingRoom && isOwner;
             }
         }
 
@@ -510,6 +640,7 @@ namespace OnlineActionRpg.Client.UI
         {
             return input != null ? input.text.Trim() : string.Empty;
         }
+
         private static string NormalizeRoomIdInput(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -525,6 +656,39 @@ namespace OnlineActionRpg.Client.UI
             }
 
             return value;
+        }
+
+        private RoomPlayerDto FindCurrentPlayer()
+        {
+            if (_currentRoom == null || _currentRoom.players == null || session == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < _currentRoom.players.Length; i++)
+            {
+                RoomPlayerDto player = _currentRoom.players[i];
+
+                if (player != null && player.playerId == session.PlayerId)
+                {
+                    return player;
+                }
+            }
+
+            return null;
+        }
+
+        private bool IsCurrentPlayerOwner()
+        {
+            return _currentRoom != null &&
+                   session != null &&
+                   _currentRoom.ownerPlayerId == session.PlayerId;
+        }
+
+        private bool IsCurrentRoomWaiting()
+        {
+            return _currentRoom != null &&
+                   string.Equals(_currentRoom.state, "Waiting", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

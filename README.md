@@ -6,22 +6,27 @@
 
 ## 当前状态
 
-项目处于工程启动早期：文档骨架和 Unity 客户端工程已建立，服务端最小 WebSocket Ping / Pong 已完成 smoke test 验证。Unity 客户端联网面板尚未实现。
+项目已完成 v0.2 阶段：基础通信、账号登录、大厅房间、Ready / StartBattle 入口已经跑通，并完成服务端 smoke test 与 Unity 双客户端手动验证。当前进入 v0.3：异步资源与场景流启动阶段。
 
 已完成：
 
 - 项目立项、架构、协议和迭代规划文档。
 - Unity 客户端工程目录统一为 `Client/UnityProject/`。
 - C# / .NET 服务端最小工程：`Server/OnlineRpgServer/`。
-- 服务端 `PingReq -> PingRes` WebSocket 通信验证。
-- PowerShell smoke test：`Tools/SmokeTests/Test-ServerPing.ps1`。
+- Unity 客户端 WebSocket 连接、Ping / Pong、RTT 与协议日志调试面板。
+- 注册 / 登录协议、Token 会话保存和登录后进入大厅入口。
+- 大厅 / 房间链路：进入大厅、创建房间、加入房间、离开房间和 `RoomStateNtf` 广播。
+- Ready / StartBattle 链路：成员准备、房主开始、服务端校验后进入 `Loading` 状态。
+- 房主断线清理：单人房销毁，多人房转移房主并广播剩余房间状态。
+- PowerShell smoke tests：Ping、账号、房间、断线清理、Ready / StartBattle。
+- Unity 双客户端手动验证：创建房间、加入房间、Ready、StartBattle、进入 Loading 入口。
 - Git 基线配置，包括 Unity / .NET `.gitignore` 和 `.gitattributes`。
 - 工程巡检报告与 Bug / 性能记录模板。
 
 未完成：
 
-- Unity 客户端 WebSocket 调试面板。
-- 登录、大厅、房间、加载、战斗和同步功能。
+- Addressables 初始化、Loading UI、异步场景加载和资源生命周期管理。
+- 战斗场景、角色加载、动作战斗和网络同步。
 - Windows Build、性能记录和演示视频。
 
 ## 项目目标
@@ -51,8 +56,8 @@ MVP 只追求一条小而完整、可解释、可演示的商业客户端流程�
 | 渲染管线 | URP | 适合轻量动作 Demo 和性能验证 |
 | 输入 | Unity Input System | 已在客户端包清单中启用 |
 | 服务端 | C# / .NET `net9.0` | 已创建最小 WebSocket 服务端 |
-| 网络 | WebSocket | 服务端 Ping / Pong 已验证，Unity 客户端待接入 |
-| 协议 | JSON | 当前已用于 `PingReq / PingRes` |
+| 网络 | WebSocket | 当前用于登录、大厅、房间等低频可靠控制消息 |
+| 协议 | JSON | 已用于 Ping、账号、大厅、房间、Ready / StartBattle |
 | 资源 | Addressables，待接入 | 用于展示异步加载和资源所有权 |
 
 ## 目录结构
@@ -74,6 +79,7 @@ Online Action RPG Tech Demo/
     性能验证记录.md
     开发日志/
   Tools/
+    SmokeTests/                # 服务端自动化冒烟测试脚本
     ProtocolGenerator/         # 协议生成工具预留
     BuildScripts/              # 构建脚本预留
   Builds/                      # 本地构建输出，不提交实际 Build 包
@@ -94,11 +100,11 @@ Client/UnityProject/
 6000.3.20f1
 ```
 
-当前客户端仍是 Unity 初始工程，还没有接入项目自己的启动场景、网络模块或 UI 流程。
+当前客户端已接入最小登录、大厅、房间和 Ready / StartBattle UI。进入 `Loading` 后暂不切换场景，异步加载流程放在 v0.3 实现。
 
 ## 运行状态
 
-当前还没有完整客户端运行链路，但服务端最小通信验证已通过。
+当前 v0.2 链路已验证：客户端连接服务端后可注册 / 登录、进入大厅、创建或加入房间、切换 Ready 状态，并由房主开始进入 `Loading` 入口。
 
 启动服务端：
 
@@ -106,22 +112,28 @@ Client/UnityProject/
 dotnet run --project Server\OnlineRpgServer\OnlineRpgServer.csproj
 ```
 
-服务端启动后执行 smoke test：
+服务端启动后可执行 smoke tests：
 
 ```powershell
 Tools\SmokeTests\Test-ServerPing.ps1
+Tools\SmokeTests\Test-ServerAccount.ps1
+Tools\SmokeTests\Test-ServerRoom.ps1
+Tools\SmokeTests\Test-ServerRoomDisconnect.ps1
+Tools\SmokeTests\Test-ServerRoomReadyStart.ps1
 ```
 
-已验证返回：
+Ready / StartBattle 专项测试已验证返回：
 
 ```json
-{"ok":true,"url":"ws://localhost:5050/ws","requestId":"smoke-test-001","responseType":"PingRes","code":0}
+{"ok":true,"finalState":"Loading","notificationCount":7}
 ```
 
-迭代 0 剩余验收目标：
+v0.3 待实现目标：
 
-- 客户端能连接本地服务端并显示 RTT。
-- 断开服务端后客户端能显示断线状态。
+- Loading 协议与 Loading UI。
+- Addressables 初始化与异步加载进度显示。
+- 从房间 `Loading` 状态进入战斗场景加载流程。
+- 加载失败提示、重试或返回大厅。
 
 ## 核心文档
 
@@ -143,4 +155,4 @@ Tools\SmokeTests\Test-ServerPing.ps1
 
 ## 当前推荐下一步
 
-继续迭代 0：在 Unity 中创建最小网络调试面板，连接 `ws://localhost:5050/ws`，发送 `PingReq` 并显示 RTT / 协议日志 / 断线状态。
+进入 v0.3：先设计 Loading 协议和最小 LoadingPanel，再接入 Addressables 初始化与战斗场景异步加载。不要把角色加载、技能特效、战斗实例和网络同步一次性混入同一小步。

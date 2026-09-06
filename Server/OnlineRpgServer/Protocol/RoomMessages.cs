@@ -18,6 +18,10 @@ public static class RoomMessageIds
     public const int JoinRoomRes = 3104;
     public const int LeaveRoomReq = 3105;
     public const int LeaveRoomRes = 3106;
+    public const int ReadyReq = 3107;
+    public const int ReadyRes = 3108;
+    public const int StartBattleReq = 3109;
+    public const int StartBattleRes = 3110;
     public const int RoomStateNtf = 3199;
 }
 
@@ -72,6 +76,33 @@ public sealed class LeaveRoomResponsePayload
     public RoomDto? Room { get; init; }
 }
 
+public sealed class ReadyRequestPayload
+{
+    [JsonPropertyName("roomId")]
+    public string? RoomId { get; init; }
+
+    [JsonPropertyName("isReady")]
+    public bool IsReady { get; init; }
+}
+
+public sealed class ReadyResponsePayload
+{
+    [JsonPropertyName("room")]
+    public required RoomDto Room { get; init; }
+}
+
+public sealed class StartBattleRequestPayload
+{
+    [JsonPropertyName("roomId")]
+    public string? RoomId { get; init; }
+}
+
+public sealed class StartBattleResponsePayload
+{
+    [JsonPropertyName("room")]
+    public required RoomDto Room { get; init; }
+}
+
 public sealed class RoomStateNotificationPayload
 {
     [JsonPropertyName("room")]
@@ -111,7 +142,8 @@ public sealed class RoomDto
                 .Select(player => new RoomPlayerDto
                 {
                     PlayerId = player.PlayerId,
-                    Nickname = player.Nickname
+                    Nickname = player.Nickname,
+                    IsReady = player.IsReady
                 })
                 .ToList()
         };
@@ -125,4 +157,7 @@ public sealed class RoomPlayerDto
 
     [JsonPropertyName("nickname")]
     public required string Nickname { get; init; }
+
+    [JsonPropertyName("isReady")]
+    public required bool IsReady { get; init; }
 }
