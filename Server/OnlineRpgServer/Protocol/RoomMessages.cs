@@ -143,7 +143,8 @@ public sealed class RoomDto
                 {
                     PlayerId = player.PlayerId,
                     Nickname = player.Nickname,
-                    IsReady = player.IsReady
+                    IsReady = player.IsReady,
+                    IsBattleReady = player.IsBattleReady
                 })
                 .ToList()
         };
@@ -160,4 +161,7 @@ public sealed class RoomPlayerDto
 
     [JsonPropertyName("isReady")]
     public required bool IsReady { get; init; }
+
+    [JsonPropertyName("isBattleReady")]
+    public required bool IsBattleReady { get; init; }
 }

@@ -8,6 +8,7 @@ public enum RoomState
 {
     Waiting = 0,
     Loading = 1,
+    Battle = 2
 }
 
 // 服务端内存中的房间记录。
@@ -34,6 +35,7 @@ public sealed class RoomPlayerRecord
     public required string Nickname { get; init; }
     public required long JoinedAt { get; init; }
     public bool IsReady { get; set; }
+    public bool IsBattleReady { get; set; }
 }
 
 // 给外部读取用的房间快照。
@@ -54,4 +56,5 @@ public sealed class RoomPlayerSnapshot
     public required string PlayerId { get; init; }
     public required string Nickname { get; init; }
     public required bool IsReady { get; init; }
+    public required bool IsBattleReady { get; init; }
 }

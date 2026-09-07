@@ -195,5 +195,6 @@ namespace OnlineActionRpg.Client.Lobby
         public string playerId;
         public string nickname;
         public bool isReady;
+        public bool isBattleReady;
     }
 }

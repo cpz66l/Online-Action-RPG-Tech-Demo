@@ -6,9 +6,6 @@ using OnlineRpgServer.Protocol;
 using OnlineRpgServer.Room;
 using OnlineRpgServer.Connection;
 
-// 服务端入口：当前迭代只负责最小 WebSocket Ping / Pong 验证。
-// 后续登录、大厅、战斗同步都会建立在这条“连接 -> 收包 -> 分发 -> 回包”的链路上。
-
 // 创建一个服务端应用构建器
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,16 +105,40 @@ static async Task HandleConnectionAsync(
 
         // 业务分发点：
         var dispatchResult = BuildResponse(result,logger,accountService,roomService,connection.ConnectionId,connectionRegistry);
-        //先回复请求的响应
-        await connection.SendTextAsync(dispatchResult.ResponseJson, cancellationToken);
 
-        logger.LogInformation("Send {ConnectionId}: {Message}", connection.ConnectionId, dispatchResult.ResponseJson);
+        // 请求类消息会有响应；通知类消息可以没有响应。
+        if (!string.IsNullOrWhiteSpace(dispatchResult.ResponseJson))
+        {
+            await connection.SendTextAsync(dispatchResult.ResponseJson, cancellationToken);
+
+            logger.LogInformation("Send {ConnectionId}: {Message}", connection.ConnectionId, dispatchResult.ResponseJson);
+        }
 
         //如果是与房间相关的响应，则再进房间状态的广播
         if (dispatchResult.RoomStateToNotify is not null)
         {
             await BroadcastRoomStateAsync(
                 dispatchResult.RoomStateToNotify,
+                connectionRegistry,
+                logger,
+                cancellationToken);
+        }
+
+        //如果是开始战斗的响应，则再进加载战斗场景的广播
+        if (dispatchResult.LoadBattleSceneToNotify is not null)
+        {
+            await BroadcastLoadBattleSceneAsync(
+                dispatchResult.LoadBattleSceneToNotify,
+                connectionRegistry,
+                logger,
+                cancellationToken);
+        }
+
+        //如果是战斗开始的响应，则再进战斗开始的广播
+        if (dispatchResult.BattleStartToNotify is not null)
+        {
+            await BroadcastBattleStartAsync(
+                dispatchResult.BattleStartToNotify,
                 connectionRegistry,
                 logger,
                 cancellationToken);
@@ -202,6 +223,10 @@ static MessageDispatchResult BuildResponse(
             "ReadyReq" => CreateReadyDispatchResult(envelope, accountService, roomService),
             //开始战斗请求：成功后把房间推进到 Loading，并广播权威房间状态
             "StartBattleReq" => CreateStartBattleDispatchResult(envelope, accountService, roomService),
+            //客户端加载进度通知：成功时只记录日志，不回业务响应。
+            "ClientLoadProgressNtf" => CreateClientLoadProgressDispatchResult(envelope, logger, accountService),
+            //客户端加载完成请求
+            "ClientBattleReadyReq" => CreateClientBattleReadyDispatchResult(envelope, accountService, roomService),
             //未定义的响应
             _ => ToDispatchResult(CreateErrorResponse(envelope.RequestId, 1001, $"Unsupported message type: {envelope.Type}"))
         };
@@ -213,9 +238,31 @@ static MessageDispatchResult BuildResponse(
     }
 }
 
-static MessageDispatchResult ToDispatchResult(object response, RoomSnapshot? roomStateToNotify = null)
+//有响应的分发结果，通常用于客户端请求时，需要回包
+static MessageDispatchResult ToDispatchResult(
+    object response,
+    RoomSnapshot? roomStateToNotify = null,
+    LoadBattleSceneDispatch? loadBattleSceneToNotify = null,
+    BattleStartDispatch? battleStartToNotify = null)
 {
-    return new MessageDispatchResult(JsonSerializer.Serialize(response), roomStateToNotify);
+    return new MessageDispatchResult(
+        JsonSerializer.Serialize(response),
+        roomStateToNotify,
+        loadBattleSceneToNotify,
+        battleStartToNotify);
+}
+
+//无响应的分发结果，通常用于客户端广播通知时，不需要回包
+static MessageDispatchResult ToNoResponseDispatchResult(
+    RoomSnapshot? roomStateToNotify = null,
+    LoadBattleSceneDispatch? loadBattleSceneToNotify = null,
+    BattleStartDispatch? battleStartToNotify = null)
+{
+    return new MessageDispatchResult(
+        null,
+        roomStateToNotify,
+        loadBattleSceneToNotify,
+        battleStartToNotify);
 }
 
 //业务分发
@@ -361,7 +408,8 @@ static object CreateEnterLobbyResponse(
             {
                 PlayerId = session.PlayerId,
                 Nickname = session.Nickname,
-                IsReady = false
+                IsReady = false,
+                IsBattleReady = false
             },
             Rooms = rooms
         }
@@ -551,7 +599,7 @@ static MessageDispatchResult CreateReadyDispatchResult(
     return ToDispatchResult(response, result.Room);
 }
 
-//开始战斗分发结果
+//组装开始战斗的派发结果
 static MessageDispatchResult CreateStartBattleDispatchResult(
     ProtocolEnvelope request,
     AccountService accountService,
@@ -594,7 +642,117 @@ static MessageDispatchResult CreateStartBattleDispatchResult(
         }
     };
 
-    return ToDispatchResult(response, result.Room);
+    var loadBattleSceneNotification = new LoadBattleSceneDispatch(
+    result.Room,
+    CreateLoadBattleScenePayload(result.Room));
+
+    return ToDispatchResult(
+        response,
+        roomStateToNotify: result.Room,
+        loadBattleSceneToNotify: loadBattleSceneNotification);
+}
+
+//客户端加载进度通知的派发结果，成功时只记录日志，不回业务响应。
+static MessageDispatchResult CreateClientLoadProgressDispatchResult(
+    ProtocolEnvelope request,
+    ILogger logger,
+    AccountService accountService)
+{
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1002, "Login token is required."));
+    }
+
+    ClientLoadProgressNotificationPayload? payload =
+        request.Payload.Deserialize<ClientLoadProgressNotificationPayload>();
+
+    if (payload is null ||
+        string.IsNullOrWhiteSpace(payload.BattleId) ||
+        string.IsNullOrWhiteSpace(payload.RoomId))
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1001, "Invalid ClientLoadProgressNtf payload."));
+    }
+
+    float progress = Math.Clamp(payload.Progress, 0f, 1f);
+
+    logger.LogInformation(
+        "Client load progress. PlayerId={PlayerId}, RoomId={RoomId}, BattleId={BattleId}, Stage={Stage}, Progress={Progress:P0}, Message={Message}",
+        session.PlayerId,
+        payload.RoomId,
+        payload.BattleId,
+        payload.Stage,
+        progress,
+        payload.Message);
+
+    return ToNoResponseDispatchResult();
+}
+
+//客户端加载完成请求的派发结果，成功时会广播房间状态和战斗开始通知
+static MessageDispatchResult CreateClientBattleReadyDispatchResult(
+    ProtocolEnvelope request,
+    AccountService accountService,
+    RoomService roomService)
+{
+    var session = accountService.GetSession(request.Token);
+
+    if (session is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1002, "Login token is required."));
+    }
+
+    ClientBattleReadyRequestPayload? payload =
+        request.Payload.Deserialize<ClientBattleReadyRequestPayload>();
+
+    if (payload is null ||
+        string.IsNullOrWhiteSpace(payload.BattleId) ||
+        string.IsNullOrWhiteSpace(payload.RoomId))
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, 1001, "Invalid ClientBattleReadyReq payload."));
+    }
+
+    //标记玩家已准备好，尝试推进房间状态
+    var result = roomService.MarkBattleReady(session, payload.RoomId);
+
+    if (!result.Success || result.Room is null)
+    {
+        return ToDispatchResult(CreateErrorResponse(request.RequestId, result.Code, result.Message));
+    }
+
+    var response = new
+    {
+        msgId = LoadingMessageIds.ClientBattleReadyRes,
+        type = "ClientBattleReadyRes",
+        requestId = request.RequestId,
+        code = result.Code,
+        message = result.Message,
+        serverTime = UnixTimeMilliseconds(),
+        payload = new ClientBattleReadyResponsePayload
+        {
+            BattleId = payload.BattleId,
+            Room = RoomDto.FromSnapshot(result.Room)
+        }
+    };
+
+    BattleStartDispatch? battleStartDispatch = null;
+
+    if (result.BattleStarted)
+    {
+        battleStartDispatch = new BattleStartDispatch(
+            result.Room,
+            new BattleStartNotificationPayload
+            {
+                BattleId = payload.BattleId,
+                RoomId = payload.RoomId,
+                ServerStartTime = UnixTimeMilliseconds()
+            });
+    }
+
+    return ToDispatchResult(
+        response,
+        roomStateToNotify: result.Room,
+        battleStartToNotify: battleStartDispatch);
 }
 
 //错误响应
@@ -634,6 +792,7 @@ static async Task BroadcastRoomStateAsync(
     var playerIds = room.Players.Select(player => player.PlayerId);
     var targets = connectionRegistry.GetConnectionsByPlayerIds(playerIds);
 
+    //给房间内的每个玩家发送广播消息
     foreach (var target in targets)
     {
         try
@@ -644,6 +803,87 @@ static async Task BroadcastRoomStateAsync(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Failed to broadcast RoomStateNtf to {ConnectionId}", target.ConnectionId);
+        }
+    }
+}
+
+static LoadBattleSceneNotificationPayload CreateLoadBattleScenePayload(RoomSnapshot room)
+{
+    return new LoadBattleSceneNotificationPayload
+    {
+        BattleId = $"b_{Guid.NewGuid():N}",
+        RoomId = room.RoomId,
+        SceneKey = "BattleArena_Training",
+        RequiredAssets =
+        [
+            "Character_Knight",
+            "Skill_Slash",
+            "Vfx_Hit"
+        ]
+        //先硬编码战斗场景Key与需要加载的资源，后续可以根据房间配置或玩家选择来动态指定
+    };
+}
+
+//广播加载战斗场景通知
+static async Task BroadcastLoadBattleSceneAsync(
+    LoadBattleSceneDispatch notification,
+    ConnectionRegistry connectionRegistry,
+    ILogger logger,
+    CancellationToken cancellationToken)
+{
+    var message = JsonSerializer.Serialize(new
+    {
+        msgId = LoadingMessageIds.LoadBattleSceneNtf,
+        type = "LoadBattleSceneNtf",
+        serverTime = UnixTimeMilliseconds(),
+        payload = notification.Payload
+    });
+
+    var playerIds = notification.Room.Players.Select(player => player.PlayerId);
+    var targets = connectionRegistry.GetConnectionsByPlayerIds(playerIds);
+
+    foreach (var target in targets)
+    {
+        try
+        {
+            await target.SendTextAsync(message, cancellationToken);
+            logger.LogInformation("Broadcast LoadBattleSceneNtf to {ConnectionId}: {Message}", target.ConnectionId, message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to broadcast LoadBattleSceneNtf to {ConnectionId}", target.ConnectionId);
+        }
+    }
+}
+
+//广播开始战斗通知
+static async Task BroadcastBattleStartAsync(
+    BattleStartDispatch notification,
+    ConnectionRegistry connectionRegistry,
+    ILogger logger,
+    CancellationToken cancellationToken)
+{
+    var message = JsonSerializer.Serialize(new
+    {
+        msgId = LoadingMessageIds.BattleStartNtf,
+        type = "BattleStartNtf",
+        serverTime = UnixTimeMilliseconds(),
+        payload = notification.Payload
+    });
+
+    var playerIds = notification.Room.Players.Select(player => player.PlayerId);
+    var targets = connectionRegistry.GetConnectionsByPlayerIds(playerIds);
+
+    foreach (var target in targets)
+    {
+        try
+        {
+            await target.SendTextAsync(message, cancellationToken);
+            logger.LogInformation("Broadcast BattleStartNtf to {ConnectionId}: {Message}", target.ConnectionId, message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to broadcast BattleStartNtf to {ConnectionId}", target.ConnectionId);
         }
     }
 }
@@ -704,6 +944,21 @@ static long? TryGetPayloadClientTime(JsonElement payload)
 
 static long UnixTimeMilliseconds() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+//消息派发，大部分情况需要返回 ResponseJson，
+//少数情况不需要进行回包，如客户端广播加载进度通知时，
+//少数需要广播房间状态或加载战斗场景通知时，
+//才会返回 RoomStateToNotify 或 LoadBattleSceneToNotify。
 sealed record MessageDispatchResult(
-    string ResponseJson,
-    RoomSnapshot? RoomStateToNotify);
+    string? ResponseJson,
+    RoomSnapshot? RoomStateToNotify,
+    LoadBattleSceneDispatch? LoadBattleSceneToNotify,
+    BattleStartDispatch? BattleStartToNotify);
+
+//加载战斗场景通知的派发结果，包含房间快照和通知负载
+sealed record LoadBattleSceneDispatch(
+    RoomSnapshot Room,
+    LoadBattleSceneNotificationPayload Payload);
+//开始战斗通知的派发结果，包含房间快照和通知负载
+sealed record BattleStartDispatch(
+    RoomSnapshot Room,
+    BattleStartNotificationPayload Payload);

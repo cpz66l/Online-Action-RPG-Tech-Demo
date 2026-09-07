@@ -4,18 +4,20 @@ param(
     [string]$Password = "123456"
 )
 
-# Smoke Test: verifies ReadyReq / StartBattleReq room gate rules.
+# Smoke Test: verifies ClientLoadProgressNtf is accepted after LoadBattleSceneNtf.
 # Start the server first: dotnet run --project Server\OnlineRpgServer\OnlineRpgServer.csproj
 $ErrorActionPreference = "Stop"
 
 if ([string]::IsNullOrWhiteSpace($UsernamePrefix)) {
-    $UsernamePrefix = "room_ready_start_" + [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    $UsernamePrefix = "loading_progress_" + [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
 }
 
 $ct = [System.Threading.CancellationToken]::None
 $sockets = @()
 $scenarios = @()
-$notifications = @()
+$roomNotifications = @()
+$loadingNotifications = @()
+$progressNotifications = @()
 
 function New-RequestId {
     return [Guid]::NewGuid().ToString("N")
@@ -119,6 +121,17 @@ function Get-JsonArrayCount {
     return @($Value).Count
 }
 
+function Assert-NotEmpty {
+    param(
+        [string]$Value,
+        [string]$Message
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        throw $Message
+    }
+}
+
 function Add-RoomStateNotificationRecord {
     param(
         [object]$Message,
@@ -128,12 +141,31 @@ function Add-RoomStateNotificationRecord {
 
     $room = $Message.payload.room
 
-    $script:notifications += [pscustomobject]@{
+    $script:roomNotifications += [pscustomobject]@{
         scenario = $Scenario
         roomId = $room.roomId
         ownerPlayerId = $room.ownerPlayerId
         state = $room.state
         playerCount = Get-JsonArrayCount -Value $room.players
+        json = $Json
+    }
+}
+
+function Add-LoadingNotificationRecord {
+    param(
+        [object]$Message,
+        [string]$Json,
+        [string]$Scenario
+    )
+
+    $payload = $Message.payload
+
+    $script:loadingNotifications += [pscustomobject]@{
+        scenario = $Scenario
+        battleId = $payload.battleId
+        roomId = $payload.roomId
+        sceneKey = $payload.sceneKey
+        requiredAssetCount = Get-JsonArrayCount -Value $payload.requiredAssets
         json = $Json
     }
 }
@@ -178,6 +210,7 @@ function Invoke-ServerRequest {
         }
 
         if ($response.type -eq "LoadBattleSceneNtf") {
+            Add-LoadingNotificationRecord -Message $response -Json $responseJson -Scenario "while waiting for $Type"
             continue
         }
 
@@ -215,17 +248,6 @@ function Assert-ServerResponse {
     }
 }
 
-function Assert-NotEmpty {
-    param(
-        [string]$Value,
-        [string]$Message
-    )
-
-    if ([string]::IsNullOrWhiteSpace($Value)) {
-        throw $Message
-    }
-}
-
 function Get-RoomPlayer {
     param(
         [object]$Room,
@@ -252,25 +274,6 @@ function Assert-RoomHasPlayer {
 
     if ($null -eq $player) {
         throw "[$Scenario] Expected room '$($Room.roomId)' to contain player '$PlayerId'."
-    }
-}
-
-function Assert-PlayerReadyState {
-    param(
-        [object]$Room,
-        [string]$PlayerId,
-        [bool]$ExpectedReady,
-        [string]$Scenario
-    )
-
-    $player = Get-RoomPlayer -Room $Room -PlayerId $PlayerId
-
-    if ($null -eq $player) {
-        throw "[$Scenario] Expected room '$($Room.roomId)' to contain player '$PlayerId'."
-    }
-
-    if ([bool]$player.isReady -ne $ExpectedReady) {
-        throw "[$Scenario] Expected player '$PlayerId' ready=$ExpectedReady, got '$($player.isReady)'."
     }
 }
 
@@ -339,6 +342,79 @@ function Receive-RoomStateNotification {
     return $message
 }
 
+function Receive-LoadBattleSceneNotification {
+    param(
+        [System.Net.WebSockets.ClientWebSocket]$Socket,
+        [string]$Scenario,
+        [string]$ExpectedRoomId,
+        [string]$ExpectedSceneKey
+    )
+
+    $messageJson = Receive-TextMessage -Socket $Socket -TimeoutMilliseconds 3000
+    $message = $messageJson | ConvertFrom-Json
+
+    if ($message.type -ne "LoadBattleSceneNtf") {
+        throw "[$Scenario] Expected LoadBattleSceneNtf, got '$($message.type)': $messageJson"
+    }
+
+    if ($message.msgId -ne 4001) {
+        throw "[$Scenario] Expected msgId 4001, got '$($message.msgId)': $messageJson"
+    }
+
+    $payload = $message.payload
+    Assert-NotEmpty -Value ([string]$payload.battleId) -Message "[$Scenario] Expected non-empty battleId: $messageJson"
+
+    if ($payload.roomId -ne $ExpectedRoomId) {
+        throw "[$Scenario] Expected roomId '$ExpectedRoomId', got '$($payload.roomId)': $messageJson"
+    }
+
+    if ($payload.sceneKey -ne $ExpectedSceneKey) {
+        throw "[$Scenario] Expected sceneKey '$ExpectedSceneKey', got '$($payload.sceneKey)': $messageJson"
+    }
+
+    Add-LoadingNotificationRecord -Message $message -Json $messageJson -Scenario $Scenario
+    return $message
+}
+
+function Send-ClientLoadProgressNotification {
+    param(
+        [System.Net.WebSockets.ClientWebSocket]$Socket,
+        [string]$Token,
+        [string]$BattleId,
+        [string]$RoomId,
+        [double]$Progress,
+        [string]$Stage,
+        [string]$Message
+    )
+
+    $clientTime = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    $notificationObject = @{
+        msgId = 4002
+        type = "ClientLoadProgressNtf"
+        token = $Token
+        clientTime = $clientTime
+        payload = @{
+            battleId = $BattleId
+            roomId = $RoomId
+            progress = $Progress
+            stage = $Stage
+            message = $Message
+        }
+    }
+
+    $notificationJson = $notificationObject | ConvertTo-Json -Compress -Depth 12
+    Send-TextMessage -Socket $Socket -Message $notificationJson
+
+    $script:progressNotifications += [pscustomobject]@{
+        battleId = $BattleId
+        roomId = $RoomId
+        progress = $Progress
+        stage = $Stage
+        message = $Message
+        json = $notificationJson
+    }
+}
+
 function Register-And-Login {
     param(
         [System.Net.WebSockets.ClientWebSocket]$Socket,
@@ -346,22 +422,21 @@ function Register-And-Login {
         [string]$Nickname
     )
 
-    $registerPayload = @{
-        username = $Username
-        password = $script:Password
-        nickname = $Nickname
-    }
+    $register = Invoke-ServerRequest `
+        -Socket $Socket `
+        -MsgId 1001 `
+        -Type "RegisterReq" `
+        -Payload @{ username = $Username; password = $script:Password; nickname = $Nickname }
 
-    $register = Invoke-ServerRequest -Socket $Socket -MsgId 1001 -Type "RegisterReq" -Payload $registerPayload
     Assert-ServerResponse -Exchange $register -Scenario "register $Nickname" -ExpectedType "RegisterRes" -ExpectedCode 0
     Add-Scenario -Name "register $Nickname" -Exchange $register
 
-    $loginPayload = @{
-        username = $Username
-        password = $script:Password
-    }
+    $login = Invoke-ServerRequest `
+        -Socket $Socket `
+        -MsgId 1003 `
+        -Type "LoginReq" `
+        -Payload @{ username = $Username; password = $script:Password }
 
-    $login = Invoke-ServerRequest -Socket $Socket -MsgId 1003 -Type "LoginReq" -Payload $loginPayload
     Assert-ServerResponse -Exchange $login -Scenario "login $Nickname" -ExpectedType "LoginRes" -ExpectedCode 0
     Add-Scenario -Name "login $Nickname" -Exchange $login
 
@@ -383,14 +458,14 @@ try {
     $ownerSocket = New-ConnectedSocket
     $memberSocket = New-ConnectedSocket
 
-    $owner = Register-And-Login -Socket $ownerSocket -Username ($UsernamePrefix + "_owner") -Nickname "ReadyOwner"
-    $member = Register-And-Login -Socket $memberSocket -Username ($UsernamePrefix + "_member") -Nickname "ReadyMember"
+    $owner = Register-And-Login -Socket $ownerSocket -Username ($UsernamePrefix + "_owner") -Nickname "ProgressOwner"
+    $member = Register-And-Login -Socket $memberSocket -Username ($UsernamePrefix + "_member") -Nickname "ProgressMember"
 
     $createRoom = Invoke-ServerRequest `
         -Socket $ownerSocket `
         -MsgId 3101 `
         -Type "CreateRoomReq" `
-        -Payload @{ roomName = "Ready Start Room"; maxPlayers = 2 } `
+        -Payload @{ roomName = "Loading Progress Room"; maxPlayers = 2 } `
         -Token $owner.Token
 
     Assert-ServerResponse -Exchange $createRoom -Scenario "owner create room" -ExpectedType "CreateRoomRes" -ExpectedCode 0
@@ -398,17 +473,6 @@ try {
 
     $roomId = [string]$createRoom.Response.payload.room.roomId
     Assert-NotEmpty -Value $roomId -Message "[owner create room] Expected non-empty roomId: $($createRoom.ResponseJson)"
-
-    Assert-RoomSnapshot `
-        -Room $createRoom.Response.payload.room `
-        -Scenario "owner create room" `
-        -RoomId $roomId `
-        -ExpectedOwnerPlayerId $owner.PlayerId `
-        -ExpectedState "Waiting" `
-        -ExpectedPlayerCount 1 `
-        -ExpectedPlayerIds @($owner.PlayerId)
-
-    Assert-PlayerReadyState -Room $createRoom.Response.payload.room -PlayerId $owner.PlayerId -ExpectedReady $false -Scenario "owner create room"
 
     Receive-RoomStateNotification `
         -Socket $ownerSocket `
@@ -419,16 +483,6 @@ try {
         -ExpectedPlayerCount 1 `
         -ExpectedPlayerIds @($owner.PlayerId) | Out-Null
 
-    $startAlone = Invoke-ServerRequest `
-        -Socket $ownerSocket `
-        -MsgId 3109 `
-        -Type "StartBattleReq" `
-        -Payload @{ roomId = $roomId } `
-        -Token $owner.Token
-
-    Assert-ServerResponse -Exchange $startAlone -Scenario "owner start with one player" -ExpectedType "ErrorRes" -ExpectedCode 3003
-    Add-Scenario -Name "owner start with one player" -Exchange $startAlone
-
     $joinRoom = Invoke-ServerRequest `
         -Socket $memberSocket `
         -MsgId 3103 `
@@ -438,18 +492,6 @@ try {
 
     Assert-ServerResponse -Exchange $joinRoom -Scenario "member join room" -ExpectedType "JoinRoomRes" -ExpectedCode 0
     Add-Scenario -Name "member join room" -Exchange $joinRoom
-
-    Assert-RoomSnapshot `
-        -Room $joinRoom.Response.payload.room `
-        -Scenario "member join room" `
-        -RoomId $roomId `
-        -ExpectedOwnerPlayerId $owner.PlayerId `
-        -ExpectedState "Waiting" `
-        -ExpectedPlayerCount 2 `
-        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId)
-
-    Assert-PlayerReadyState -Room $joinRoom.Response.payload.room -PlayerId $owner.PlayerId -ExpectedReady $false -Scenario "member join room"
-    Assert-PlayerReadyState -Room $joinRoom.Response.payload.room -PlayerId $member.PlayerId -ExpectedReady $false -Scenario "member join room"
 
     Receive-RoomStateNotification `
         -Socket $ownerSocket `
@@ -469,26 +511,6 @@ try {
         -ExpectedPlayerCount 2 `
         -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId) | Out-Null
 
-    $memberStart = Invoke-ServerRequest `
-        -Socket $memberSocket `
-        -MsgId 3109 `
-        -Type "StartBattleReq" `
-        -Payload @{ roomId = $roomId } `
-        -Token $member.Token
-
-    Assert-ServerResponse -Exchange $memberStart -Scenario "non-owner start battle" -ExpectedType "ErrorRes" -ExpectedCode 1003
-    Add-Scenario -Name "non-owner start battle" -Exchange $memberStart
-
-    $ownerStartBeforeReady = Invoke-ServerRequest `
-        -Socket $ownerSocket `
-        -MsgId 3109 `
-        -Type "StartBattleReq" `
-        -Payload @{ roomId = $roomId } `
-        -Token $owner.Token
-
-    Assert-ServerResponse -Exchange $ownerStartBeforeReady -Scenario "owner start before member ready" -ExpectedType "ErrorRes" -ExpectedCode 3003
-    Add-Scenario -Name "owner start before member ready" -Exchange $ownerStartBeforeReady
-
     $memberReady = Invoke-ServerRequest `
         -Socket $memberSocket `
         -MsgId 3107 `
@@ -499,113 +521,128 @@ try {
     Assert-ServerResponse -Exchange $memberReady -Scenario "member ready" -ExpectedType "ReadyRes" -ExpectedCode 0
     Add-Scenario -Name "member ready" -Exchange $memberReady
 
-    Assert-RoomSnapshot `
-        -Room $memberReady.Response.payload.room `
-        -Scenario "member ready" `
-        -RoomId $roomId `
-        -ExpectedOwnerPlayerId $owner.PlayerId `
-        -ExpectedState "Waiting" `
-        -ExpectedPlayerCount 2 `
-        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId)
-
-    Assert-PlayerReadyState -Room $memberReady.Response.payload.room -PlayerId $owner.PlayerId -ExpectedReady $false -Scenario "member ready"
-    Assert-PlayerReadyState -Room $memberReady.Response.payload.room -PlayerId $member.PlayerId -ExpectedReady $true -Scenario "member ready"
-
-    $ownerReadyNtf = Receive-RoomStateNotification `
+    Receive-RoomStateNotification `
         -Socket $ownerSocket `
         -Scenario "ready notification to owner" `
         -RoomId $roomId `
         -ExpectedOwnerPlayerId $owner.PlayerId `
         -ExpectedState "Waiting" `
         -ExpectedPlayerCount 2 `
-        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId)
+        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId) | Out-Null
 
-    Assert-PlayerReadyState -Room $ownerReadyNtf.payload.room -PlayerId $member.PlayerId -ExpectedReady $true -Scenario "ready notification to owner"
-
-    $memberReadyNtf = Receive-RoomStateNotification `
+    Receive-RoomStateNotification `
         -Socket $memberSocket `
         -Scenario "ready notification to member" `
         -RoomId $roomId `
         -ExpectedOwnerPlayerId $owner.PlayerId `
         -ExpectedState "Waiting" `
         -ExpectedPlayerCount 2 `
-        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId)
+        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId) | Out-Null
 
-    Assert-PlayerReadyState -Room $memberReadyNtf.payload.room -PlayerId $member.PlayerId -ExpectedReady $true -Scenario "ready notification to member"
-
-    $ownerStartAfterReady = Invoke-ServerRequest `
+    $startBattle = Invoke-ServerRequest `
         -Socket $ownerSocket `
         -MsgId 3109 `
         -Type "StartBattleReq" `
         -Payload @{ roomId = $roomId } `
         -Token $owner.Token
 
-    Assert-ServerResponse -Exchange $ownerStartAfterReady -Scenario "owner start after member ready" -ExpectedType "StartBattleRes" -ExpectedCode 0
-    Add-Scenario -Name "owner start after member ready" -Exchange $ownerStartAfterReady
+    Assert-ServerResponse -Exchange $startBattle -Scenario "owner start battle" -ExpectedType "StartBattleRes" -ExpectedCode 0
+    Add-Scenario -Name "owner start battle" -Exchange $startBattle
 
     Assert-RoomSnapshot `
-        -Room $ownerStartAfterReady.Response.payload.room `
-        -Scenario "owner start after member ready" `
+        -Room $startBattle.Response.payload.room `
+        -Scenario "owner start battle" `
         -RoomId $roomId `
         -ExpectedOwnerPlayerId $owner.PlayerId `
         -ExpectedState "Loading" `
         -ExpectedPlayerCount 2 `
         -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId)
 
-    $ownerLoadingNtf = Receive-RoomStateNotification `
+    Receive-RoomStateNotification `
         -Socket $ownerSocket `
-        -Scenario "loading notification to owner" `
+        -Scenario "loading room notification to owner" `
         -RoomId $roomId `
         -ExpectedOwnerPlayerId $owner.PlayerId `
         -ExpectedState "Loading" `
         -ExpectedPlayerCount 2 `
-        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId)
+        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId) | Out-Null
 
-    Assert-PlayerReadyState -Room $ownerLoadingNtf.payload.room -PlayerId $member.PlayerId -ExpectedReady $true -Scenario "loading notification to owner"
-
-    $memberLoadingNtf = Receive-RoomStateNotification `
+    Receive-RoomStateNotification `
         -Socket $memberSocket `
-        -Scenario "loading notification to member" `
+        -Scenario "loading room notification to member" `
         -RoomId $roomId `
         -ExpectedOwnerPlayerId $owner.PlayerId `
         -ExpectedState "Loading" `
         -ExpectedPlayerCount 2 `
-        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId)
+        -ExpectedPlayerIds @($owner.PlayerId, $member.PlayerId) | Out-Null
 
-    Assert-PlayerReadyState -Room $memberLoadingNtf.payload.room -PlayerId $member.PlayerId -ExpectedReady $true -Scenario "loading notification to member"
-
-    $readyAfterLoading = Invoke-ServerRequest `
-        -Socket $memberSocket `
-        -MsgId 3107 `
-        -Type "ReadyReq" `
-        -Payload @{ roomId = $roomId; isReady = $false } `
-        -Token $member.Token
-
-    Assert-ServerResponse -Exchange $readyAfterLoading -Scenario "ready after loading" -ExpectedType "ErrorRes" -ExpectedCode 3003
-    Add-Scenario -Name "ready after loading" -Exchange $readyAfterLoading
-
-    $startAfterLoading = Invoke-ServerRequest `
+    $ownerLoadingTask = Receive-LoadBattleSceneNotification `
         -Socket $ownerSocket `
-        -MsgId 3109 `
-        -Type "StartBattleReq" `
-        -Payload @{ roomId = $roomId } `
-        -Token $owner.Token
+        -Scenario "load battle scene notification to owner" `
+        -ExpectedRoomId $roomId `
+        -ExpectedSceneKey "BattleArena_Training"
 
-    Assert-ServerResponse -Exchange $startAfterLoading -Scenario "start after loading" -ExpectedType "ErrorRes" -ExpectedCode 3003
-    Add-Scenario -Name "start after loading" -Exchange $startAfterLoading
+    $memberLoadingTask = Receive-LoadBattleSceneNotification `
+        -Socket $memberSocket `
+        -Scenario "load battle scene notification to member" `
+        -ExpectedRoomId $roomId `
+        -ExpectedSceneKey "BattleArena_Training"
 
-    $expectedNotificationCount = 7
-    if ((@($notifications).Count) -ne $expectedNotificationCount) {
-        throw "Expected $expectedNotificationCount RoomStateNtf messages, got $(@($notifications).Count)."
+    $battleId = [string]$ownerLoadingTask.payload.battleId
+    if ($memberLoadingTask.payload.battleId -ne $battleId) {
+        throw "Expected both clients to receive the same battleId. Owner='$battleId', member='$($memberLoadingTask.payload.battleId)'."
     }
+
+    Send-ClientLoadProgressNotification `
+        -Socket $ownerSocket `
+        -Token $owner.Token `
+        -BattleId $battleId `
+        -RoomId $roomId `
+        -Progress 0.25 `
+        -Stage "AddressablesInitializing" `
+        -Message "owner initializing addressables"
+
+    Send-ClientLoadProgressNotification `
+        -Socket $memberSocket `
+        -Token $member.Token `
+        -BattleId $battleId `
+        -RoomId $roomId `
+        -Progress 1.0 `
+        -Stage "AddressablesInitialized" `
+        -Message "member addressables initialized"
+
+    # Do not prove "no notification response" by starting a short timed ReceiveAsync.
+    # On .NET ClientWebSocket, canceling a pending receive can abort the client socket,
+    # which creates a false server-side disconnect. The following PingReq checks both
+    # that no unexpected response was queued and that the connection is still usable.
+
+    $ownerPing = Invoke-ServerRequest `
+        -Socket $ownerSocket `
+        -MsgId 1 `
+        -Type "PingReq" `
+        -Payload @{ clientTime = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() }
+    Assert-ServerResponse -Exchange $ownerPing -Scenario "owner ping after progress" -ExpectedType "PingRes" -ExpectedCode 0
+    Add-Scenario -Name "owner ping after progress" -Exchange $ownerPing
+
+    $memberPing = Invoke-ServerRequest `
+        -Socket $memberSocket `
+        -MsgId 1 `
+        -Type "PingReq" `
+        -Payload @{ clientTime = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() }
+    Assert-ServerResponse -Exchange $memberPing -Scenario "member ping after progress" -ExpectedType "PingRes" -ExpectedCode 0
+    Add-Scenario -Name "member ping after progress" -Exchange $memberPing
 
     $resultObject = [pscustomobject]@{
         ok = $true
         url = $Url
         usernamePrefix = $UsernamePrefix
         roomId = $roomId
-        finalState = "Loading"
-        notificationCount = @($notifications).Count
+        battleId = $battleId
+        sceneKey = [string]$ownerLoadingTask.payload.sceneKey
+        roomStateNotificationCount = @($roomNotifications).Count
+        loadBattleSceneNotificationCount = @($loadingNotifications).Count
+        clientLoadProgressNotificationCount = @($progressNotifications).Count
+        progressStages = @($progressNotifications | ForEach-Object { $_.stage })
         scenarios = $scenarios
     }
 
@@ -614,16 +651,16 @@ try {
 catch [System.AggregateException] {
     $inner = $_.Exception.InnerException
     $innerMessage = if ($inner -ne $null) { $inner.Message } else { $_.Exception.Message }
-    throw "Room ready/start smoke test failed. Make sure the server is listening at $Url. Original error: $innerMessage"
+    throw "Loading progress smoke test failed. Make sure the server is listening at $Url. Original error: $innerMessage"
 }
 catch {
-    throw "Room ready/start smoke test failed. $($_.Exception.Message)"
+    throw "Loading progress smoke test failed. $($_.Exception.Message)"
 }
 finally {
     foreach ($socket in $sockets) {
         try {
             if ($socket.State -eq [System.Net.WebSockets.WebSocketState]::Open) {
-                $closeTask = $socket.CloseAsync([System.Net.WebSockets.WebSocketCloseStatus]::NormalClosure, "room ready/start smoke test done", $ct)
+                $closeTask = $socket.CloseAsync([System.Net.WebSockets.WebSocketCloseStatus]::NormalClosure, "loading progress smoke test done", $ct)
                 $closeTask.Wait()
             }
         }

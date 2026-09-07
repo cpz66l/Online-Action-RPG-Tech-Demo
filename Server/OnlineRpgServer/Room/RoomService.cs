@@ -265,6 +265,54 @@ public sealed class RoomService
         }
     }
 
+    // 客户端加载完成确认。
+    // 只有房间已经处于 Loading 状态时，客户端才能确认 BattleReady。
+    // 当所有房间成员都完成加载后，服务端把房间推进到 Battle。
+    public RoomOperationResult MarkBattleReady(PlayerSession session, string? roomId)
+    {
+        roomId = Normalize(roomId);
+
+        if (IsMissing(roomId))
+        {
+            return RoomOperationResult.Fail(InvalidArgument, "Room id is required.");
+        }
+
+        lock (_gate)
+        {
+            if (!_roomsById.TryGetValue(roomId, out RoomRecord? room))
+            {
+                return RoomOperationResult.Fail(RoomNotFound, "Room not found.");
+            }
+
+            if (!room.PlayersById.TryGetValue(session.PlayerId, out RoomPlayerRecord? player))
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "Player is not in this room.");
+            }
+
+            if (room.State == RoomState.Battle)
+            {
+                return RoomOperationResult.Ok(CreateSnapshot(room));
+            }
+
+            if (room.State != RoomState.Loading)
+            {
+                return RoomOperationResult.Fail(InvalidRoomState, "Room is not loading.");
+            }
+
+            player.IsBattleReady = true;
+            //每有一个玩家标记为战斗准备好，就检查房间内所有玩家是否都已准备好
+            bool allPlayersBattleReady = room.PlayersById.Values.All(roomPlayer => roomPlayer.IsBattleReady);
+
+            if (allPlayersBattleReady)
+            {
+                room.State = RoomState.Battle;
+                return RoomOperationResult.Ok(CreateSnapshot(room), battleStarted: true);
+            }
+
+            return RoomOperationResult.Ok(CreateSnapshot(room));
+        }
+    }
+
     //确保玩家不处于任何房间
     private void LeaveCurrentRoomIfNeeded(string playerId)
     {
@@ -346,7 +394,8 @@ public sealed class RoomService
                 {
                     PlayerId = player.PlayerId,
                     Nickname = player.Nickname,
-                    IsReady = player.IsReady
+                    IsReady = player.IsReady,
+                    IsBattleReady = player.IsBattleReady
                 })
                 .ToList()
         };
@@ -376,15 +425,20 @@ public sealed class RoomOperationResult
     public int Code { get; private init; }
     public string Message { get; private init; } = string.Empty;
     public RoomSnapshot? Room { get; private init; }
+    public bool BattleStarted { get; private init; }
 
-    public static RoomOperationResult Ok(RoomSnapshot? room)
+
+    public static RoomOperationResult Ok(
+        RoomSnapshot? room,
+        bool battleStarted = false)
     {
         return new RoomOperationResult
         {
             Success = true,
             Code = 0,
             Message = "OK",
-            Room = room
+            Room = room,
+            BattleStarted = battleStarted
         };
     }
 
