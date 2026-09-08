@@ -33,6 +33,7 @@ namespace OnlineActionRpg.Client.UI
         private LoadBattleSceneTaskInfo _currentTask;
         private float _lastReportedProgress = -1f;
         private string _lastReportedStage = string.Empty;
+        private bool _hasSentBattleReady;
 
         //每10%进度广播一次.
         private const float ProgressReportStep = 0.1f;
@@ -52,6 +53,8 @@ namespace OnlineActionRpg.Client.UI
             if (loadingClient != null)
             {
                 loadingClient.LoadBattleSceneReceived += HandleLoadBattleSceneReceived;
+                loadingClient.BattleReadyCompleted += HandleBattleReadyCompleted;
+                loadingClient.BattleStartReceived += HandleBattleStartReceived;
             }
 
             if (resourceService != null)
@@ -67,6 +70,8 @@ namespace OnlineActionRpg.Client.UI
             if (loadingClient != null)
             {
                 loadingClient.LoadBattleSceneReceived -= HandleLoadBattleSceneReceived;
+                loadingClient.BattleReadyCompleted -= HandleBattleReadyCompleted;
+                loadingClient.BattleStartReceived -= HandleBattleStartReceived;
             }
 
             if (resourceService != null)
@@ -78,6 +83,11 @@ namespace OnlineActionRpg.Client.UI
         private async void HandleLoadBattleSceneReceived(LoadBattleSceneTaskInfo task)
         {
             Show();
+
+            _currentTask = task;
+            _lastReportedProgress = -1f;
+            _lastReportedStage = string.Empty;
+            _hasSentBattleReady = false;
 
             SetText(statusText, "Loading task received.");
             SetText(battleIdText, $"BattleId: {task.BattleId}");
@@ -118,7 +128,47 @@ namespace OnlineActionRpg.Client.UI
                 return;
             }
 
-            SetText(statusText, "Addressables initialized. Waiting for scene loading step.");
+            SetText(statusText, "Addressables initialized. Reporting battle ready...");
+            await SendBattleReadyOnceAsync();
+        }
+
+        private async System.Threading.Tasks.Task SendBattleReadyOnceAsync()
+        {
+            if (_hasSentBattleReady || loadingClient == null || !_currentTask.IsValid)
+            {
+                return;
+            }
+
+            _hasSentBattleReady = true;
+
+            await loadingClient.SendBattleReadyAsync(
+                _currentTask.BattleId,
+                _currentTask.RoomId);
+        }
+
+        private void HandleBattleReadyCompleted(ClientBattleReadyResult result)
+        {
+            if (!result.Success)
+            {
+                SetText(statusText, $"Battle ready failed: {result.Message}");
+                return;
+            }
+
+            SetText(statusText, "Battle ready accepted. Waiting for other players...");
+            SetText(progressText, "Progress: 100%");
+
+            if (progressSlider != null)
+            {
+                progressSlider.value = 1f;
+            }
+        }
+
+        private void HandleBattleStartReceived(BattleStartInfo info)
+        {
+            SetText(statusText, $"Battle start received. ServerStartTime: {info.ServerStartTime}");
+            SetText(progressText, "Progress: all players ready.");
+
+            // 下一阶段再在这里接 SceneManager / Addressables scene loading。
         }
 
         // 处理资源加载进度变化事件，UI更新显示加载进度。每帧轮询，确保UI显示最新的加载进度。

@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-项目已完成 v0.2 阶段：基础通信、账号登录、大厅房间、Ready / StartBattle 入口已经跑通，并完成服务端 smoke test 与 Unity 双客户端手动验证。当前进入 v0.3：异步资源与场景流启动阶段。
+项目已完成 v0.3 阶段：基础通信、账号登录、大厅房间、Ready / StartBattle、Loading 协议、Addressables 初始化、加载进度上报、全员 BattleReady、服务端统一 BattleStart，以及训练场景入口加载已经跑通。当前准备进入 v0.4：本地动作战斗原型。
 
 已完成：
 
@@ -17,17 +17,20 @@
 - 注册 / 登录协议、Token 会话保存和登录后进入大厅入口。
 - 大厅 / 房间链路：进入大厅、创建房间、加入房间、离开房间和 `RoomStateNtf` 广播。
 - Ready / StartBattle 链路：成员准备、房主开始、服务端校验后进入 `Loading` 状态。
+- Loading 链路：服务端下发 `LoadBattleSceneNtf`，客户端显示 Loading UI，初始化 Addressables，并上报加载进度。
+- BattleReady / BattleStart 链路：客户端加载完成后发送 `ClientBattleReadyReq`，服务端等待全员完成后广播 `BattleStartNtf`。
+- 训练场景入口：Unity 客户端收到 `BattleStartNtf` 后通过 Addressables 加载 `BattleArena_Training`。
 - 房主断线清理：单人房销毁，多人房转移房主并广播剩余房间状态。
-- PowerShell smoke tests：Ping、账号、房间、断线清理、Ready / StartBattle。
-- Unity 双客户端手动验证：创建房间、加入房间、Ready、StartBattle、进入 Loading 入口。
+- PowerShell smoke tests：Ping、账号、房间、断线清理、Ready / StartBattle、Loading 通知、加载进度、BattleReady / BattleStart。
+- Unity 双客户端手动验证：创建房间、加入房间、Ready、StartBattle、Loading、Addressables 初始化、BattleStart 后进入训练场景入口。
 - Git 基线配置，包括 Unity / .NET `.gitignore` 和 `.gitattributes`。
 - 工程巡检报告与 Bug / 性能记录模板。
 
 未完成：
 
-- Addressables 初始化、Loading UI、异步场景加载和资源生命周期管理。
-- 战斗场景、角色加载、动作战斗和网络同步。
-- Windows Build、性能记录和演示视频。
+- 本地玩家生成、第三人称控制、相机跟随、动画状态机和普攻命中闭环。
+- 远端玩家生成、状态同步、战斗事件同步和结算。
+- 完整资源生命周期管理、加载失败重试、Windows Build、性能记录和演示视频。
 
 ## 项目目标
 
@@ -57,8 +60,8 @@ MVP 只追求一条小而完整、可解释、可演示的商业客户端流程�
 | 输入 | Unity Input System | 已在客户端包清单中启用 |
 | 服务端 | C# / .NET `net9.0` | 已创建最小 WebSocket 服务端 |
 | 网络 | WebSocket | 当前用于登录、大厅、房间等低频可靠控制消息 |
-| 协议 | JSON | 已用于 Ping、账号、大厅、房间、Ready / StartBattle |
-| 资源 | Addressables，待接入 | 用于展示异步加载和资源所有权 |
+| 协议 | JSON | 已用于 Ping、账号、大厅、房间、Loading 和 BattleStart |
+| 资源 | Addressables | 已用于初始化、加载进度观察和训练场景入口加载 |
 
 ## 目录结构
 
@@ -69,6 +72,7 @@ Online Action RPG Tech Demo/
   Server/
     OnlineRpgServer/           # C# / .NET 服务端工程
   Docs/
+    README.md
     项目立项书.md
     系统架构设计.md
     协议设计.md
@@ -77,7 +81,8 @@ Online Action RPG Tech Demo/
     工程巡检报告-2026-08-13.md
     Bug记录簿.md
     性能验证记录.md
-    开发日志/
+    开发日志/                  # 本地复盘材料，不提交 GitHub
+    导师手册.md                # 本地协作约定，不提交 GitHub
   Tools/
     SmokeTests/                # 服务端自动化冒烟测试脚本
     ProtocolGenerator/         # 协议生成工具预留
@@ -100,11 +105,11 @@ Client/UnityProject/
 6000.3.20f1
 ```
 
-当前客户端已接入最小登录、大厅、房间和 Ready / StartBattle UI。进入 `Loading` 后暂不切换场景，异步加载流程放在 v0.3 实现。
+当前客户端已接入最小登录、大厅、房间、Ready / StartBattle、Loading UI、Addressables 初始化和训练场景入口加载。进入训练场后，角色控制和动作战斗将在 v0.4 实现。
 
 ## 运行状态
 
-当前 v0.2 链路已验证：客户端连接服务端后可注册 / 登录、进入大厅、创建或加入房间、切换 Ready 状态，并由房主开始进入 `Loading` 入口。
+当前 v0.3 链路已验证：客户端连接服务端后可注册 / 登录、进入大厅、创建或加入房间、切换 Ready 状态，由房主开始进入 Loading；客户端完成 Addressables 初始化并上报 BattleReady 后，服务端统一广播 BattleStart，客户端加载训练场景入口。
 
 启动服务端：
 
@@ -120,23 +125,27 @@ Tools\SmokeTests\Test-ServerAccount.ps1
 Tools\SmokeTests\Test-ServerRoom.ps1
 Tools\SmokeTests\Test-ServerRoomDisconnect.ps1
 Tools\SmokeTests\Test-ServerRoomReadyStart.ps1
+Tools\SmokeTests\Test-ServerLoadingStart.ps1
+Tools\SmokeTests\Test-ServerLoadingProgress.ps1
+Tools\SmokeTests\Test-ServerBattleReadyStart.ps1
 ```
 
-Ready / StartBattle 专项测试已验证返回：
+BattleReady / BattleStart 专项测试已验证返回：
 
 ```json
-{"ok":true,"finalState":"Loading","notificationCount":7}
+{"ok":true,"finalRoomState":"Battle","loadBattleSceneNotificationCount":2,"battleStartNotificationCount":2}
 ```
 
-v0.3 待实现目标：
+v0.4 待实现目标：
 
-- Loading 协议与 Loading UI。
-- Addressables 初始化与异步加载进度显示。
-- 从房间 `Loading` 状态进入战斗场景加载流程。
-- 加载失败提示、重试或返回大厅。
+- 灰盒训练场启动结构和 `BattleBootstrap`。
+- 本地玩家生成、第三人称移动、朝向和相机跟随。
+- 基础动画状态机：Idle / Run / Attack。
+- 普攻命中窗口、训练木桩 HP 和 HitBox / HurtBox 调试可视化。
 
 ## 核心文档
 
+- [文档索引](Docs/README.md)
 - [项目立项书](Docs/项目立项书.md)
 - [系统架构设计](Docs/系统架构设计.md)
 - [协议设计](Docs/协议设计.md)
@@ -155,4 +164,4 @@ v0.3 待实现目标：
 
 ## 当前推荐下一步
 
-进入 v0.3：先设计 Loading 协议和最小 LoadingPanel，再接入 Addressables 初始化与战斗场景异步加载。不要把角色加载、技能特效、战斗实例和网络同步一次性混入同一小步。
+进入 v0.4：先建立训练场景的 `BattleBootstrap / BattleContext / PlayerSpawnPoint`，再接本地 3C、动画状态机、普攻命中和 HitBox / HurtBox 调试可视化。暂时不要把远端同步、服务端 Tick、伤害权威和结算混入 04。

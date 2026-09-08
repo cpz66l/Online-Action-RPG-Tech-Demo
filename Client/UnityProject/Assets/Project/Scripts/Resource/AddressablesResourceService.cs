@@ -1,10 +1,11 @@
 using System;
-using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets.ResourceLocators;
+using UnityEngine.ResourceManagement.ResourceProviders;
+using UnityEngine.SceneManagement;
 
 namespace OnlineActionRpg.Client.Resource
 {
@@ -12,10 +13,13 @@ namespace OnlineActionRpg.Client.Resource
     public sealed class AddressablesResourceService : MonoBehaviour
     {
         public event Action<ResourceProgressInfo> ProgressChanged;
-
         public bool IsInitialized { get; private set; }
         public bool IsInitializing { get; private set; }
         public string LastError { get; private set; } = string.Empty;
+
+        private AsyncOperationHandle<SceneInstance> _loadedBattleSceneHandle;
+        private bool _hasLoadedBattleScene;
+        private string _loadedBattleSceneKey = string.Empty;
 
         private Task<bool> _initializeTask;
 
@@ -94,6 +98,92 @@ namespace OnlineActionRpg.Client.Resource
                 {
                     _initializeTask = null;
                 }
+            }
+        }
+
+        // 加载战斗场景的异步方法，返回一个 Task<bool>，表示加载是否成功。
+        public async Task<bool> LoadBattleSceneAsync(string sceneKey, LoadSceneMode loadMode = LoadSceneMode.Additive)
+        {
+            sceneKey = sceneKey != null ? sceneKey.Trim() : string.Empty;
+
+            if (string.IsNullOrWhiteSpace(sceneKey))
+            {
+                LastError = "Battle scene key is required.";
+                RaiseProgress("BattleSceneLoadFailed", 1f, LastError);
+                return false;
+            }
+
+            if (_hasLoadedBattleScene && _loadedBattleSceneHandle.IsValid())
+            {
+                RaiseProgress("BattleSceneLoaded", 1f, $"Battle scene already loaded: {_loadedBattleSceneKey}");
+                return true;
+            }
+
+            if (!IsInitialized)
+            {
+                bool initialized = await InitializeAsync();
+
+                if (!initialized)
+                {
+                    return false;
+                }
+            }
+
+            RaiseProgress("BattleSceneLoading", 0f, $"Loading battle scene: {sceneKey}");
+
+            AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(
+                sceneKey,
+                loadMode,
+                true);
+
+            try
+            {
+                while (!handle.IsDone)
+                {
+                    RaiseProgress(
+                        "BattleSceneLoading",
+                        handle.PercentComplete,
+                        $"Loading battle scene: {sceneKey}");
+
+                    await Task.Yield();
+                }
+
+                if (handle.Status != AsyncOperationStatus.Succeeded)
+                {
+                    LastError = handle.OperationException != null
+                        ? handle.OperationException.Message
+                        : $"Battle scene load failed: {sceneKey}";
+
+                    RaiseProgress("BattleSceneLoadFailed", 1f, LastError);
+                    return false;
+                }
+
+                _loadedBattleSceneHandle = handle;
+                _hasLoadedBattleScene = true;
+                _loadedBattleSceneKey = sceneKey;
+
+                Scene loadedScene = handle.Result.Scene;
+
+                if (loadedScene.IsValid())
+                { 
+                    SceneManager.SetActiveScene(loadedScene);
+                    //让Unity后续创建对象时默认归属到BattleArena_Training
+                }
+
+                RaiseProgress("BattleSceneLoaded", 1f, $"Battle scene loaded: {sceneKey}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
+                RaiseProgress("BattleSceneLoadFailed", 1f, LastError);
+
+                if (handle.IsValid())
+                {
+                    Addressables.Release(handle);
+                }
+
+                return false;
             }
         }
 

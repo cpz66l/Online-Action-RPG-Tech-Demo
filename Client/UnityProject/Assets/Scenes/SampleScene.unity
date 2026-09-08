@@ -5703,6 +5703,7 @@ GameObject:
   - component: {fileID: 920935101}
   - component: {fileID: 920935105}
   - component: {fileID: 920935106}
+  - component: {fileID: 920935107}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -5855,6 +5856,28 @@ MonoBehaviour:
   currentRoomText: {fileID: 64332225}
   roomPlate: {fileID: 909463555}
   creatRoomPlate: {fileID: 97991653}
+--- !u!114 &920935107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920935100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d4c62d43c7aa7f4bb2ec38f11a2cbce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.UI.NetworkDebugPanel
+  networkClient: {fileID: 2036766105}
+  serverUrlInput: {fileID: 1101427370}
+  connectButton: {fileID: 773250310}
+  disconnectButton: {fileID: 2069801850}
+  pingButton: {fileID: 993785744}
+  stateText: {fileID: 526446227}
+  rttText: {fileID: 1989526666}
+  lastSentText: {fileID: 1792198785}
+  lastReceivedText: {fileID: 1816565021}
+  errorText: {fileID: 278863989}
 --- !u!1 &962073638
 GameObject:
   m_ObjectHideFlags: 0
@@ -8709,6 +8732,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Loading.LoadingClient
   networkClient: {fileID: 2036766105}
+  session: {fileID: 0}
 --- !u!1 &1497393785
 GameObject:
   m_ObjectHideFlags: 0
@@ -9760,7 +9784,6 @@ GameObject:
   - component: {fileID: 1702741155}
   - component: {fileID: 1702741158}
   - component: {fileID: 1702741157}
-  - component: {fileID: 1702741156}
   m_Layer: 5
   m_Name: NetworkDebugPanel
   m_TagString: Untagged
@@ -9796,28 +9819,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1702741156
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1702741154}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d4c62d43c7aa7f4bb2ec38f11a2cbce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.UI.NetworkDebugPanel
-  networkClient: {fileID: 2036766105}
-  serverUrlInput: {fileID: 1101427370}
-  connectButton: {fileID: 773250310}
-  disconnectButton: {fileID: 2069801850}
-  pingButton: {fileID: 993785744}
-  stateText: {fileID: 526446227}
-  rttText: {fileID: 1989526666}
-  lastSentText: {fileID: 1792198785}
-  lastReceivedText: {fileID: 1816565021}
-  errorText: {fileID: 278863989}
 --- !u!114 &1702741157
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12317,6 +12318,60 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &2099390078
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2099390080}
+  - component: {fileID: 2099390079}
+  m_Layer: 0
+  m_Name: BattleSceneLoadController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2099390079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099390078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ba8a4675ca3762409e76c6e069db6dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Loading.BattleSceneLoadController
+  loadingClient: {fileID: 1474787592}
+  resourceService: {fileID: 1381540149}
+  loadSceneMode: 1
+  lobbyCamera: {fileID: 330585545}
+  lobbyAudioListener: {fileID: 330585544}
+  lobbyObjectsToHideAfterBattleLoaded:
+  - {fileID: 1428662149}
+  - {fileID: 1702741154}
+  - {fileID: 810738879}
+  - {fileID: 1785194629}
+--- !u!4 &2099390080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099390078}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 862.8161, y: 0, z: 496.3197}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2125764903
 GameObject:
   m_ObjectHideFlags: 0
@@ -12502,3 +12557,4 @@ SceneRoots:
   - {fileID: 2125764904}
   - {fileID: 1533052290}
   - {fileID: 1381540150}
+  - {fileID: 2099390080}
