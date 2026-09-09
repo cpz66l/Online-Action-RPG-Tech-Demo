@@ -1,0 +1,17 @@
+{
+  "source": "Meshy text-to-3d, meshy-6",
+  "height_m": 3,
+  "bounds_m_blender_xyz": [
+    1.03543,
+    1.03593,
+    3.0
+  ],
+  "triangles": 5580,
+  "mesh_objects": 1,
+  "materials": [
+    "Material_0"
+  ],
+  "origin": "bottom center",
+  "unity_collider": "not created",
+  "character_rig_or_animation": false
+}

@@ -1,0 +1,302 @@
+{
+  "passed": true,
+  "blender_version": "5.2.1 LTS",
+  "file": "TrainingCourtyard.blend",
+  "dummy_positions": [
+    {
+      "name": "TrainingDummy_01",
+      "unity_pivot_m": [
+        -4.0,
+        0.0,
+        4.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "TrainingDummy_02",
+      "unity_pivot_m": [
+        -0.0,
+        0.0,
+        5.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "TrainingDummy_03",
+      "unity_pivot_m": [
+        4.0,
+        0.0,
+        4.0
+      ],
+      "passed": true
+    }
+  ],
+  "material_graphs": [
+    {
+      "name": "Cloth_PatinaTeal",
+      "base_color_linear": [
+        0.020288562402129173,
+        0.1946178376674652,
+        0.18782077729701996,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Material",
+      "base_color_linear": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Metal_AgedBrass",
+      "base_color_linear": [
+        0.5149176716804504,
+        0.2961382567882538,
+        0.08437620848417282,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Metal_DarkIron",
+      "base_color_linear": [
+        0.045186202973127365,
+        0.05780543014407158,
+        0.07227185368537903,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Plant_DryGrass",
+      "base_color_linear": [
+        0.2961382567882538,
+        0.31854677200317383,
+        0.13013647496700287,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Plant_Fern",
+      "base_color_linear": [
+        0.2158605009317398,
+        0.30054378509521484,
+        0.18447498977184296,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Plant_Sage",
+      "base_color_linear": [
+        0.11953842639923096,
+        0.2158605009317398,
+        0.1384316086769104,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Preview_Backdrop",
+      "base_color_linear": [
+        0.4677838087081909,
+        0.5520114302635193,
+        0.5583403706550598,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Preview_ScaleFigure",
+      "base_color_linear": [
+        0.039546236395835876,
+        0.13563333451747894,
+        0.14702726900577545,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Rope_NaturalFlax",
+      "base_color_linear": [
+        0.577580451965332,
+        0.46207699179649353,
+        0.24228112399578094,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Basalt_BlueGrey",
+      "base_color_linear": [
+        0.040915198624134064,
+        0.061246052384376526,
+        0.08650045841932297,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Basalt_Edge",
+      "base_color_linear": [
+        0.08437620848417282,
+        0.12213877588510513,
+        0.16826939582824707,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Mortar",
+      "base_color_linear": [
+        0.14995978772640228,
+        0.18447498977184296,
+        0.18782077729701996,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Paving_Cool",
+      "base_color_linear": [
+        0.38642942905426025,
+        0.43415364623069763,
+        0.3915724754333496,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Paving_Grey",
+      "base_color_linear": [
+        0.34191441535949707,
+        0.38642942905426025,
+        0.34670406579971313,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Paving_Light",
+      "base_color_linear": [
+        0.5583403706550598,
+        0.5457244515419006,
+        0.423267662525177,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Paving_Warm",
+      "base_color_linear": [
+        0.48514994978904724,
+        0.4793201684951782,
+        0.3762621283531189,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Sandstone",
+      "base_color_linear": [
+        0.6038273572921753,
+        0.48514994978904724,
+        0.30054378509521484,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Sandstone_Cap",
+      "base_color_linear": [
+        0.7835378050804138,
+        0.6514056324958801,
+        0.4019777774810791,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Stone_Sandstone_Shade",
+      "base_color_linear": [
+        0.46207699179649353,
+        0.37123769521713257,
+        0.24228112399578094,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Wood_DarkOak",
+      "base_color_linear": [
+        0.19120168685913086,
+        0.08437620848417282,
+        0.03560131415724754,
+        1.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "Wood_Heartwood",
+      "base_color_linear": [
+        0.42869049310684204,
+        0.22696587443351746,
+        0.0802198201417923,
+        1.0
+      ],
+      "passed": true
+    }
+  ],
+  "visual": {
+    "mesh_objects": 36,
+    "vertices": 52768,
+    "triangles": 80428,
+    "materials": [
+      "Cloth_PatinaTeal",
+      "Material_0",
+      "Metal_AgedBrass",
+      "Metal_DarkIron",
+      "Plant_DryGrass",
+      "Plant_Fern",
+      "Plant_Sage",
+      "Rope_NaturalFlax",
+      "Stone_Basalt_BlueGrey",
+      "Stone_Basalt_Edge",
+      "Stone_Mortar",
+      "Stone_Paving_Cool",
+      "Stone_Paving_Grey",
+      "Stone_Paving_Light",
+      "Stone_Paving_Warm",
+      "Stone_Sandstone",
+      "Stone_Sandstone_Cap",
+      "Stone_Sandstone_Shade",
+      "Wood_DarkOak",
+      "Wood_Heartwood"
+    ],
+    "material_count": 20,
+    "unity_bounds_m": {
+      "min": [
+        -14.045000076293945,
+        -1.3200000524520874,
+        -14.045000076293945
+      ],
+      "max": [
+        14.045000076293945,
+        6.369999885559082,
+        14.045000076293945
+      ]
+    },
+    "unity_dimensions_m": [
+      28.09000015258789,
+      7.689999938011169,
+      28.09000015258789
+    ]
+  },
+  "note": "Source checks only; Unity importing is validated separately."
+}

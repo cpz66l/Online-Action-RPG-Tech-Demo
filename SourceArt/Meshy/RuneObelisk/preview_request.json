@@ -1,0 +1,13 @@
+{
+  "should_remesh": true,
+  "prompt": "A single freestanding ancient rune obelisk prop for a stylized low polygon fantasy training courtyard. Chunky weathered sandstone pillar, broad stable stepped square plinth, dark slate stone inset panels, a small faceted teal crystal cradled at the top, shallow geometric carved runes. Readable bold silhouette, hand crafted beveled stone edges, restrained medieval fantasy design, approximately three meters tall. One isolated environment prop only, no characters, no surrounding floor, no scenery, no floating disconnected pieces, no text or logos. All details made as a cohesive reusable game environment asset.",
+  "ai_model": "meshy-6",
+  "topology": "triangle",
+  "target_polycount": 6000,
+  "mode": "preview",
+  "model_type": "standard",
+  "target_formats": [
+    "glb",
+    "fbx"
+  ]
+}

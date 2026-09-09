@@ -1,0 +1,221 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7285213668682058830
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6599375981442368864}
+  - component: {fileID: 5623508188092267604}
+  - component: {fileID: 8130470294917285336}
+  - component: {fileID: 7367967369394817888}
+  - component: {fileID: 8763788044651070870}
+  m_Layer: 0
+  m_Name: LocalPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6599375981442368864
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285213668682058830}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.526, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2762832841547541258}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!143 &5623508188092267604
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285213668682058830}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 1.8
+  m_Radius: 0.33
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8130470294917285336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285213668682058830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f8cd56de7d9bb843af7170f79df7077, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Battle.LocalPlayerController
+  inputReader: {fileID: 8763788044651070870}
+  walkSpeed: 2
+  runSpeed: 6
+  defaultLocomotionMode: 1
+  acceleration: 32
+  deceleration: 40
+  gravity: -20
+  groundedStickForce: -2
+  jumpHeight: 1.2
+  jumpGroundedGraceTime: 0.08
+  turnSmoothTime: 0.08
+  minRotationSpeed: 0.15
+  cameraTransform: {fileID: 0}
+  dodgeSpeed: 10
+  dodgeDuration: 0.6
+  dodgeCooldown: 1.5
+  dodgeRequiresGrounded: 1
+  attackDuration: 0.8
+  attackCooldown: 0.3
+  attackRequiresGrounded: 1
+  attackBlockedByDodge: 1
+  dodgeBlockedByAttack: 1
+  attackLocksMovement: 1
+  attackImpulseSpeed: 6
+  attackImpulseDuration: 0.25
+  attackImpulseBrake: 30
+--- !u!114 &7367967369394817888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285213668682058830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ced515b3419cecd49b2fbe754a2cfd04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Battle.CharacterAnimatorDriver
+  playerController: {fileID: 8130470294917285336}
+  animator: {fileID: 8122137475620843888}
+  inputReader: {fileID: 8763788044651070870}
+  moveSpeedParameter: MoveSpeed
+  isMovingParameter: IsMoving
+  attackTriggerParameter: Attack
+  dodgeTriggerParameter: Dodge
+  jumpTriggerParameter: Jump
+  isGroundedParameter: IsGrounded
+  verticalSpeedParameter: VerticalSpeed
+  isAttackingParameter: IsAttacking
+  isWalkingParameter: IsWalking
+  isRunningParameter: IsRunning
+  moveThreshold: 0.05
+  speedDampTime: 0.08
+--- !u!114 &8763788044651070870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285213668682058830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3ddf7bc180a864ead0a221520413bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Battle.PlayerInputReader
+  moveAction: {fileID: 1975483448169280185, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+  lookAction: {fileID: 6892715243067282217, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+  attackAction: {fileID: 4177590858362266985, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+  dodgeAction: {fileID: 8697751930870506065, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+  jumpAction: {fileID: -5495608441465207645, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+  walkModeAction: {fileID: 0}
+--- !u!1001 &2440164476520238305
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6599375981442368864}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.008
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.908
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_Name
+      value: UAL1_Standard
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 705a7c99863ca00439e4944c2e0cb4a8, type: 2}
+    - target: {fileID: 5866666021909216657, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+      propertyPath: m_AnimatePhysics
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+--- !u!4 &2762832841547541258 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+  m_PrefabInstance: {fileID: 2440164476520238305}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &8122137475620843888 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: bdba5f84b339f414688de374d1d5d1ee, type: 3}
+  m_PrefabInstance: {fileID: 2440164476520238305}
+  m_PrefabAsset: {fileID: 0}

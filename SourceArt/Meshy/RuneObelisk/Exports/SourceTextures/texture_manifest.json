@@ -1,0 +1,13 @@
+{
+  "BaseColor": "RuneObelisk_BaseColor.jpg",
+  "MetallicRoughness": "RuneObelisk_MetallicRoughness.jpg",
+  "Normal": "RuneObelisk_Normal.jpg",
+  "Emission": "RuneObelisk_Emission.jpg",
+  "Unity_notes": {
+    "BaseColor": "URP/Lit Base Map, sRGB enabled.",
+    "Normal": "Import as Texture Type Normal map, assign to Normal Map.",
+    "Emission": "Optional URP Emission map, enable Emission; inspect intensity in Unity.",
+    "MetallicRoughness": "Original glTF packing: G = roughness, B = metallic. Do NOT directly assign this to a Unity metallic-smoothness map. First prototype can use Metallic 0 and Smoothness 0.25 without this map.",
+    "fbx_import": "Default FBX import was verified for geometry and material slots. Textures require explicit Unity material assignment; appearance in URP is not yet validated."
+  }
+}

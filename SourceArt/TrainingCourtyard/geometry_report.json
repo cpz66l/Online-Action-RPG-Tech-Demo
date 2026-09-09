@@ -1,0 +1,281 @@
+{
+  "title": "Original Stylized Training Courtyard / Scene 04 prototype",
+  "seed": 404,
+  "blender_version": "5.2.1 LTS",
+  "units": "meters",
+  "design_footprint_m": [
+    28,
+    28
+  ],
+  "clear_combat_core_m": [
+    20,
+    20
+  ],
+  "paving_top_unity_y": 0.0,
+  "inlay_top_unity_y": 0.004,
+  "coordinates": {
+    "design": "Unity X right, Y up, Z toward arch",
+    "blender_from_unity": "(-x, -z, y)",
+    "handedness_note": "X inversion compensates the measured Unity FBX importer handedness conversion.",
+    "fbx_export_forward": "-Z",
+    "fbx_export_up": "Y",
+    "gltf_y_up": true
+  },
+  "visual": {
+    "mesh_objects": 36,
+    "vertices": 52768,
+    "triangles": 80428,
+    "materials": [
+      "Cloth_PatinaTeal",
+      "Material_0",
+      "Metal_AgedBrass",
+      "Metal_DarkIron",
+      "Plant_DryGrass",
+      "Plant_Fern",
+      "Plant_Sage",
+      "Rope_NaturalFlax",
+      "Stone_Basalt_BlueGrey",
+      "Stone_Basalt_Edge",
+      "Stone_Mortar",
+      "Stone_Paving_Cool",
+      "Stone_Paving_Grey",
+      "Stone_Paving_Light",
+      "Stone_Paving_Warm",
+      "Stone_Sandstone",
+      "Stone_Sandstone_Cap",
+      "Stone_Sandstone_Shade",
+      "Wood_DarkOak",
+      "Wood_Heartwood"
+    ],
+    "material_count": 20,
+    "unity_bounds_m": {
+      "min": [
+        -14.045000076293945,
+        -1.3200000524520874,
+        -14.045000076293945
+      ],
+      "max": [
+        14.045000076293945,
+        6.369999885559082,
+        14.045000076293945
+      ]
+    },
+    "unity_dimensions_m": [
+      28.09000015258789,
+      7.689999938011169,
+      28.09000015258789
+    ]
+  },
+  "environment_only": {
+    "mesh_objects": 33,
+    "vertices": 48676,
+    "triangles": 72328,
+    "materials": [
+      "Cloth_PatinaTeal",
+      "Material_0",
+      "Metal_AgedBrass",
+      "Metal_DarkIron",
+      "Plant_DryGrass",
+      "Plant_Fern",
+      "Plant_Sage",
+      "Rope_NaturalFlax",
+      "Stone_Basalt_BlueGrey",
+      "Stone_Basalt_Edge",
+      "Stone_Mortar",
+      "Stone_Paving_Cool",
+      "Stone_Paving_Grey",
+      "Stone_Paving_Light",
+      "Stone_Paving_Warm",
+      "Stone_Sandstone",
+      "Stone_Sandstone_Cap",
+      "Stone_Sandstone_Shade",
+      "Wood_DarkOak",
+      "Wood_Heartwood"
+    ],
+    "material_count": 20,
+    "unity_bounds_m": {
+      "min": [
+        -14.045000076293945,
+        -1.3200000524520874,
+        -14.045000076293945
+      ],
+      "max": [
+        14.045000076293945,
+        6.369999885559082,
+        14.045000076293945
+      ]
+    },
+    "unity_dimensions_m": [
+      28.09000015258789,
+      7.689999938011169,
+      28.09000015258789
+    ]
+  },
+  "meshy_decoration": {
+    "included": true,
+    "source": "E:\\YouXiKaiFa\\Online Action RPG Tech Demo\\SourceArt\\Meshy\\RuneObelisk\\Exports\\RuneObelisk_3m.glb",
+    "instances": 2,
+    "height_m": 3
+  },
+  "collision_proxies": {
+    "mesh_objects": 28,
+    "vertices": 224,
+    "triangles": 336,
+    "materials": [],
+    "material_count": 0,
+    "unity_bounds_m": {
+      "min": [
+        -14.0,
+        -0.4000000059604645,
+        -14.0
+      ],
+      "max": [
+        14.0,
+        6.00499963760376,
+        14.0
+      ]
+    },
+    "unity_dimensions_m": [
+      28.0,
+      6.404999643564224,
+      28.0
+    ]
+  },
+  "dummies": {
+    "TrainingDummy_01": {
+      "mesh_objects": 1,
+      "vertices": 1364,
+      "triangles": 2700,
+      "materials": [
+        "Rope_NaturalFlax",
+        "Stone_Basalt_Edge",
+        "Wood_DarkOak",
+        "Wood_Heartwood"
+      ],
+      "material_count": 4,
+      "unity_bounds_m": {
+        "min": [
+          -4.760000228881836,
+          0.0,
+          3.440000057220459
+        ],
+        "max": [
+          -3.239999771118164,
+          2.0949997901916504,
+          4.559999942779541
+        ]
+      },
+      "unity_dimensions_m": [
+        1.5200004577636719,
+        2.0949997901916504,
+        1.119999885559082
+      ]
+    },
+    "TrainingDummy_02": {
+      "mesh_objects": 1,
+      "vertices": 1364,
+      "triangles": 2700,
+      "materials": [
+        "Rope_NaturalFlax",
+        "Stone_Basalt_Edge",
+        "Wood_DarkOak",
+        "Wood_Heartwood"
+      ],
+      "material_count": 4,
+      "unity_bounds_m": {
+        "min": [
+          -0.7599999904632568,
+          0.0,
+          4.440000057220459
+        ],
+        "max": [
+          0.7599999904632568,
+          2.0949997901916504,
+          5.559999942779541
+        ]
+      },
+      "unity_dimensions_m": [
+        1.5199999809265137,
+        2.0949997901916504,
+        1.119999885559082
+      ]
+    },
+    "TrainingDummy_03": {
+      "mesh_objects": 1,
+      "vertices": 1364,
+      "triangles": 2700,
+      "materials": [
+        "Rope_NaturalFlax",
+        "Stone_Basalt_Edge",
+        "Wood_DarkOak",
+        "Wood_Heartwood"
+      ],
+      "material_count": 4,
+      "unity_bounds_m": {
+        "min": [
+          3.239999771118164,
+          0.0,
+          3.440000057220459
+        ],
+        "max": [
+          4.760000228881836,
+          2.0949997901916504,
+          4.559999942779541
+        ]
+      },
+      "unity_dimensions_m": [
+        1.5200004577636719,
+        2.0949997901916504,
+        1.119999885559082
+      ]
+    }
+  },
+  "anchors_unity_m": {
+    "DummyAnchor_01": [
+      -4.0,
+      0.0,
+      4.0
+    ],
+    "DummyAnchor_02": [
+      0.0,
+      0.0,
+      5.0
+    ],
+    "DummyAnchor_03": [
+      4.0,
+      0.0,
+      4.0
+    ],
+    "Spawn_Player_01": [
+      -2.0,
+      0.0,
+      -7.0
+    ],
+    "Spawn_Player_02": [
+      2.0,
+      0.0,
+      -7.0
+    ],
+    "Courtyard_Origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Gate_Center": [
+      0.0,
+      0.0,
+      11.9
+    ]
+  },
+  "notes": [
+    "Courtyard architecture, paving, banners, plants and dummies are original procedural geometry with flat PBR materials.",
+    "Two optional rune obelisk instances use the separately generated Meshy model and its AI-generated PBR textures.",
+    "Collision FBX contains proxy geometry only. Unity Collider components are not enabled by this export.",
+    "Preview scale figure, ground, cameras and lights are excluded from all model exports.",
+    "Three dummies have individual ground-centered pivots and individual FBX exports at origin.",
+    "Core is planar paving; combat props occupy the specified rear training positions.",
+    "Lighting and shadows shown in renders require separate Unity lighting setup.",
+    "No UV lightmap unwrap is authored; generate UV2 in Unity before lightmap baking."
+  ],
+  "source_validation": "Passed verify_source.py: saved scene dummy pivots and active material graphs checked."
+}

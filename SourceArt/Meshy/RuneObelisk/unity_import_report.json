@@ -1,0 +1,164 @@
+{
+  "status": "passed",
+  "unityVersion": "6000.3.20f1",
+  "importedAssetPath": "Assets/RuneObelisk_3m.fbx",
+  "assetSha256": "a61fa993671f4d1a872f321d850ec3eb00c29a739450c41e2639597ea399389e",
+  "utcTime": "2026-09-08T10:32:23.6911688Z",
+  "exception": "",
+  "scopeNotes": [
+    "Validation uses a disposable independent Unity project; the game's Client/UnityProject was not modified.",
+    "This validates default FBX import, mesh bounds, transforms, topology counts and material slots only.",
+    "No Unity collider is expected in the source model. This is an environment art prototype, not a playable scene.",
+    "Shader/color data reflects default Unity FBX import and does not certify URP appearance or gameplay integration.",
+    "Final import setup: RuneObelisk_3m.fbx and its complete Exports/Textures folder were copied together into the disposable project Assets folder.",
+    "A prior FBX-only import produced a valid Standard material with no assigned textures. Supplying the sidecar Textures folder restored base color, normal, and emission references; roughness/metallic still require explicit material mapping for URP."
+  ],
+  "importerGlobalScale": 1.0,
+  "importerFileScale": 1.0,
+  "importerUseFileScale": true,
+  "importerBakeAxisConversion": false,
+  "importerAnimationType": "Generic",
+  "importerMaterialImportMode": "ImportViaMaterialDescription",
+  "rootLocalPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+  },
+  "rootLocalEulerAngles": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+  },
+  "rootLocalScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+  },
+  "worldBoundsCenter": {
+    "x": 0.0,
+    "y": 1.5,
+    "z": 0.0
+  },
+  "worldBoundsSize": {
+    "x": 1.0354321002960205,
+    "y": 3.0,
+    "z": 1.035929799079895
+  },
+  "worldBoundsMin": {
+    "x": -0.5177160501480103,
+    "y": 0.0,
+    "z": -0.5179648995399475
+  },
+  "worldBoundsMax": {
+    "x": 0.5177160501480103,
+    "y": 3.0,
+    "z": 0.5179648995399475
+  },
+  "meshCount": 1,
+  "rendererCount": 1,
+  "transformCount": 1,
+  "uniqueMaterials": 1,
+  "totalVertices": 7934,
+  "totalTriangles": 5580,
+  "cameraCount": 0,
+  "lightCount": 0,
+  "colliderCount": 0,
+  "nullMaterialSlotCount": 0,
+  "geometryBoundsFinite": true,
+  "rootAtOrigin": true,
+  "rootRotationIdentity": true,
+  "warnings": [],
+  "meshes": [
+    {
+      "name": "SM_RuneObelisk",
+      "transformPath": "RuneObelisk_3m(Clone)",
+      "vertices": 7934,
+      "triangles": 5580,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.5,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 1.0354321002960205,
+        "y": 3.0,
+        "z": 1.035929799079895
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 1.5,
+        "z": 0.0
+      },
+      "worldBoundsSize": {
+        "x": 1.0354321002960205,
+        "y": 3.0,
+        "z": 1.035929799079895
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Material_0"
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "Material_0",
+      "shader": "Standard",
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "textures": [
+        {
+          "property": "_MainTex",
+          "textureName": "Obelisk_00",
+          "assetPath": "Assets/Textures/Obelisk_00.png",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "property": "_BumpMap",
+          "textureName": "Obelisk_02",
+          "assetPath": "Assets/Textures/Obelisk_02.png",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "property": "_EmissionMap",
+          "textureName": "Obelisk_03",
+          "assetPath": "Assets/Textures/Obelisk_03.png",
+          "width": 2048,
+          "height": 2048
+        }
+      ]
+    }
+  ],
+  "nonMeshTransforms": []
+}

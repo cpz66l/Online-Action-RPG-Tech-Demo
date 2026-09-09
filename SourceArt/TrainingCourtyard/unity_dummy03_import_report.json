@@ -1,0 +1,176 @@
+{
+    "status": "passed",
+    "unityVersion": "6000.3.20f1",
+    "importedAssetPath": "Assets/TrainingDummy_03.fbx",
+    "assetSha256": "278c879f8a21d11dab857bf49000c806978cf80fb813090bdea9d6a26e00e79c",
+    "utcTime": "2026-09-08T10:43:50.5440085Z",
+    "exception": "",
+    "scopeNotes": [
+        "Validation uses a disposable independent Unity project; the game's Client/UnityProject was not modified.",
+        "This validates default FBX import, mesh bounds, transforms, topology counts and material slots only.",
+        "No Unity collider is expected in the source model. This is an environment art prototype, not a playable scene.",
+        "Shader/color data reflects default Unity FBX import and does not certify URP appearance or gameplay integration."
+    ],
+    "importerGlobalScale": 1.0,
+    "importerFileScale": 1.0,
+    "importerUseFileScale": true,
+    "importerBakeAxisConversion": false,
+    "importerAnimationType": "Generic",
+    "importerMaterialImportMode": "ImportViaMaterialDescription",
+    "rootLocalPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "rootLocalEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "rootLocalScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+    },
+    "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 1.0474998950958253,
+        "z": 0.0
+    },
+    "worldBoundsSize": {
+        "x": 1.5200002193450928,
+        "y": 2.0949997901916506,
+        "z": 1.1200000047683716
+    },
+    "worldBoundsMin": {
+        "x": -0.7600001096725464,
+        "y": 0.0,
+        "z": -0.5600000023841858
+    },
+    "worldBoundsMax": {
+        "x": 0.7600001096725464,
+        "y": 2.0949997901916506,
+        "z": 0.5600000023841858
+    },
+    "meshCount": 1,
+    "rendererCount": 1,
+    "transformCount": 1,
+    "uniqueMaterials": 4,
+    "totalVertices": 4808,
+    "totalTriangles": 2700,
+    "cameraCount": 0,
+    "lightCount": 0,
+    "colliderCount": 0,
+    "nullMaterialSlotCount": 0,
+    "geometryBoundsFinite": true,
+    "rootAtOrigin": true,
+    "rootRotationIdentity": true,
+    "warnings": [],
+    "meshes": [
+        {
+            "name": "TrainingDummy_03",
+            "transformPath": "TrainingDummy_03(Clone)",
+            "vertices": 4808,
+            "triangles": 2700,
+            "subMeshes": 4,
+            "localBoundsCenter": {
+                "x": 0.0,
+                "y": 1.0474998950958253,
+                "z": 0.0
+            },
+            "localBoundsSize": {
+                "x": 1.5200002193450928,
+                "y": 2.0949997901916506,
+                "z": 1.1200000047683716
+            },
+            "worldBoundsCenter": {
+                "x": 0.0,
+                "y": 1.0474998950958253,
+                "z": 0.0
+            },
+            "worldBoundsSize": {
+                "x": 1.5200002193450928,
+                "y": 2.0949997901916506,
+                "z": 1.1200000047683716
+            },
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "localEulerAngles": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "localScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "worldPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worldScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "materialSlots": [
+                "Stone_Basalt_Edge",
+                "Wood_DarkOak",
+                "Wood_Heartwood",
+                "Rope_NaturalFlax"
+            ]
+        }
+    ],
+    "materials": [
+        {
+            "name": "Rope_NaturalFlax",
+            "shader": "Standard",
+            "color": {
+                "r": 0.577580451965332,
+                "g": 0.46207699179649355,
+                "b": 0.24228112399578095,
+                "a": 1.0
+            },
+            "textures": []
+        },
+        {
+            "name": "Stone_Basalt_Edge",
+            "shader": "Standard",
+            "color": {
+                "r": 0.08437620848417282,
+                "g": 0.12213877588510513,
+                "b": 0.16826939582824708,
+                "a": 1.0
+            },
+            "textures": []
+        },
+        {
+            "name": "Wood_DarkOak",
+            "shader": "Standard",
+            "color": {
+                "r": 0.19120168685913087,
+                "g": 0.08437620848417282,
+                "b": 0.03560131415724754,
+                "a": 1.0
+            },
+            "textures": []
+        },
+        {
+            "name": "Wood_Heartwood",
+            "shader": "Standard",
+            "color": {
+                "r": 0.42869049310684206,
+                "g": 0.22696587443351746,
+                "b": 0.0802198201417923,
+                "a": 1.0
+            },
+            "textures": []
+        }
+    ],
+    "nonMeshTransforms": []
+}

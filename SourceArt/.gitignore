@@ -1,0 +1,7 @@
+# Local validation projects and generated logs are not art source assets.
+.validation-unity/
+*.blend1
+*.blend2
+*.log
+*_log.txt
+__pycache__/

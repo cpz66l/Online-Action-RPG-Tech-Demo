@@ -1,0 +1,2852 @@
+{
+  "status": "passed",
+  "unityVersion": "6000.3.20f1",
+  "importedAssetPath": "Assets/TrainingCourtyard.fbx",
+  "assetSha256": "fbcac71029a301a54b90ec91017dbbb3e63b94a4619780949e481869e7da8326",
+  "utcTime": "2026-09-08T10:42:58.3027561Z",
+  "exception": "",
+  "scopeNotes": [
+    "Validation uses a disposable independent Unity project; the game's Client/UnityProject was not modified.",
+    "This validates default FBX import, mesh bounds, transforms, topology counts and material slots only.",
+    "No Unity collider is expected in the source model. This is an environment art prototype, not a playable scene.",
+    "Shader/color data reflects default Unity FBX import and does not certify URP appearance or gameplay integration.",
+    "The full Exports/Textures sidecar folder was supplied alongside TrainingCourtyard.fbx for this import; no previous stone model or textures remained in Assets.",
+    "Material slots and base colors were read back. The Meshy decoration had base-color, normal, and emission textures assigned by Standard material import. URP material conversion, roughness/metallic mapping, lightmap UV2, colliders, and gameplay behavior are outside this validation."
+  ],
+  "importerGlobalScale": 1.0,
+  "importerFileScale": 1.0,
+  "importerUseFileScale": true,
+  "importerBakeAxisConversion": false,
+  "importerAnimationType": "Generic",
+  "importerMaterialImportMode": "ImportViaMaterialDescription",
+  "rootLocalPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+  },
+  "rootLocalEulerAngles": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+  },
+  "rootLocalScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+  },
+  "worldBoundsCenter": {
+    "x": 0.0,
+    "y": 2.5249998569488525,
+    "z": 0.0
+  },
+  "worldBoundsSize": {
+    "x": 28.09000015258789,
+    "y": 7.689999580383301,
+    "z": 28.09000015258789
+  },
+  "worldBoundsMin": {
+    "x": -14.045000076293945,
+    "y": -1.3199999332427979,
+    "z": -14.045000076293945
+  },
+  "worldBoundsMax": {
+    "x": 14.045000076293945,
+    "y": 6.369999885559082,
+    "z": 14.045000076293945
+  },
+  "meshCount": 36,
+  "rendererCount": 36,
+  "transformCount": 44,
+  "uniqueMaterials": 20,
+  "totalVertices": 150064,
+  "totalTriangles": 79388,
+  "cameraCount": 0,
+  "lightCount": 0,
+  "colliderCount": 0,
+  "nullMaterialSlotCount": 0,
+  "geometryBoundsFinite": true,
+  "rootAtOrigin": true,
+  "rootRotationIdentity": true,
+  "warnings": [],
+  "meshes": [
+    {
+      "name": "Banner_Teal_-1",
+      "transformPath": "TrainingCourtyard(Clone)/Banner_Teal_-1",
+      "vertices": 1995,
+      "triangles": 1631,
+      "subMeshes": 5,
+      "localBoundsCenter": {
+        "x": -5.050000190734863,
+        "y": 3.184999942779541,
+        "z": 11.029999732971191
+      },
+      "localBoundsSize": {
+        "x": 1.3999996185302734,
+        "y": 6.369999885559082,
+        "z": 0.7000007629394531
+      },
+      "worldBoundsCenter": {
+        "x": -5.050000190734863,
+        "y": 3.184999942779541,
+        "z": 11.029999732971191
+      },
+      "worldBoundsSize": {
+        "x": 1.3999996185302734,
+        "y": 6.369999885559082,
+        "z": 0.7000007629394531
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_BlueGrey",
+        "Metal_DarkIron",
+        "Metal_AgedBrass",
+        "Cloth_PatinaTeal",
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Banner_Teal_1",
+      "transformPath": "TrainingCourtyard(Clone)/Banner_Teal_1",
+      "vertices": 1995,
+      "triangles": 1631,
+      "subMeshes": 5,
+      "localBoundsCenter": {
+        "x": 5.050000190734863,
+        "y": 3.184999942779541,
+        "z": 11.029999732971191
+      },
+      "localBoundsSize": {
+        "x": 1.3999996185302734,
+        "y": 6.369999885559082,
+        "z": 0.7000007629394531
+      },
+      "worldBoundsCenter": {
+        "x": 5.050000190734863,
+        "y": 3.184999942779541,
+        "z": 11.029999732971191
+      },
+      "worldBoundsSize": {
+        "x": 1.3999996185302734,
+        "y": 6.369999885559082,
+        "z": 0.7000007629394531
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_BlueGrey",
+        "Metal_DarkIron",
+        "Metal_AgedBrass",
+        "Cloth_PatinaTeal",
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Bench_Oak_-1",
+      "transformPath": "TrainingCourtyard(Clone)/Bench_Oak_-1",
+      "vertices": 1080,
+      "triangles": 540,
+      "subMeshes": 2,
+      "localBoundsCenter": {
+        "x": -11.479999542236328,
+        "y": 0.4150000214576721,
+        "z": -4.099999904632568
+      },
+      "localBoundsSize": {
+        "x": 0.7050008773803711,
+        "y": 0.8300000429153442,
+        "z": 2.8000001907348633
+      },
+      "worldBoundsCenter": {
+        "x": -11.479999542236328,
+        "y": 0.4150000214576721,
+        "z": -4.099999904632568
+      },
+      "worldBoundsSize": {
+        "x": 0.7050008773803711,
+        "y": 0.8300000429153442,
+        "z": 2.8000001907348633
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Shade",
+        "Wood_DarkOak"
+      ]
+    },
+    {
+      "name": "Bench_Oak_1",
+      "transformPath": "TrainingCourtyard(Clone)/Bench_Oak_1",
+      "vertices": 1080,
+      "triangles": 540,
+      "subMeshes": 2,
+      "localBoundsCenter": {
+        "x": 11.479999542236328,
+        "y": 0.4150000214576721,
+        "z": -4.099999904632568
+      },
+      "localBoundsSize": {
+        "x": 0.7050008773803711,
+        "y": 0.8300000429153442,
+        "z": 2.8000001907348633
+      },
+      "worldBoundsCenter": {
+        "x": 11.479999542236328,
+        "y": 0.4150000214576721,
+        "z": -4.099999904632568
+      },
+      "worldBoundsSize": {
+        "x": 0.7050008773803711,
+        "y": 0.8300000429153442,
+        "z": 2.8000001907348633
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Shade",
+        "Wood_DarkOak"
+      ]
+    },
+    {
+      "name": "Courtyard_EdgeVegetation",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_EdgeVegetation",
+      "vertices": 12578,
+      "triangles": 5776,
+      "subMeshes": 3,
+      "localBoundsCenter": {
+        "x": 0.0635380744934082,
+        "y": 1.2798889875411987,
+        "z": -0.3172612190246582
+      },
+      "localBoundsSize": {
+        "x": 25.018585205078125,
+        "y": 2.54377818107605,
+        "z": 24.496074676513672
+      },
+      "worldBoundsCenter": {
+        "x": 0.0635380744934082,
+        "y": 1.2798889875411987,
+        "z": -0.3172612190246582
+      },
+      "worldBoundsSize": {
+        "x": 25.018585205078125,
+        "y": 2.54377818107605,
+        "z": 24.496074676513672
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Plant_Fern",
+        "Plant_Sage",
+        "Plant_DryGrass"
+      ]
+    },
+    {
+      "name": "Courtyard_EntryPillar",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_EntryPillar",
+      "vertices": 3888,
+      "triangles": 1944,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.8824999928474426,
+        "z": -12.649999618530273
+      },
+      "localBoundsSize": {
+        "x": 17.18000030517578,
+        "y": 1.7649999856948853,
+        "z": 1.5200004577636719
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 0.8824999928474426,
+        "z": -12.649999618530273
+      },
+      "worldBoundsSize": {
+        "x": 17.18000030517578,
+        "y": 1.7649999856948853,
+        "z": 1.5200004577636719
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone_Cap",
+        "Stone_Sandstone"
+      ]
+    },
+    {
+      "name": "Courtyard_Foundation",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_Foundation",
+      "vertices": 9504,
+      "triangles": 4752,
+      "subMeshes": 2,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": -0.7075000405311584,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 28.09000015258789,
+        "y": 1.225000023841858,
+        "z": 28.09000015258789
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": -0.7075000405311584,
+        "z": 0.0
+      },
+      "worldBoundsSize": {
+        "x": 28.09000015258789,
+        "y": 1.225000023841858,
+        "z": 28.09000015258789
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_BlueGrey",
+        "Stone_Basalt_Edge"
+      ]
+    },
+    {
+      "name": "Courtyard_FrontReturn",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_FrontReturn",
+      "vertices": 3456,
+      "triangles": 1728,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.550000011920929,
+        "z": -12.649999618530273
+      },
+      "localBoundsSize": {
+        "x": 24.720001220703125,
+        "y": 1.100000023841858,
+        "z": 0.9699993133544922
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 0.550000011920929,
+        "z": -12.649999618530273
+      },
+      "worldBoundsSize": {
+        "x": 24.720001220703125,
+        "y": 1.100000023841858,
+        "z": 0.9699993133544922
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone",
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Courtyard_Gate_Arch",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_Gate_Arch",
+      "vertices": 4320,
+      "triangles": 2340,
+      "subMeshes": 3,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 4.6158905029296875,
+        "z": 11.899999618530273
+      },
+      "localBoundsSize": {
+        "x": 5.957947731018066,
+        "y": 3.1048412322998047,
+        "z": 1.6999998092651367
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 4.6158905029296875,
+        "z": 11.899999618530273
+      },
+      "worldBoundsSize": {
+        "x": 5.957947731018066,
+        "y": 3.1048412322998047,
+        "z": 1.6999998092651367
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone",
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Courtyard_Gate_Outer",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_Gate_Outer",
+      "vertices": 4320,
+      "triangles": 2340,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 4.6232428550720215,
+        "z": 11.139999389648438
+      },
+      "localBoundsSize": {
+        "x": 6.257942199707031,
+        "y": 3.110125780105591,
+        "z": 0.13000011444091797
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 4.6232428550720215,
+        "z": 11.139999389648438
+      },
+      "worldBoundsSize": {
+        "x": 6.257942199707031,
+        "y": 3.110125780105591,
+        "z": 0.13000011444091797
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Courtyard_GatePier",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_GatePier",
+      "vertices": 4752,
+      "triangles": 2376,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": -1.1920928955078125E-07,
+        "y": 1.5799999237060547,
+        "z": 11.899999618530273
+      },
+      "localBoundsSize": {
+        "x": 6.880000114440918,
+        "y": 3.1599998474121094,
+        "z": 1.6599998474121094
+      },
+      "worldBoundsCenter": {
+        "x": -1.1920928955078125E-07,
+        "y": 1.5799999237060547,
+        "z": 11.899999618530273
+      },
+      "worldBoundsSize": {
+        "x": 6.880000114440918,
+        "y": 3.1599998474121094,
+        "z": 1.6599998474121094
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone_Cap",
+        "Stone_Sandstone"
+      ]
+    },
+    {
+      "name": "Courtyard_Paving_Flat20mCore",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_Paving_Flat20mCore",
+      "vertices": 25944,
+      "triangles": 12076,
+      "subMeshes": 7,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": -0.10300000011920929,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 27.600000381469727,
+        "y": 0.21400001645088196,
+        "z": 27.600000381469727
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": -0.10300000011920929,
+        "z": 0.0
+      },
+      "worldBoundsSize": {
+        "x": 27.600000381469727,
+        "y": 0.21400001645088196,
+        "z": 27.600000381469727
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Mortar",
+        "Stone_Paving_Warm",
+        "Stone_Paving_Light",
+        "Stone_Paving_Cool",
+        "Stone_Paving_Grey",
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Courtyard_RearCornerPillar",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_RearCornerPillar",
+      "vertices": 3888,
+      "triangles": 1944,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.6324999332427979,
+        "z": 12.149999618530273
+      },
+      "localBoundsSize": {
+        "x": 26.81999969482422,
+        "y": 3.2649998664855957,
+        "z": 1.5200004577636719
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 1.6324999332427979,
+        "z": 12.149999618530273
+      },
+      "worldBoundsSize": {
+        "x": 26.81999969482422,
+        "y": 3.2649998664855957,
+        "z": 1.5200004577636719
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone_Cap",
+        "Stone_Sandstone"
+      ]
+    },
+    {
+      "name": "Courtyard_RearStepWall",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_RearStepWall",
+      "vertices": 3456,
+      "triangles": 1728,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 2.384185791015625E-07,
+        "y": 1.5899999141693115,
+        "z": 12.149999618530273
+      },
+      "localBoundsSize": {
+        "x": 10.489999771118164,
+        "y": 3.179999828338623,
+        "z": 0.9699993133544922
+      },
+      "worldBoundsCenter": {
+        "x": 2.384185791015625E-07,
+        "y": 1.5899999141693115,
+        "z": 12.149999618530273
+      },
+      "worldBoundsSize": {
+        "x": 10.489999771118164,
+        "y": 3.179999828338623,
+        "z": 0.9699993133544922
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone",
+        "Stone_Sandstone_Cap",
+        "Stone_Sandstone_Shade"
+      ]
+    },
+    {
+      "name": "Courtyard_RearWall",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_RearWall",
+      "vertices": 11664,
+      "triangles": 5832,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 4.76837158203125E-07,
+        "y": 1.2649999856948853,
+        "z": 12.149999618530273
+      },
+      "localBoundsSize": {
+        "x": 24.170001983642578,
+        "y": 2.5299999713897705,
+        "z": 0.9699993133544922
+      },
+      "worldBoundsCenter": {
+        "x": 4.76837158203125E-07,
+        "y": 1.2649999856948853,
+        "z": 12.149999618530273
+      },
+      "worldBoundsSize": {
+        "x": 24.170001983642578,
+        "y": 2.5299999713897705,
+        "z": 0.9699993133544922
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone",
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Courtyard_SidePillar",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_SidePillar",
+      "vertices": 3888,
+      "triangles": 1944,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.2324998378753662,
+        "z": -0.45000001788139343
+      },
+      "localBoundsSize": {
+        "x": 26.81999969482422,
+        "y": 2.4649996757507324,
+        "z": 1.5199999809265137
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 1.2324998378753662,
+        "z": -0.45000001788139343
+      },
+      "worldBoundsSize": {
+        "x": 26.81999969482422,
+        "y": 2.4649996757507324,
+        "z": 1.5199999809265137
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone_Cap",
+        "Stone_Sandstone"
+      ]
+    },
+    {
+      "name": "Courtyard_SideWall",
+      "transformPath": "TrainingCourtyard(Clone)/Courtyard_SideWall",
+      "vertices": 14688,
+      "triangles": 7344,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 4.76837158203125E-07,
+        "y": 0.7900000214576721,
+        "z": -0.5500001907348633
+      },
+      "localBoundsSize": {
+        "x": 26.270000457763672,
+        "y": 1.5800000429153442,
+        "z": 21.170000076293945
+      },
+      "worldBoundsCenter": {
+        "x": 4.76837158203125E-07,
+        "y": 0.7900000214576721,
+        "z": -0.5500001907348633
+      },
+      "worldBoundsSize": {
+        "x": 26.270000457763672,
+        "y": 1.5800000429153442,
+        "z": 21.170000076293945
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Stone_Sandstone",
+        "Stone_Sandstone_Shade",
+        "Stone_Sandstone_Cap"
+      ]
+    },
+    {
+      "name": "Gate_Keystone_BrassDiamond",
+      "transformPath": "TrainingCourtyard(Clone)/Gate_Keystone_BrassDiamond",
+      "vertices": 4,
+      "triangles": 2,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 5.810000419616699,
+        "z": 11.029999732971191
+      },
+      "localBoundsSize": {
+        "x": 0.2800000011920929,
+        "y": 0.40000009536743164,
+        "z": 0.0
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 5.810000419616699,
+        "z": 11.029999732971191
+      },
+      "worldBoundsSize": {
+        "x": 0.2800000011920929,
+        "y": 0.40000009536743164,
+        "z": 0.0
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Metal_AgedBrass"
+      ]
+    },
+    {
+      "name": "Meshy_RuneObelisk_-1_0",
+      "transformPath": "TrainingCourtyard(Clone)/Meshy_RuneObelisk_-1_0",
+      "vertices": 7934,
+      "triangles": 5580,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.5,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 1.0354321002960205,
+        "y": 3.0,
+        "z": 1.035929799079895
+      },
+      "worldBoundsCenter": {
+        "x": -9.0,
+        "y": 1.5,
+        "z": 10.0
+      },
+      "worldBoundsSize": {
+        "x": 1.0354321002960205,
+        "y": 3.0,
+        "z": 1.035929799079895
+      },
+      "localPosition": {
+        "x": -9.0,
+        "y": 0.0,
+        "z": 10.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -9.0,
+        "y": 0.0,
+        "z": 10.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Material_0"
+      ]
+    },
+    {
+      "name": "Meshy_RuneObelisk_-1_0",
+      "transformPath": "TrainingCourtyard(Clone)/Meshy_RuneObelisk_1_0",
+      "vertices": 7934,
+      "triangles": 5580,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.5,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 1.0354321002960205,
+        "y": 3.0,
+        "z": 1.035929799079895
+      },
+      "worldBoundsCenter": {
+        "x": 9.0,
+        "y": 1.5,
+        "z": 10.0
+      },
+      "worldBoundsSize": {
+        "x": 1.0354321002960205,
+        "y": 3.0,
+        "z": 1.035929799079895
+      },
+      "localPosition": {
+        "x": 9.0,
+        "y": 0.0,
+        "z": 10.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 9.0,
+        "y": 0.0,
+        "z": 10.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Material_0"
+      ]
+    },
+    {
+      "name": "Prop_TrainingWeaponRack",
+      "transformPath": "TrainingCourtyard(Clone)/Prop_TrainingWeaponRack",
+      "vertices": 4680,
+      "triangles": 2364,
+      "subMeshes": 3,
+      "localBoundsCenter": {
+        "x": 10.749999046325684,
+        "y": 1.1026983261108398,
+        "z": -7.750001907348633
+      },
+      "localBoundsSize": {
+        "x": 2.3999996185302734,
+        "y": 2.0053963661193848,
+        "z": 0.4586162567138672
+      },
+      "worldBoundsCenter": {
+        "x": -10.75,
+        "y": 1.1026983261108398,
+        "z": 7.750000476837158
+      },
+      "worldBoundsSize": {
+        "x": 2.3999996185302734,
+        "y": 2.0053963661193848,
+        "z": 0.45861661434173584
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": -7.016710397255007E-15,
+        "y": 180.0,
+        "z": -7.0167091267055864E-15
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Wood_DarkOak",
+        "Wood_Heartwood",
+        "Rope_NaturalFlax"
+      ]
+    },
+    {
+      "name": "RearCornerPillar_-1_FaceInlay",
+      "transformPath": "TrainingCourtyard(Clone)/RearCornerPillar_-1_FaceInlay",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "worldBoundsCenter": {
+        "x": -12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": 11.60099983215332
+      },
+      "worldBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "localPosition": {
+        "x": -12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": 11.60099983215332
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": 11.60099983215332
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge"
+      ]
+    },
+    {
+      "name": "RearCornerPillar_-1_InlayCap",
+      "transformPath": "TrainingCourtyard(Clone)/RearCornerPillar_-1_InlayCap",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "worldBoundsCenter": {
+        "x": -12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": 11.586999893188477
+      },
+      "worldBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "localPosition": {
+        "x": -12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": 11.586999893188477
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": 11.586999893188477
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Metal_AgedBrass"
+      ]
+    },
+    {
+      "name": "RearCornerPillar_1_FaceInlay",
+      "transformPath": "TrainingCourtyard(Clone)/RearCornerPillar_1_FaceInlay",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "worldBoundsCenter": {
+        "x": 12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": 11.60099983215332
+      },
+      "worldBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "localPosition": {
+        "x": 12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": 11.60099983215332
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": 11.60099983215332
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge"
+      ]
+    },
+    {
+      "name": "RearCornerPillar_1_InlayCap",
+      "transformPath": "TrainingCourtyard(Clone)/RearCornerPillar_1_InlayCap",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "worldBoundsCenter": {
+        "x": 12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": 11.586999893188477
+      },
+      "worldBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "localPosition": {
+        "x": 12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": 11.586999893188477
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": 11.586999893188477
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Metal_AgedBrass"
+      ]
+    },
+    {
+      "name": "Ruin_LooseStone_0",
+      "transformPath": "TrainingCourtyard(Clone)/Ruin_LooseStone_0",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.8500000238418579,
+        "y": 0.36000001430511475,
+        "z": 0.5199999809265137
+      },
+      "worldBoundsCenter": {
+        "x": -10.600000381469727,
+        "y": 0.18000000715255737,
+        "z": 10.5
+      },
+      "worldBoundsSize": {
+        "x": 0.9181632399559021,
+        "y": 0.36000001430511475,
+        "z": 0.6411833167076111
+      },
+      "localPosition": {
+        "x": -10.600000381469727,
+        "y": 0.18000000715255737,
+        "z": 10.5
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 351.4056396484375,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -10.600000381469727,
+        "y": 0.18000000715255737,
+        "z": 10.5
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Shade"
+      ]
+    },
+    {
+      "name": "Ruin_LooseStone_1",
+      "transformPath": "TrainingCourtyard(Clone)/Ruin_LooseStone_1",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.8500000238418579,
+        "y": 0.36000001430511475,
+        "z": 0.5199999809265137
+      },
+      "worldBoundsCenter": {
+        "x": -10.050000190734863,
+        "y": 0.2199999988079071,
+        "z": 10.180000305175781
+      },
+      "worldBoundsSize": {
+        "x": 0.9891611337661743,
+        "y": 0.36000001430511475,
+        "z": 0.9354254007339478
+      },
+      "localPosition": {
+        "x": -10.050000190734863,
+        "y": 0.2199999988079071,
+        "z": 10.180000305175781
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 321.61181640625,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -10.050000190734863,
+        "y": 0.2199999988079071,
+        "z": 10.180000305175781
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Shade"
+      ]
+    },
+    {
+      "name": "Ruin_LooseStone_2",
+      "transformPath": "TrainingCourtyard(Clone)/Ruin_LooseStone_2",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.8500000238418579,
+        "y": 0.36000001430511475,
+        "z": 0.5199999809265137
+      },
+      "worldBoundsCenter": {
+        "x": -9.5,
+        "y": 0.18000000715255737,
+        "z": 9.859999656677246
+      },
+      "worldBoundsSize": {
+        "x": 0.7986626625061035,
+        "y": 0.36000001430511475,
+        "z": 0.982376754283905
+      },
+      "localPosition": {
+        "x": -9.5,
+        "y": 0.18000000715255737,
+        "z": 9.859999656677246
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 291.8180236816406,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -9.5,
+        "y": 0.18000000715255737,
+        "z": 9.859999656677246
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Shade"
+      ]
+    },
+    {
+      "name": "Ruin_LooseStone_3",
+      "transformPath": "TrainingCourtyard(Clone)/Ruin_LooseStone_3",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.8500000238418579,
+        "y": 0.36000001430511475,
+        "z": 0.5199999809265137
+      },
+      "worldBoundsCenter": {
+        "x": -8.949999809265137,
+        "y": 0.2199999988079071,
+        "z": 9.539999961853027
+      },
+      "worldBoundsSize": {
+        "x": 0.6329114437103271,
+        "y": 0.36000001430511475,
+        "z": 0.9139302372932434
+      },
+      "localPosition": {
+        "x": -8.949999809265137,
+        "y": 0.2199999988079071,
+        "z": 9.539999961853027
+      },
+      "localEulerAngles": {
+        "x": -6.787411987458147E-17,
+        "y": 262.0242004394531,
+        "z": -9.736012689142478E-16
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -8.949999809265137,
+        "y": 0.2199999988079071,
+        "z": 9.539999961853027
+      },
+      "worldScale": {
+        "x": 1.0000001192092896,
+        "y": 1.0,
+        "z": 1.0000001192092896
+      },
+      "materialSlots": [
+        "Stone_Sandstone_Shade"
+      ]
+    },
+    {
+      "name": "SidePillar_-1_FaceInlay",
+      "transformPath": "TrainingCourtyard(Clone)/SidePillar_-1_FaceInlay",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "worldBoundsCenter": {
+        "x": -12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": -0.9990000128746033
+      },
+      "worldBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "localPosition": {
+        "x": -12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": -0.9990000128746033
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": -0.9990000128746033
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge"
+      ]
+    },
+    {
+      "name": "SidePillar_-1_InlayCap",
+      "transformPath": "TrainingCourtyard(Clone)/SidePillar_-1_InlayCap",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "worldBoundsCenter": {
+        "x": -12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": -1.0130000114440918
+      },
+      "worldBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "localPosition": {
+        "x": -12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": -1.0130000114440918
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": -1.0130000114440918
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Metal_AgedBrass"
+      ]
+    },
+    {
+      "name": "SidePillar_1_FaceInlay",
+      "transformPath": "TrainingCourtyard(Clone)/SidePillar_1_FaceInlay",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "worldBoundsCenter": {
+        "x": 12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": -0.9990000128746033
+      },
+      "worldBoundsSize": {
+        "x": 0.15000000596046448,
+        "y": 1.4500000476837158,
+        "z": 0.02500000037252903
+      },
+      "localPosition": {
+        "x": 12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": -0.9990000128746033
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 12.649999618530273,
+        "y": 1.7200000286102295,
+        "z": -0.9990000128746033
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge"
+      ]
+    },
+    {
+      "name": "SidePillar_1_InlayCap",
+      "transformPath": "TrainingCourtyard(Clone)/SidePillar_1_InlayCap",
+      "vertices": 216,
+      "triangles": 108,
+      "subMeshes": 1,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "worldBoundsCenter": {
+        "x": 12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": -1.0130000114440918
+      },
+      "worldBoundsSize": {
+        "x": 0.3499999940395355,
+        "y": 0.11999999731779099,
+        "z": 0.03500000014901161
+      },
+      "localPosition": {
+        "x": 12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": -1.0130000114440918
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 12.649999618530273,
+        "y": 2.5199999809265137,
+        "z": -1.0130000114440918
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Metal_AgedBrass"
+      ]
+    },
+    {
+      "name": "TrainingDummy_01",
+      "transformPath": "TrainingCourtyard(Clone)/TrainingDummy_01",
+      "vertices": 4808,
+      "triangles": 2700,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.0474998950958252,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 1.5200002193450928,
+        "y": 2.0949997901916504,
+        "z": 1.1200000047683716
+      },
+      "worldBoundsCenter": {
+        "x": -4.0,
+        "y": 1.0474998950958252,
+        "z": 4.0
+      },
+      "worldBoundsSize": {
+        "x": 1.5200002193450928,
+        "y": 2.0949997901916504,
+        "z": 1.1200000047683716
+      },
+      "localPosition": {
+        "x": -4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Wood_DarkOak",
+        "Wood_Heartwood",
+        "Rope_NaturalFlax"
+      ]
+    },
+    {
+      "name": "TrainingDummy_02",
+      "transformPath": "TrainingCourtyard(Clone)/TrainingDummy_02",
+      "vertices": 4808,
+      "triangles": 2700,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.0474998950958252,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 1.5199999809265137,
+        "y": 2.0949997901916504,
+        "z": 1.1200000047683716
+      },
+      "worldBoundsCenter": {
+        "x": 0.0,
+        "y": 1.0474998950958252,
+        "z": 5.0
+      },
+      "worldBoundsSize": {
+        "x": 1.5199999809265137,
+        "y": 2.0949997901916504,
+        "z": 1.1200000047683716
+      },
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 5.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 5.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Wood_DarkOak",
+        "Wood_Heartwood",
+        "Rope_NaturalFlax"
+      ]
+    },
+    {
+      "name": "TrainingDummy_03",
+      "transformPath": "TrainingCourtyard(Clone)/TrainingDummy_03",
+      "vertices": 4808,
+      "triangles": 2700,
+      "subMeshes": 4,
+      "localBoundsCenter": {
+        "x": 0.0,
+        "y": 1.0474998950958252,
+        "z": 0.0
+      },
+      "localBoundsSize": {
+        "x": 1.5200002193450928,
+        "y": 2.0949997901916504,
+        "z": 1.1200000047683716
+      },
+      "worldBoundsCenter": {
+        "x": 4.0,
+        "y": 1.0474998950958252,
+        "z": 4.0
+      },
+      "worldBoundsSize": {
+        "x": 1.5200002193450928,
+        "y": 2.0949997901916504,
+        "z": 1.1200000047683716
+      },
+      "localPosition": {
+        "x": 4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "worldScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "materialSlots": [
+        "Stone_Basalt_Edge",
+        "Wood_DarkOak",
+        "Wood_Heartwood",
+        "Rope_NaturalFlax"
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "Cloth_PatinaTeal",
+      "shader": "Standard",
+      "color": {
+        "r": 0.020288562402129173,
+        "g": 0.1946178376674652,
+        "b": 0.18782077729701996,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Material_0",
+      "shader": "Standard",
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "textures": [
+        {
+          "property": "_MainTex",
+          "textureName": "Courtyard_Meshy_00",
+          "assetPath": "Assets/Textures/Courtyard_Meshy_00.png",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "property": "_BumpMap",
+          "textureName": "Courtyard_Meshy_02",
+          "assetPath": "Assets/Textures/Courtyard_Meshy_02.png",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "property": "_EmissionMap",
+          "textureName": "Courtyard_Meshy_03",
+          "assetPath": "Assets/Textures/Courtyard_Meshy_03.png",
+          "width": 2048,
+          "height": 2048
+        }
+      ]
+    },
+    {
+      "name": "Metal_AgedBrass",
+      "shader": "Standard",
+      "color": {
+        "r": 0.5149176716804504,
+        "g": 0.2961382567882538,
+        "b": 0.08437620848417282,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Metal_DarkIron",
+      "shader": "Standard",
+      "color": {
+        "r": 0.045186202973127365,
+        "g": 0.05780543014407158,
+        "b": 0.07227185368537903,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Plant_DryGrass",
+      "shader": "Standard",
+      "color": {
+        "r": 0.2961382567882538,
+        "g": 0.31854677200317383,
+        "b": 0.13013647496700287,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Plant_Fern",
+      "shader": "Standard",
+      "color": {
+        "r": 0.2158605009317398,
+        "g": 0.30054378509521484,
+        "b": 0.18447498977184296,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Plant_Sage",
+      "shader": "Standard",
+      "color": {
+        "r": 0.11953842639923096,
+        "g": 0.2158605009317398,
+        "b": 0.1384316086769104,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Rope_NaturalFlax",
+      "shader": "Standard",
+      "color": {
+        "r": 0.577580451965332,
+        "g": 0.46207699179649353,
+        "b": 0.24228112399578094,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Basalt_BlueGrey",
+      "shader": "Standard",
+      "color": {
+        "r": 0.040915198624134064,
+        "g": 0.061246052384376526,
+        "b": 0.08650045841932297,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Basalt_Edge",
+      "shader": "Standard",
+      "color": {
+        "r": 0.08437620848417282,
+        "g": 0.12213877588510513,
+        "b": 0.16826939582824707,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Mortar",
+      "shader": "Standard",
+      "color": {
+        "r": 0.14995978772640228,
+        "g": 0.18447498977184296,
+        "b": 0.18782077729701996,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Paving_Cool",
+      "shader": "Standard",
+      "color": {
+        "r": 0.38642942905426025,
+        "g": 0.43415364623069763,
+        "b": 0.3915724754333496,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Paving_Grey",
+      "shader": "Standard",
+      "color": {
+        "r": 0.34191441535949707,
+        "g": 0.38642942905426025,
+        "b": 0.34670406579971313,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Paving_Light",
+      "shader": "Standard",
+      "color": {
+        "r": 0.5583403706550598,
+        "g": 0.5457244515419006,
+        "b": 0.423267662525177,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Paving_Warm",
+      "shader": "Standard",
+      "color": {
+        "r": 0.48514994978904724,
+        "g": 0.4793201684951782,
+        "b": 0.3762621283531189,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Sandstone",
+      "shader": "Standard",
+      "color": {
+        "r": 0.6038273572921753,
+        "g": 0.48514994978904724,
+        "b": 0.30054378509521484,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Sandstone_Cap",
+      "shader": "Standard",
+      "color": {
+        "r": 0.7835378050804138,
+        "g": 0.6514056324958801,
+        "b": 0.4019777774810791,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Stone_Sandstone_Shade",
+      "shader": "Standard",
+      "color": {
+        "r": 0.46207699179649353,
+        "g": 0.37123769521713257,
+        "b": 0.24228112399578094,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Wood_DarkOak",
+      "shader": "Standard",
+      "color": {
+        "r": 0.19120168685913086,
+        "g": 0.08437620848417282,
+        "b": 0.03560131415724754,
+        "a": 1.0
+      },
+      "textures": []
+    },
+    {
+      "name": "Wood_Heartwood",
+      "shader": "Standard",
+      "color": {
+        "r": 0.42869049310684204,
+        "g": 0.22696587443351746,
+        "b": 0.0802198201417923,
+        "a": 1.0
+      },
+      "textures": []
+    }
+  ],
+  "nonMeshTransforms": [
+    {
+      "name": "TrainingCourtyard(Clone)",
+      "path": "TrainingCourtyard(Clone)",
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    },
+    {
+      "name": "Courtyard_Origin",
+      "path": "TrainingCourtyard(Clone)/Courtyard_Origin",
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    },
+    {
+      "name": "DummyAnchor_01",
+      "path": "TrainingCourtyard(Clone)/DummyAnchor_01",
+      "localPosition": {
+        "x": -4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    },
+    {
+      "name": "DummyAnchor_02",
+      "path": "TrainingCourtyard(Clone)/DummyAnchor_02",
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 5.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 5.0
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    },
+    {
+      "name": "DummyAnchor_03",
+      "path": "TrainingCourtyard(Clone)/DummyAnchor_03",
+      "localPosition": {
+        "x": 4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 4.0,
+        "y": 0.0,
+        "z": 4.0
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    },
+    {
+      "name": "Gate_Center",
+      "path": "TrainingCourtyard(Clone)/Gate_Center",
+      "localPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 11.899999618530273
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 11.899999618530273
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    },
+    {
+      "name": "Spawn_Player_01",
+      "path": "TrainingCourtyard(Clone)/Spawn_Player_01",
+      "localPosition": {
+        "x": -2.0,
+        "y": 0.0,
+        "z": -7.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": -2.0,
+        "y": 0.0,
+        "z": -7.0
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    },
+    {
+      "name": "Spawn_Player_02",
+      "path": "TrainingCourtyard(Clone)/Spawn_Player_02",
+      "localPosition": {
+        "x": 2.0,
+        "y": 0.0,
+        "z": -7.0
+      },
+      "localEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "localScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "worldPosition": {
+        "x": 2.0,
+        "y": 0.0,
+        "z": -7.0
+      },
+      "worldEulerAngles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "worldForward": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "worldUp": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      }
+    }
+  ],
+  "sourceGeometryComparison": {
+    "sourceGeometryReport": "SourceArt/TrainingCourtyard/geometry_report.json",
+    "positionToleranceMeters": 0.001,
+    "sourceDimensionsMeters": [
+      28.09000015258789,
+      7.689999938011169,
+      28.09000015258789
+    ],
+    "importedDimensionsMeters": [
+      28.09000015258789,
+      7.689999580383301,
+      28.09000015258789
+    ],
+    "dimensionsMatch": true,
+    "meshAndMaterialCountsMatch": true,
+    "sourceTrianglesBeforeUnityImport": 80428,
+    "trianglesAfterDefaultUnityImport": 79388,
+    "triangleCountNote": "These are separate measured counts. Any difference is recorded rather than treated as evidence of a specific importer optimization.",
+    "rootTransformNormalized": true,
+    "anchors": [
+      {
+        "name": "DummyAnchor_01",
+        "expectedPositionMeters": [
+          -4.0,
+          0.0,
+          4.0
+        ],
+        "actualPositionMeters": [
+          -4.0,
+          0.0,
+          4.0
+        ],
+        "errorMeters": 0.0,
+        "positionMatches": true,
+        "forwardIsUnityPositiveZ": true
+      },
+      {
+        "name": "DummyAnchor_02",
+        "expectedPositionMeters": [
+          0.0,
+          0.0,
+          5.0
+        ],
+        "actualPositionMeters": [
+          0.0,
+          0.0,
+          5.0
+        ],
+        "errorMeters": 0.0,
+        "positionMatches": true,
+        "forwardIsUnityPositiveZ": true
+      },
+      {
+        "name": "DummyAnchor_03",
+        "expectedPositionMeters": [
+          4.0,
+          0.0,
+          4.0
+        ],
+        "actualPositionMeters": [
+          4.0,
+          0.0,
+          4.0
+        ],
+        "errorMeters": 0.0,
+        "positionMatches": true,
+        "forwardIsUnityPositiveZ": true
+      },
+      {
+        "name": "Spawn_Player_01",
+        "expectedPositionMeters": [
+          -2.0,
+          0.0,
+          -7.0
+        ],
+        "actualPositionMeters": [
+          -2.0,
+          0.0,
+          -7.0
+        ],
+        "errorMeters": 0.0,
+        "positionMatches": true,
+        "forwardIsUnityPositiveZ": true
+      },
+      {
+        "name": "Spawn_Player_02",
+        "expectedPositionMeters": [
+          2.0,
+          0.0,
+          -7.0
+        ],
+        "actualPositionMeters": [
+          2.0,
+          0.0,
+          -7.0
+        ],
+        "errorMeters": 0.0,
+        "positionMatches": true,
+        "forwardIsUnityPositiveZ": true
+      },
+      {
+        "name": "Courtyard_Origin",
+        "expectedPositionMeters": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "actualPositionMeters": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "errorMeters": 0.0,
+        "positionMatches": true,
+        "forwardIsUnityPositiveZ": true
+      },
+      {
+        "name": "Gate_Center",
+        "expectedPositionMeters": [
+          0.0,
+          0.0,
+          11.9
+        ],
+        "actualPositionMeters": [
+          0.0,
+          0.0,
+          11.899999618530273
+        ],
+        "errorMeters": 3.8146972691777137E-07,
+        "positionMatches": true,
+        "forwardIsUnityPositiveZ": true
+      }
+    ],
+    "fullSceneDummyPivots": [
+      {
+        "name": "TrainingDummy_01",
+        "expectedPositionMeters": [
+          -4.0,
+          0.0,
+          4.0
+        ],
+        "actualPositionMeters": [
+          -4.0,
+          0.0,
+          4.0
+        ],
+        "errorMeters": 0.0,
+        "bottomY": 0.0,
+        "groundCenteredPivotMatches": true
+      },
+      {
+        "name": "TrainingDummy_02",
+        "expectedPositionMeters": [
+          0.0,
+          0.0,
+          5.0
+        ],
+        "actualPositionMeters": [
+          0.0,
+          0.0,
+          5.0
+        ],
+        "errorMeters": 0.0,
+        "bottomY": 0.0,
+        "groundCenteredPivotMatches": true
+      },
+      {
+        "name": "TrainingDummy_03",
+        "expectedPositionMeters": [
+          4.0,
+          0.0,
+          4.0
+        ],
+        "actualPositionMeters": [
+          4.0,
+          0.0,
+          4.0
+        ],
+        "errorMeters": 0.0,
+        "bottomY": 0.0,
+        "groundCenteredPivotMatches": true
+      }
+    ],
+    "passed": true
+  }
+}
