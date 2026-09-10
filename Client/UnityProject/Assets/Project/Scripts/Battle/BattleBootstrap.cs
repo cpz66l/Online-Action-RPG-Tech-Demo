@@ -30,6 +30,7 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private bool spawnLocalPlayerOnStart = true;
         [SerializeField] private string spawnedLocalPlayerName = "LocalPlayer";
         [SerializeField] private ThirdPersonCameraController cameraController;
+        [SerializeField] private EmoteWheelView emoteWheelView;
 
         public GameObject LocalPlayerInstance { get; private set; }
 
@@ -189,10 +190,17 @@ namespace OnlineActionRpg.Client.Battle
             LocalPlayerInstance.name = spawnedLocalPlayerName;
 
             LocalPlayerController playerController = LocalPlayerInstance.GetComponent<LocalPlayerController>();
+            PlayerInputReader inputReader = LocalPlayerInstance.GetComponent<PlayerInputReader>();
+            LocalEmoteController emoteController = LocalPlayerInstance.GetComponent<LocalEmoteController>();
 
             if (cameraController == null)
             {
                 cameraController = FindFirstObjectByType<ThirdPersonCameraController>();
+            }
+
+            if (emoteWheelView == null)
+            {
+                emoteWheelView = FindFirstObjectByType<EmoteWheelView>();
             }
 
             if (cameraController != null)
@@ -203,6 +211,11 @@ namespace OnlineActionRpg.Client.Battle
                 {
                     playerController.SetCameraTransform(cameraController.transform);
                 }
+            }
+
+            if (emoteWheelView != null)
+            {
+                emoteWheelView.SetTarget(LocalPlayerInstance.transform);
             }
 
             Debug.Log($"Local player spawned. PlayerId={CurrentContext.LocalPlayerId}, " +

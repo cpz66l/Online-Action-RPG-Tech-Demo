@@ -22,19 +22,14 @@
 
 原 `MetallicRoughness` 图片遵循 glTF：G 为 roughness、B 为 metallic；URP 的打包约定不同，不能把这张图直接当作 Unity Metallic/Smoothness 图使用。通道说明依据 [glTF 2.0 规范](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) 和 [Unity URP 打包纹理说明](https://docs.unity3d.com/6000.0/Documentation/Manual/urp/shaders-in-universalrp-channel-packed-texture.html)。
 
-## 生成记录与复现
+## 生成记录
 
 `preview_request.json` / `refine_request.json` 保存实际请求参数；任务 ID、成功状态、消耗记录分别在同目录 JSON。凭据只读取本机 `MESHY_API_KEY` 环境变量，没有写入文件。
 
 本次为 `meshy-6` preview 20 credits + 2K/PBR refine 10 credits，合计 **30 credits**；余额 1650 → 1620。之后的 Blender 导出与渲染不调用 Meshy API。
 
-在仓库根目录运行：
+当前仓库保留原始下载文件、整理后的 Blender / FBX / GLB 产物、贴图和验证报告；原用于整理 GLB 与提取贴图的临时 Python 脚本已清理，不属于 Unity 客户端或服务端运行链路。若以后需要二次整理，应以 `RuneObelisk_3m.blend` 或 `RuneObelisk_Textured.glb` 为源重新处理，并在确认脚本会长期维护前避免提交临时工具。
 
-```powershell
-& 'E:\Blender\blender.exe' --background --python 'SourceArt\Meshy\RuneObelisk\prepare_obelisk.py'
-python 'SourceArt\Meshy\RuneObelisk\extract_source_textures.py'
-```
-
-以上命令使用已下载的 `RuneObelisk_Textured.glb`，不会重复消费生成额度。原始下载文件另行保留，整理后的静态 FBX 已烘焙轴转换，避免导入后重设旋转导致模型侧躺。
+原始下载文件另行保留，整理后的静态 FBX 已烘焙轴转换，避免导入后重设旋转导致模型侧躺。
 
 服务接口和流程见 [Meshy Text-to-3D 官方文档](https://docs.meshy.ai/en/api/text-to-3d)。素材来源与账号授权记录见仓库 `Docs/资产来源与许可.md`。

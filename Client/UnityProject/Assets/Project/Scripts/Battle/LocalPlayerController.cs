@@ -3,10 +3,25 @@ using UnityEngine;
 
 namespace OnlineActionRpg.Client.Battle
 {
-    // 04B-2 本地玩家控制器：负责本地移动、加减速、重力和朝向。
+    // 负责本地移动、加减速、重力和朝向。
+    // 输入只表达意图，Controller 判断动作是否成立。
     [RequireComponent(typeof(CharacterController))]
     public sealed class LocalPlayerController : MonoBehaviour
     {
+        // ==================== Types ====================
+        public enum AttackVariant
+        {
+            RightPunch,
+            LeftPunch
+        }
+
+        private enum LocomotionMode
+        {
+            Walk,
+            Run
+        }
+
+        // ==================== Inspector Config ====================
         [Header("Input")]
         [SerializeField] private PlayerInputReader inputReader;
 
@@ -44,46 +59,49 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private float attackImpulseSpeed = 3.5f;
         [SerializeField] private float attackImpulseDuration = 0.12f;
         [SerializeField] private float attackImpulseBrake = 30f;
+        [SerializeField] private float attackInputBufferTime = 0.12f;
+        [SerializeField] private float comboResetWindow = 0.55f;
 
+        // ==================== Runtime State ====================
         private CharacterController _characterController;
+
+        // Movement state.
         private Vector3 _horizontalVelocity;
         private float _verticalVelocity;
         private float _turnSmoothVelocity;
+        private LocomotionMode _currentLocomotionMode;
 
-        //跳跃
+        // Jump state.
         private float _lastGroundedTime;
         private bool _jumpQueued;
-        public float VerticalSpeed => _verticalVelocity;
-        public bool IsGrounded { get; private set; }
 
-        //翻滚
+        // Dodge state.
         private bool _dodgeQueued;
         private bool _isDodging;
         private Vector3 _dodgeDirection;
         private float _dodgeTimer;
         private float _dodgeCooldownTimer;
-        public event Action DodgeStarted;
-        public event Action DodgeEnded;
-        public bool IsDodging => _isDodging;
-        public float DodgeCooldownRemaining => _dodgeCooldownTimer;
-        //攻击
-        private bool _attackQueued;
+
+        // Attack state.
+        private float _attackInputBufferTimer;
         private bool _isAttacking;
         private float _attackTimer;
         private float _attackCooldownTimer;
-        public event Action AttackStarted;
-        public event Action AttackEnded;
-        public bool IsAttacking => _isAttacking;
-        public float AttackCooldownRemaining => _attackCooldownTimer;
+        private float _comboWindowTimer;
         private Vector3 _attackImpulseDirection;
         private float _attackImpulseTimer;
-        //移动
-        private enum LocomotionMode
-        {
-            Walk,
-            Run
-        }
-        private LocomotionMode _currentLocomotionMode;
+
+        // ==================== Public State / Events ====================
+        public float VerticalSpeed => _verticalVelocity;
+        public bool IsGrounded { get; private set; }
+
+        public bool IsDodging => _isDodging;
+        public float DodgeCooldownRemaining => _dodgeCooldownTimer;
+
+        public bool IsAttacking => _isAttacking;
+        public float AttackCooldownRemaining => _attackCooldownTimer;
+        public float ComboWindowRemaining => _comboWindowTimer;
+        public AttackVariant CurrentAttackVariant { get; private set; } = AttackVariant.RightPunch;
 
         public bool IsWalking => _currentLocomotionMode == LocomotionMode.Walk && CurrentMoveSpeed01 > 0.05f;
         public bool IsRunning => _currentLocomotionMode == LocomotionMode.Run && CurrentMoveSpeed01 > 0.05f;
@@ -92,6 +110,13 @@ namespace OnlineActionRpg.Client.Battle
         public Vector3 CurrentHorizontalVelocity => _horizontalVelocity;
         public float CurrentMoveSpeed01 { get; private set; }
 
+        public event Action JumpStarted;
+        public event Action DodgeStarted;
+        public event Action DodgeEnded;
+        public event Action AttackStarted;
+        public event Action AttackEnded;
+
+        // ==================== Unity Lifecycle ====================
         private void Awake()
         {
             _characterController = GetComponent<CharacterController>();
@@ -138,28 +163,21 @@ namespace OnlineActionRpg.Client.Battle
             cameraTransform = targetCamera;
         }
 
-        private void HandleWalkModeChanged(bool isWalkModeHeld)
-        {
-            _currentLocomotionMode = isWalkModeHeld
-                ? LocomotionMode.Walk
-                : defaultLocomotionMode;
-        }
-
+        // ==================== Frame Pipeline ====================
         private void Update()
         {
             float deltaTime = Time.deltaTime;
 
-            //处理移动输入，计算期望的移动方向
             Vector2 moveInput = inputReader != null ? inputReader.Move : Vector2.zero;
             Vector3 desiredDirection = BuildCameraRelativeMoveDirection(moveInput);
 
-            //翻滚和攻击的冷却计时
             TickDodgeCooldown(deltaTime);
+            TickAttackInputBuffer(deltaTime);
             TickAttackState(deltaTime);
+            TickAttackComboWindow(deltaTime);
 
             UpdateGroundedState();
 
-            //处理翻滚和攻击输入
             TryStartDodge(desiredDirection);
             TryStartAttack();
 
@@ -176,7 +194,6 @@ namespace OnlineActionRpg.Client.Battle
                 UpdateHorizontalVelocity(desiredDirection, moveInput.magnitude);
             }
 
-            //处理旋转、跳跃、重力和移动
             ApplyRotation();
             ApplyJump();
             ApplyGravity();
@@ -186,6 +203,30 @@ namespace OnlineActionRpg.Client.Battle
             UpdateDebugState();
         }
 
+        // ==================== Input Handlers ====================
+        private void HandleWalkModeChanged(bool isWalkModeHeld)
+        {
+            _currentLocomotionMode = isWalkModeHeld
+                ? LocomotionMode.Walk
+                : defaultLocomotionMode;
+        }
+
+        private void HandleJumpPressed()
+        {
+            _jumpQueued = true;
+        }
+
+        private void HandleDodgePressed()
+        {
+            _dodgeQueued = true;
+        }
+
+        private void HandleAttackPressed()
+        {
+            _attackInputBufferTimer = attackInputBufferTime;
+        }
+
+        // ==================== Locomotion ====================
         private Vector3 BuildCameraRelativeMoveDirection(Vector2 input)
         {
             if (input.sqrMagnitude <= 0.0001f)
@@ -215,9 +256,7 @@ namespace OnlineActionRpg.Client.Battle
         private void UpdateHorizontalVelocity(Vector3 desiredDirection, float inputMagnitude)
         {
             float clampedInput = Mathf.Clamp01(inputMagnitude);
-
             float selectedSpeed = _currentLocomotionMode == LocomotionMode.Walk ? walkSpeed : runSpeed;
-
             Vector3 targetVelocity = desiredDirection * (selectedSpeed * clampedInput);
 
             bool hasInput = desiredDirection.sqrMagnitude > 0.0001f;
@@ -250,16 +289,6 @@ namespace OnlineActionRpg.Client.Battle
             transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
         }
 
-        private void ApplyGravity()
-        {
-            if (IsGrounded && _verticalVelocity < 0f && !_jumpQueued)
-            {
-                _verticalVelocity = groundedStickForce;
-            }
-
-            _verticalVelocity += gravity * Time.deltaTime;
-        }
-
         private void ApplyMovement()
         {
             Vector3 velocity = _horizontalVelocity + Vector3.up * _verticalVelocity;
@@ -276,7 +305,17 @@ namespace OnlineActionRpg.Client.Battle
             CurrentMoveDirection = speed > 0.0001f ? flatVelocity.normalized : Vector3.zero;
         }
 
-        //跳跃
+        // ==================== Grounding / Jump ====================
+        private void UpdateGroundedState()
+        {
+            IsGrounded = _characterController.isGrounded;
+
+            if (_characterController.isGrounded)
+            {
+                _lastGroundedTime = Time.time;
+            }
+        }
+
         private void ApplyJump()
         {
             if (!_jumpQueued)
@@ -284,21 +323,18 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
-            //如果玩家正在翻滚，则不允许跳跃。
             if (_isDodging)
             {
                 _jumpQueued = false;
                 return;
             }
 
-            //如果玩家正在攻击，则不允许跳跃。
             if (_isAttacking)
             {
                 _jumpQueued = false;
                 return;
             }
 
-            //如果玩家在跳跃按键按下后，仍然在允许的跳跃宽限时间内，则允许跳跃。
             bool canJump = Time.time - _lastGroundedTime <= jumpGroundedGraceTime;
 
             if (!canJump)
@@ -309,16 +345,19 @@ namespace OnlineActionRpg.Client.Battle
 
             _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             _jumpQueued = false;
+            ResetAttackCombo();
+
+            JumpStarted?.Invoke();
         }
 
-        private void UpdateGroundedState()
+        private void ApplyGravity()
         {
-            IsGrounded = _characterController.isGrounded;
-
-            if (_characterController.isGrounded)
+            if (IsGrounded && _verticalVelocity < 0f && !_jumpQueued)
             {
-                _lastGroundedTime = Time.time;
+                _verticalVelocity = groundedStickForce;
             }
+
+            _verticalVelocity += gravity * Time.deltaTime;
         }
 
         private void RefreshGroundedAfterMove()
@@ -331,12 +370,7 @@ namespace OnlineActionRpg.Client.Battle
             }
         }
 
-        private void HandleJumpPressed()
-        {
-            _jumpQueued = true;
-        }
-
-        //翻滚
+        // ==================== Dodge ====================
         private void TickDodgeCooldown(float deltaTime)
         {
             if (_dodgeCooldownTimer > 0f)
@@ -359,13 +393,11 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
-            //如果玩家正在攻击，则不允许翻滚。
             if (dodgeBlockedByAttack && _isAttacking)
             {
                 return;
             }
 
-            //如果玩家当前不在地面上，则不允许翻滚。
             if (dodgeRequiresGrounded && !IsGrounded)
             {
                 return;
@@ -388,6 +420,7 @@ namespace OnlineActionRpg.Client.Battle
             _dodgeCooldownTimer = dodgeCooldown;
             _horizontalVelocity = _dodgeDirection * dodgeSpeed;
 
+            ResetAttackCombo();
             DodgeStarted?.Invoke();
         }
 
@@ -408,12 +441,15 @@ namespace OnlineActionRpg.Client.Battle
             DodgeEnded?.Invoke();
         }
 
-        private void HandleDodgePressed()
+        // ==================== Attack / Combo ====================
+        private void TickAttackInputBuffer(float deltaTime)
         {
-            _dodgeQueued = true;
+            if (_attackInputBufferTimer > 0f)
+            {
+                _attackInputBufferTimer = Mathf.Max(0f, _attackInputBufferTimer - deltaTime);
+            }
         }
 
-        //攻击
         private void TickAttackState(float deltaTime)
         {
             if (_attackCooldownTimer > 0f)
@@ -435,6 +471,8 @@ namespace OnlineActionRpg.Client.Battle
 
             _isAttacking = false;
             _attackImpulseTimer = 0f;
+            _comboWindowTimer = comboResetWindow;
+
             _horizontalVelocity = Vector3.MoveTowards(
                 _horizontalVelocity,
                 Vector3.zero,
@@ -443,14 +481,22 @@ namespace OnlineActionRpg.Client.Battle
             AttackEnded?.Invoke();
         }
 
-        private void TryStartAttack()
+        private void TickAttackComboWindow(float deltaTime)
         {
-            if (!_attackQueued)
+            if (_isAttacking || _comboWindowTimer <= 0f)
             {
                 return;
             }
 
-            _attackQueued = false;
+            _comboWindowTimer = Mathf.Max(0f, _comboWindowTimer - deltaTime);
+        }
+
+        private void TryStartAttack()
+        {
+            if (_attackInputBufferTimer <= 0f)
+            {
+                return;
+            }
 
             if (_isAttacking || _attackCooldownTimer > 0f)
             {
@@ -467,9 +513,13 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
+            _attackInputBufferTimer = 0f;
+            CurrentAttackVariant = ResolveNextAttackVariant();
+
             _isAttacking = true;
             _attackTimer = attackDuration;
             _attackCooldownTimer = attackDuration + attackCooldown;
+            _comboWindowTimer = 0f;
 
             StartAttackImpulse();
 
@@ -511,10 +561,22 @@ namespace OnlineActionRpg.Client.Battle
                 attackImpulseBrake * deltaTime);
         }
 
-        private void HandleAttackPressed()
+        private AttackVariant ResolveNextAttackVariant()
         {
-            _attackQueued = true;
+            if (_comboWindowTimer <= 0f)
+            {
+                return AttackVariant.RightPunch;
+            }
+
+            return CurrentAttackVariant == AttackVariant.RightPunch
+                ? AttackVariant.LeftPunch
+                : AttackVariant.RightPunch;
         }
 
+        private void ResetAttackCombo()
+        {
+            _comboWindowTimer = 0f;
+            CurrentAttackVariant = AttackVariant.RightPunch;
+        }
     }
 }

@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-项目已完成 v0.3 阶段：基础通信、账号登录、大厅房间、Ready / StartBattle、Loading 协议、Addressables 初始化、加载进度上报、全员 BattleReady、服务端统一 BattleStart，以及训练场景入口加载已经跑通。当前准备进入 v0.4：本地动作战斗原型。
+项目已完成 v0.4 的 04A / 04B / 04C / 04C+ 阶段：在 v0.3 联机进入训练场景链路之上，已经完成本地玩家生成、第三人称 3C、动画状态、跳跃、闪避、左右拳连招、Emote Wheel 和本地动作手感验证。当前准备进入 04D：本地普攻命中闭环。
 
 已完成：
 
@@ -28,7 +28,7 @@
 
 未完成：
 
-- 本地玩家生成、第三人称控制、相机跟随、动画状态机和普攻命中闭环。
+- 本地普攻命中窗口、HitBox / HurtBox、训练木桩 HP 和命中反馈。
 - 远端玩家生成、状态同步、战斗事件同步和结算。
 - 完整资源生命周期管理、加载失败重试、Windows Build、性能记录和演示视频。
 
@@ -105,11 +105,11 @@ Client/UnityProject/
 6000.3.20f1
 ```
 
-当前客户端已接入最小登录、大厅、房间、Ready / StartBattle、Loading UI、Addressables 初始化和训练场景入口加载。进入训练场后，角色控制和动作战斗将在 v0.4 实现。
+当前客户端已接入最小登录、大厅、房间、Ready / StartBattle、Loading UI、Addressables 初始化、训练场景入口加载和本地动作战斗原型。进入训练场后可以生成本地玩家并完成基础 3C、动作表现与 Emote Wheel；本地命中闭环仍在 04D 实现。
 
 ## 运行状态
 
-当前 v0.3 链路已验证：客户端连接服务端后可注册 / 登录、进入大厅、创建或加入房间、切换 Ready 状态，由房主开始进入 Loading；客户端完成 Addressables 初始化并上报 BattleReady 后，服务端统一广播 BattleStart，客户端加载训练场景入口。
+当前 v0.3 联机入口链路与 v0.4 本地动作链路均已分阶段验证：客户端连接服务端后可注册 / 登录、进入大厅、创建或加入房间、切换 Ready 状态，由房主开始进入 Loading；客户端完成 Addressables 初始化并上报 BattleReady 后，服务端统一广播 BattleStart，客户端加载训练场景入口，随后由 `BattleBootstrap` 生成本地玩家并进入本地动作战斗原型。
 
 启动服务端：
 
@@ -136,12 +136,10 @@ BattleReady / BattleStart 专项测试已验证返回：
 {"ok":true,"finalRoomState":"Battle","loadBattleSceneNotificationCount":2,"battleStartNotificationCount":2}
 ```
 
-v0.4 待实现目标：
+v0.4 当前待实现目标：
 
-- 灰盒训练场启动结构和 `BattleBootstrap`。
-- 本地玩家生成、第三人称移动、朝向和相机跟随。
-- 基础动画状态机：Idle / Run / Attack。
-- 普攻命中窗口、训练木桩 HP 和 HitBox / HurtBox 调试可视化。
+- 本地普攻命中窗口、HitBox / HurtBox 和训练木桩 HP。
+- 本地命中日志与战斗调试可视化。
 
 ## 核心文档
 
@@ -164,4 +162,4 @@ v0.4 待实现目标：
 
 ## 当前推荐下一步
 
-进入 v0.4：先建立训练场景的 `BattleBootstrap / BattleContext / PlayerSpawnPoint`，再接本地 3C、动画状态机、普攻命中和 HitBox / HurtBox 调试可视化。暂时不要把远端同步、服务端 Tick、伤害权威和结算混入 04。
+进入 v0.4 的下一小步 `04D`：实现本地普攻命中窗口、HitBox / HurtBox、训练木桩 HP 和命中日志。暂时不要把远端同步、服务端 Tick、伤害权威和结算混入 04。

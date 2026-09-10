@@ -13,9 +13,10 @@ GameObject:
   - component: {fileID: 8130470294917285336}
   - component: {fileID: 7367967369394817888}
   - component: {fileID: 8763788044651070870}
+  - component: {fileID: 1598369282948082989}
   m_Layer: 0
   m_Name: LocalPlayer
-  m_TagString: Untagged
+  m_TagString: LocalPlayer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -90,8 +91,8 @@ MonoBehaviour:
   dodgeDuration: 0.6
   dodgeCooldown: 1.5
   dodgeRequiresGrounded: 1
-  attackDuration: 0.8
-  attackCooldown: 0.3
+  attackDuration: 0.5
+  attackCooldown: 0.1
   attackRequiresGrounded: 1
   attackBlockedByDodge: 1
   dodgeBlockedByAttack: 1
@@ -99,6 +100,8 @@ MonoBehaviour:
   attackImpulseSpeed: 6
   attackImpulseDuration: 0.25
   attackImpulseBrake: 30
+  attackInputBufferTime: 0.12
+  comboResetWindow: 0.55
 --- !u!114 &7367967369394817888
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,9 +117,12 @@ MonoBehaviour:
   playerController: {fileID: 8130470294917285336}
   animator: {fileID: 8122137475620843888}
   inputReader: {fileID: 8763788044651070870}
+  emoteController: {fileID: 0}
+  idleStateName: Idle_Loop
   moveSpeedParameter: MoveSpeed
   isMovingParameter: IsMoving
-  attackTriggerParameter: Attack
+  rightPunchTriggerParameter: AttackRight
+  leftPunchTriggerParameter: AttackLeft
   dodgeTriggerParameter: Dodge
   jumpTriggerParameter: Jump
   isGroundedParameter: IsGrounded
@@ -126,6 +132,7 @@ MonoBehaviour:
   isRunningParameter: IsRunning
   moveThreshold: 0.05
   speedDampTime: 0.08
+  emoteFadeDuration: 0.12
 --- !u!114 &8763788044651070870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +150,49 @@ MonoBehaviour:
   attackAction: {fileID: 4177590858362266985, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
   dodgeAction: {fileID: 8697751930870506065, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
   jumpAction: {fileID: -5495608441465207645, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
-  walkModeAction: {fileID: 0}
+  walkModeAction: {fileID: -4099973277700037273, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+  emoteWheelAction: {fileID: -3767536829467481745, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+  emotePointerAction: {fileID: -2399493694587048292, guid: e29a80badaccc9c4097ac878b0282763, type: 3}
+--- !u!114 &1598369282948082989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285213668682058830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8bb86ab7318985f4a8e4e3b114be5955, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Battle.LocalEmoteController
+  inputReader: {fileID: 8763788044651070870}
+  playerController: {fileID: 8130470294917285336}
+  emotes:
+  - Id: dance
+    DisplayName: Dance
+    Icon: {fileID: 0}
+    AnimatorStateName: Emote_Dance
+    Loop: 1
+    Duration: 0
+    CancelOnMove: 1
+    CancelOnCombatAction: 1
+  - Id: interact
+    DisplayName: Interact
+    Icon: {fileID: 0}
+    AnimatorStateName: Emote_Interact
+    Loop: 0
+    Duration: 2
+    CancelOnMove: 1
+    CancelOnCombatAction: 1
+  - Id: talk
+    DisplayName: Talk
+    Icon: {fileID: 0}
+    AnimatorStateName: Emote_Talk
+    Loop: 1
+    Duration: 0
+    CancelOnMove: 1
+    CancelOnCombatAction: 1
+  moveCancelThreshold: 0.1
 --- !u!1001 &2440164476520238305
 PrefabInstance:
   m_ObjectHideFlags: 0

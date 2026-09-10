@@ -1,13 +1,12 @@
 # 04 战斗场景：石砌训练庭院建模原型
 
-这是可编辑、可重新生成的场景美术原型。庭院建筑、地砖、旗帜、训练木桩、植被由 Blender 脚本生成；后区两座符文石柱使用 `SourceArt/Meshy/RuneObelisk` 中单独生成的 Meshy 道具。模型尚未替换现有 Unity 04 场景。
+这是可编辑的场景美术原型。当前保留已生成的 Blender 源文件、导出模型、预览图和验证报告；原用于一次性生成庭院的 Python / Blender 脚本已从仓库移除，避免与 Unity 客户端或服务端运行代码混淆。后区两座符文石柱使用 `SourceArt/Meshy/RuneObelisk` 中单独生成的 Meshy 道具。模型尚未替换现有 Unity 04 场景。
 
 ## 交付文件
 
 | 文件 | 用途 |
 | --- | --- |
 | `TrainingCourtyard.blend` | 可编辑的 Blender 场景，包含模型、预览灯光、相机和比例人形 |
-| `build_courtyard.py` | 可复现建模与导出脚本，随机种子固定为 404 |
 | `Exports/TrainingCourtyard.fbx` | 完整视觉模型，包含三个木桩及空锚点 |
 | `Exports/TrainingCourtyard_EnvironmentOnly.fbx` | 不含木桩视觉网格的环境，方便后续独立生成训练目标 |
 | `Exports/TrainingCourtyard.glb` | 带材质的通用 3D 预览/交换版本 |
@@ -32,15 +31,9 @@
 | `DummyAnchor_02` | `(0, 0, 5)` |
 | `DummyAnchor_03` | `(4, 0, 4)` |
 
-## 重新生成
+## 修改方式
 
-在项目根目录用 PowerShell 执行：
-
-```powershell
-& 'E:/Blender/blender.exe' --background --python 'SourceArt/TrainingCourtyard/build_courtyard.py' -- --samples 48
-```
-
-加入 `--skip-render` 可只生成模型、导出文件和统计报告。Blender 场景与导出文件会按固定名称覆盖，因此手工编辑前应另存副本。脚本面向 Blender 5.x，当前实测版本记录在统计报告内。
+当前仓库不再保留自动生成脚本。若需要调整场景，应优先打开 `TrainingCourtyard.blend` 在 Blender 内直接编辑，再按既有文件名重新导出 FBX / GLB。若后续确实需要重新建立程序化建模流程，可以另起本地实验脚本；在确认会长期维护前，不建议把临时脚本提交到仓库。
 
 ## Blender 集合
 

@@ -236,13 +236,13 @@ namespace OnlineActionRpg.Client.Battle
             return pitch > 180f ? pitch - 360f : pitch;
         }
 
-        private static void LockCursor()
+        public static void LockCursor()
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
-        private static void UnlockCursor()
+        public static void UnlockCursor()
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;

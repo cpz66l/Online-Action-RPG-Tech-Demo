@@ -16,6 +16,8 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private InputActionReference dodgeAction;
         [SerializeField] private InputActionReference jumpAction;
         [SerializeField] private InputActionReference walkModeAction;
+        [SerializeField] private InputActionReference emoteWheelAction;
+        [SerializeField] private InputActionReference emotePointerAction;
 
         public event Action<Vector2> MoveChanged;
         public event Action<Vector2> LookChanged;
@@ -23,14 +25,21 @@ namespace OnlineActionRpg.Client.Battle
         public event Action DodgePressed;
         public event Action JumpPressed;
         public event Action<bool> WalkModeChanged;
+        public event Action EmoteWheelPressed;
+        public event Action EmoteWheelReleased;
+        public event Action<Vector2> EmotePointerChanged;
 
         public Vector2 Move { get; private set; }
         public Vector2 Look { get; private set; }
+        public Vector2 EmotePointer { get; private set; }
+
         public bool IsWalkModeHeld { get; private set; }
 
         public bool HasMoveInput => Move.sqrMagnitude > 0.0001f;
 
         private InputAction _walkModeRuntimeAction;
+        private InputAction _emoteWheelRuntimeAction;
+        private InputAction _emotePointerRuntimeAction;
 
         private void OnEnable()
         {
@@ -41,7 +50,12 @@ namespace OnlineActionRpg.Client.Battle
             EnableAction(jumpAction);
 
             _walkModeRuntimeAction = ResolveAction(walkModeAction, "WalkMode");
+            _emoteWheelRuntimeAction = ResolveAction(emoteWheelAction, "EmoteWheel");
+            _emotePointerRuntimeAction = ResolveAction(emotePointerAction, "EmotePointer");
+
             EnableAction(_walkModeRuntimeAction);
+            EnableAction(_emoteWheelRuntimeAction);
+            EnableAction(_emotePointerRuntimeAction);
 
             Subscribe();
         }
@@ -56,11 +70,18 @@ namespace OnlineActionRpg.Client.Battle
             DisableAction(dodgeAction);
             DisableAction(jumpAction);
             DisableAction(_walkModeRuntimeAction);
+            DisableAction(_emoteWheelRuntimeAction);
+            DisableAction(_emotePointerRuntimeAction);
 
             Move = Vector2.zero;
             Look = Vector2.zero;
+            EmotePointer = Vector2.zero;
+
             IsWalkModeHeld = false;
+
             _walkModeRuntimeAction = null;
+            _emoteWheelRuntimeAction = null;
+            _emotePointerRuntimeAction = null;
         }
 
         private void Subscribe()
@@ -97,6 +118,17 @@ namespace OnlineActionRpg.Client.Battle
                 _walkModeRuntimeAction.performed += HandleWalkModePerformed;
                 _walkModeRuntimeAction.canceled += HandleWalkModeCanceled;
             }
+
+            if (_emoteWheelRuntimeAction != null)
+            {
+                _emoteWheelRuntimeAction.performed += HandleEmoteWheelPerformed;
+                _emoteWheelRuntimeAction.canceled += HandleEmoteWheelCanceled;
+            }
+
+            if (_emotePointerRuntimeAction != null)
+            {
+                _emotePointerRuntimeAction.performed += HandleEmotePointerPerformed;
+            }
         }
 
         private void Unsubscribe()
@@ -132,6 +164,17 @@ namespace OnlineActionRpg.Client.Battle
             {
                 _walkModeRuntimeAction.performed -= HandleWalkModePerformed;
                 _walkModeRuntimeAction.canceled -= HandleWalkModeCanceled;
+            }
+
+            if (_emoteWheelRuntimeAction != null)
+            {
+                _emoteWheelRuntimeAction.performed -= HandleEmoteWheelPerformed;
+                _emoteWheelRuntimeAction.canceled -= HandleEmoteWheelCanceled;
+            }
+
+            if (_emotePointerRuntimeAction != null)
+            {
+                _emotePointerRuntimeAction.performed -= HandleEmotePointerPerformed;
             }
         }
 
@@ -183,6 +226,22 @@ namespace OnlineActionRpg.Client.Battle
         private void HandleWalkModeCanceled(InputAction.CallbackContext context)
         {
             SetWalkMode(false);
+        }
+
+        private void HandleEmoteWheelPerformed(InputAction.CallbackContext context)
+        {
+            EmoteWheelPressed?.Invoke();
+        }
+
+        private void HandleEmoteWheelCanceled(InputAction.CallbackContext context)
+        {
+            EmoteWheelReleased?.Invoke();
+        }
+
+        private void HandleEmotePointerPerformed(InputAction.CallbackContext context)
+        {
+            EmotePointer = context.ReadValue<Vector2>();
+            EmotePointerChanged?.Invoke(EmotePointer);
         }
 
         private void SetWalkMode(bool isHeld)

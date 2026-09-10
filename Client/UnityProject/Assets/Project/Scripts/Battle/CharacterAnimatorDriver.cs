@@ -9,11 +9,14 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private LocalPlayerController playerController;
         [SerializeField] private Animator animator;
         [SerializeField] private PlayerInputReader inputReader;
+        [SerializeField] private LocalEmoteController emoteController;
 
         [Header("Animator Parameters")]
+        [SerializeField] private string idleStateName = "Idle_Loop";
         [SerializeField] private string moveSpeedParameter = "MoveSpeed";
         [SerializeField] private string isMovingParameter = "IsMoving";
-        [SerializeField] private string attackTriggerParameter = "Attack";
+        [SerializeField] private string rightPunchTriggerParameter = "AttackRight";
+        [SerializeField] private string leftPunchTriggerParameter = "AttackLeft";
         [SerializeField] private string dodgeTriggerParameter = "Dodge";
         [SerializeField] private string jumpTriggerParameter = "Jump";
         [SerializeField] private string isGroundedParameter = "IsGrounded";
@@ -25,10 +28,12 @@ namespace OnlineActionRpg.Client.Battle
         [Header("Movement")]
         [SerializeField] private float moveThreshold = 0.05f;
         [SerializeField] private float speedDampTime = 0.08f;
+        [SerializeField] private float emoteFadeDuration = 0.12f;
 
         private int _moveSpeedHash;
         private int _isMovingHash;
-        private int _attackHash;
+        private int _rightPunchHash;
+        private int _leftPunchHash;
         private int _dodgeHash;
         private int _jumpHash;
         private int _isGroundedHash;
@@ -53,29 +58,33 @@ namespace OnlineActionRpg.Client.Battle
         {
             ResolveReferences();
 
-            if (inputReader != null)
-            {
-                inputReader.JumpPressed += HandleJumpPressed;
-            }
-
             if (playerController != null)
             {
                 playerController.AttackStarted += HandleAttackStarted;
                 playerController.DodgeStarted += HandleDodgeStarted;
+                playerController.JumpStarted += HandleJumpStarted;
+            }
+
+            if (emoteController != null)
+            {
+                emoteController.EmoteStarted += HandleEmoteStarted;
+                emoteController.EmoteCanceled += HandleEmoteCanceled;
             }
         }
 
         private void OnDisable()
         {
-            if (inputReader != null)
-            {
-                inputReader.JumpPressed -= HandleJumpPressed;
-            }
-
             if (playerController != null)
             {
                 playerController.AttackStarted -= HandleAttackStarted;
                 playerController.DodgeStarted -= HandleDodgeStarted;
+                playerController.JumpStarted -= HandleJumpStarted;
+            }
+
+            if (emoteController != null)
+            {
+                emoteController.EmoteStarted -= HandleEmoteStarted;
+                emoteController.EmoteCanceled -= HandleEmoteCanceled;
             }
         }
 
@@ -110,14 +119,20 @@ namespace OnlineActionRpg.Client.Battle
             {
                 inputReader = GetComponentInParent<PlayerInputReader>();
             }
+
+            if (emoteController == null)
+            {
+                emoteController = GetComponentInParent<LocalEmoteController>();
+            }
         }
 
-        //缓存Animator参数的哈希值，以提高性能。
+        //缓存Animator参数的哈希值，避免每次查找字符串以提高性能。
         private void CacheParameterHashes()
         {
             _moveSpeedHash = Animator.StringToHash(moveSpeedParameter);
             _isMovingHash = Animator.StringToHash(isMovingParameter);
-            _attackHash = Animator.StringToHash(attackTriggerParameter);
+            _rightPunchHash = Animator.StringToHash(rightPunchTriggerParameter);
+            _leftPunchHash = Animator.StringToHash(leftPunchTriggerParameter);
             _dodgeHash = Animator.StringToHash(dodgeTriggerParameter);
             _jumpHash = Animator.StringToHash(jumpTriggerParameter);
             _isGroundedHash = Animator.StringToHash(isGroundedParameter);
@@ -144,12 +159,16 @@ namespace OnlineActionRpg.Client.Battle
 
         private void HandleAttackStarted()
         {
-            if (animator == null)
+            if (animator == null || playerController == null)
             {
                 return;
             }
 
-            animator.SetTrigger(_attackHash);
+            int triggerHash = playerController.CurrentAttackVariant == LocalPlayerController.AttackVariant.LeftPunch
+                ? _leftPunchHash
+                : _rightPunchHash;
+
+            animator.SetTrigger(triggerHash);
         }
 
         private void HandleDodgeStarted()
@@ -159,17 +178,45 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
+            animator.ResetTrigger(_jumpHash);
             animator.SetTrigger(_dodgeHash);
         }
 
-        private void HandleJumpPressed()
+        private void HandleJumpStarted()
         {
-            if(animator == null || !playerController.IsGrounded)
+            if (animator == null)
             {
                 return;
             }
 
             animator.SetTrigger(_jumpHash);
+        }
+
+        private void HandleEmoteStarted(EmoteDefinition emote)
+        {
+            if (animator == null || emote == null || string.IsNullOrWhiteSpace(emote.AnimatorStateName))
+            {
+                return;
+            }
+
+            //当表情动作开始时，重置攻击、闪避和跳跃触发器，以确保动画状态机正确过渡到表情动画。
+            animator.ResetTrigger(_rightPunchHash);
+            animator.ResetTrigger(_leftPunchHash);
+            animator.ResetTrigger(_dodgeHash);
+            animator.ResetTrigger(_jumpHash);
+            //使用 CrossFadeInFixedTime 方法平滑过渡到表情动画状态，持续时间为 emoteFadeDuration。
+            animator.CrossFadeInFixedTime(emote.AnimatorStateName, emoteFadeDuration);
+        }
+
+        private void HandleEmoteCanceled()
+        {
+            if (animator == null || string.IsNullOrWhiteSpace(idleStateName))
+            {
+                return;
+            }
+
+            //当表情动作被取消时，过渡回默认的空闲状态。
+            animator.CrossFadeInFixedTime(idleStateName, emoteFadeDuration);
         }
     }
 }
