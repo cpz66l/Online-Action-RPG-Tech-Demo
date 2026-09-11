@@ -1,6 +1,6 @@
-namespace OnlineActionRpg.Client.Battle
+ï»¿namespace OnlineActionRpg.Client.Battle
 {
-    // BattleContext ±£´æµ±Ç°Õ½¶·³¡¾°ÔËĞĞÊ±ÉÏÏÂÎÄ¡£
+    // BattleContext ä¿å­˜å½“å‰æˆ˜æ–—åœºæ™¯è¿è¡Œæ—¶ä¸Šä¸‹æ–‡ã€‚
     public readonly struct BattleContext
     {
         public readonly string BattleId;

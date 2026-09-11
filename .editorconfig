@@ -1,0 +1,9 @@
+root = true
+
+# 全仓库的 C# 源码统一使用 UTF-8 with BOM。
+# 原因：项目注释和日志文本大量使用中文，带 BOM 可以避免编辑器、GitHub 网页
+# 和非中文代码页机器把源码按错误编码解码，导致注释乱码或字符串字面量被破坏。
+[*.cs]
+charset = utf-8-bom
+indent_style = space
+indent_size = 4

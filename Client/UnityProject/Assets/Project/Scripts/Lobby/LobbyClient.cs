@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using OnlineActionRpg.Client.Account;
@@ -7,16 +7,16 @@ using UnityEngine;
 
 namespace OnlineActionRpg.Client.Lobby
 {
-    // LobbyClient ÊÇ¿Í»§¶Ë´óÌü / ·¿¼äÒµÎñÈë¿Ú¡£
-    // ËüÖ»¸ºÔğĞ­ÒéÇëÇó¡¢ÏìÓ¦½âÎöºÍÊÂ¼şÅ×³ö£¬²»Ö±½Ó²Ù×÷ UI¡£
+    // LobbyClient æ˜¯å®¢æˆ·ç«¯å¤§å… / æˆ¿é—´ä¸šåŠ¡å…¥å£ã€‚
+    // å®ƒåªè´Ÿè´£åè®®è¯·æ±‚ã€å“åº”è§£æå’Œäº‹ä»¶æŠ›å‡ºï¼Œä¸ç›´æ¥æ“ä½œ UIã€‚
     public sealed class LobbyClient : MonoBehaviour
     {
         [SerializeField] private NetworkClient networkClient;
         [SerializeField] private ClientSession session;
 
-        //¼ÇÂ¼·¢ËÍµÄÇëÇóid,·½±ã¼ì²éÊÕµ½µÄÏìÓ¦ÊÇ·ñÊÇµ±Ç°ÇëÇóµÄÏìÓ¦
-        //ÕâÀïÇëÇó-ÏìÓ¦Ä£Ê½,Ã¿´Î·¢ËÍÇëÇóÊ±Éú³ÉÒ»¸öĞÂµÄrequestId,ÊÕµ½ÏìÓ¦Ê±¼ì²érequestIdÊÇ·ñÆ¥Åä¡£
-        //¶ª°ü»áµ¼ÖÂÇëÇó³¬Ê±,µ«²»»áÓ°ÏìºóĞøÇëÇóµÄ·¢ËÍºÍÏìÓ¦µÄ´¦Àí¡£
+        //è®°å½•å‘é€çš„è¯·æ±‚id,æ–¹ä¾¿æ£€æŸ¥æ”¶åˆ°çš„å“åº”æ˜¯å¦æ˜¯å½“å‰è¯·æ±‚çš„å“åº”
+        //è¿™é‡Œè¯·æ±‚-å“åº”æ¨¡å¼,æ¯æ¬¡å‘é€è¯·æ±‚æ—¶ç”Ÿæˆä¸€ä¸ªæ–°çš„requestId,æ”¶åˆ°å“åº”æ—¶æ£€æŸ¥requestIdæ˜¯å¦åŒ¹é…ã€‚
+        //ä¸¢åŒ…ä¼šå¯¼è‡´è¯·æ±‚è¶…æ—¶,ä½†ä¸ä¼šå½±å“åç»­è¯·æ±‚çš„å‘é€å’Œå“åº”çš„å¤„ç†ã€‚
         private string _pendingEnterLobbyRequestId = string.Empty;
         private string _pendingCreateRoomRequestId = string.Empty;
         private string _pendingJoinRoomRequestId = string.Empty;
@@ -24,7 +24,7 @@ namespace OnlineActionRpg.Client.Lobby
         private string _pendingReadyRequestId = string.Empty;
         private string _pendingStartBattleRequestId = string.Empty;
 
-        // SynchronizationContext ÓÃÓÚÔÚ Unity Ö÷Ïß³ÌÉÏÅ×³öÊÂ¼ş£¬È·±£ÊÂ¼ş´¦Àí³ÌĞòÔÚÖ÷Ïß³ÌÉÏÖ´ĞĞ¡£
+        // SynchronizationContext ç”¨äºåœ¨ Unity ä¸»çº¿ç¨‹ä¸ŠæŠ›å‡ºäº‹ä»¶ï¼Œç¡®ä¿äº‹ä»¶å¤„ç†ç¨‹åºåœ¨ä¸»çº¿ç¨‹ä¸Šæ‰§è¡Œã€‚
         private SynchronizationContext _unityContext;
 
         public event Action<EnterLobbyResult> EnterLobbyCompleted;
@@ -33,12 +33,12 @@ namespace OnlineActionRpg.Client.Lobby
         public event Action<RoomCommandResult> LeaveRoomCompleted;
         public event Action<RoomCommandResult> ReadyCompleted;
         public event Action<RoomCommandResult> StartBattleCompleted;
-        // RoomStateNtf ÊÇ·şÎñ¶ËÖ÷¶¯ÍÆËÍ£¬²»¶ÔÓ¦Ä³Ò»´Î°´Å¥µã»÷¡£
+        // RoomStateNtf æ˜¯æœåŠ¡ç«¯ä¸»åŠ¨æ¨é€ï¼Œä¸å¯¹åº”æŸä¸€æ¬¡æŒ‰é’®ç‚¹å‡»ã€‚
         public event Action<RoomDto> RoomStateChanged;
 
         private void Awake()
         {
-            //unityContext ÊÇ Unity Ö÷Ïß³ÌµÄ SynchronizationContext, ÓÃÓÚÔÚÖ÷Ïß³ÌÉÏÅ×³öÊÂ¼ş£¬È·±£ÊÂ¼ş´¦Àí³ÌĞòÔÚÖ÷Ïß³ÌÉÏÖ´ĞĞ¡£
+            //unityContext æ˜¯ Unity ä¸»çº¿ç¨‹çš„ SynchronizationContext, ç”¨äºåœ¨ä¸»çº¿ç¨‹ä¸ŠæŠ›å‡ºäº‹ä»¶ï¼Œç¡®ä¿äº‹ä»¶å¤„ç†ç¨‹åºåœ¨ä¸»çº¿ç¨‹ä¸Šæ‰§è¡Œã€‚
             _unityContext = SynchronizationContext.Current;
 
             if (networkClient == null)
@@ -65,7 +65,7 @@ namespace OnlineActionRpg.Client.Lobby
             }
         }
 
-        //·¢ËÍ½øÈë´óÌüÇëÇó
+        //å‘é€è¿›å…¥å¤§å…è¯·æ±‚
         public async Task EnterLobbyAsync()
         {
             if (!EnsureReady(out int code, out string message))
@@ -93,7 +93,7 @@ namespace OnlineActionRpg.Client.Lobby
             await networkClient.SendJsonAsync(json);
         }
 
-        //·¢ËÍ´´½¨·¿¼äÇëÇó
+        //å‘é€åˆ›å»ºæˆ¿é—´è¯·æ±‚
         public async Task CreateRoomAsync(string roomName, int maxPlayers)
         {
             if (!EnsureReady(out int code, out string message))
@@ -131,7 +131,7 @@ namespace OnlineActionRpg.Client.Lobby
             await networkClient.SendJsonAsync(json);
         }
 
-        //·¢ËÍ¼ÓÈë·¿¼äÇëÇó
+        //å‘é€åŠ å…¥æˆ¿é—´è¯·æ±‚
         public async Task JoinRoomAsync(string roomId)
         {
             if (!EnsureReady(out int code, out string message))
@@ -168,7 +168,7 @@ namespace OnlineActionRpg.Client.Lobby
             await networkClient.SendJsonAsync(json);
         }
 
-        //·¢ËÍÀë¿ª·¿¼äÇëÇó
+        //å‘é€ç¦»å¼€æˆ¿é—´è¯·æ±‚
         public async Task LeaveRoomAsync(string roomId)
         {
             if (!EnsureReady(out int code, out string message))
@@ -278,17 +278,17 @@ namespace OnlineActionRpg.Client.Lobby
             await networkClient.SendJsonAsync(json);
         }
 
-        //´¦Àí·şÎñÆ÷·¢À´µÄÎÄ±¾ÏûÏ¢£¬¸ù¾İÏûÏ¢ÀàĞÍ·Ö·¢µ½²»Í¬µÄ´¦Àí·½·¨
+        //å¤„ç†æœåŠ¡å™¨å‘æ¥çš„æ–‡æœ¬æ¶ˆæ¯ï¼Œæ ¹æ®æ¶ˆæ¯ç±»å‹åˆ†å‘åˆ°ä¸åŒçš„å¤„ç†æ–¹æ³•
         private void HandleTextMessageReceived(string json)
         {
-            //½«µÃµ½µÄjson·´ĞòÁĞ»¯ÎªProtocolEnvelope¶ÔÏó£¬»ñÈ¡ÏûÏ¢ÀàĞÍtypeºÍrequestId)
+            //å°†å¾—åˆ°çš„jsonååºåˆ—åŒ–ä¸ºProtocolEnvelopeå¯¹è±¡ï¼Œè·å–æ¶ˆæ¯ç±»å‹typeå’ŒrequestId)
             ProtocolEnvelope envelope = JsonUtility.FromJson<ProtocolEnvelope>(json);
 
             if (envelope == null || string.IsNullOrEmpty(envelope.type))
             {
                 return;
             }
-            //¸ù¾İÏûÏ¢ÀàĞÍ·Ö·¢µ½²»Í¬µÄ´¦Àí·½·¨
+            //æ ¹æ®æ¶ˆæ¯ç±»å‹åˆ†å‘åˆ°ä¸åŒçš„å¤„ç†æ–¹æ³•
             if (envelope.type == "EnterLobbyRes")
             {
                 HandleEnterLobbyResponse(json);
@@ -337,7 +337,7 @@ namespace OnlineActionRpg.Client.Lobby
             }
         }
 
-        //´¦Àí½øÈë´óÌüÏìÓ¦
+        //å¤„ç†è¿›å…¥å¤§å…å“åº”
         private void HandleEnterLobbyResponse(string json)
         {
             EnterLobbyResponseEnvelope response = JsonUtility.FromJson<EnterLobbyResponseEnvelope>(json);
@@ -355,7 +355,7 @@ namespace OnlineActionRpg.Client.Lobby
                 response.payload.rooms));
         }
 
-        //´¦Àí´´½¨·¿¼äÏìÓ¦
+        //å¤„ç†åˆ›å»ºæˆ¿é—´å“åº”
         private void HandleCreateRoomResponse(string json)
         {
             CreateRoomResponseEnvelope response = JsonUtility.FromJson<CreateRoomResponseEnvelope>(json);
@@ -373,7 +373,7 @@ namespace OnlineActionRpg.Client.Lobby
                 response.payload.room));
         }
 
-        //´¦Àí¼ÓÈë·¿¼äÏìÓ¦
+        //å¤„ç†åŠ å…¥æˆ¿é—´å“åº”
         private void HandleJoinRoomResponse(string json)
         {
             JoinRoomResponseEnvelope response = JsonUtility.FromJson<JoinRoomResponseEnvelope>(json);
@@ -391,7 +391,7 @@ namespace OnlineActionRpg.Client.Lobby
                 response.payload.room));
         }
 
-        //´¦ÀíÀë¿ª·¿¼äÏìÓ¦
+        //å¤„ç†ç¦»å¼€æˆ¿é—´å“åº”
         private void HandleLeaveRoomResponse(string json)
         {
             LeaveRoomResponseEnvelope response = JsonUtility.FromJson<LeaveRoomResponseEnvelope>(json);
@@ -443,7 +443,7 @@ namespace OnlineActionRpg.Client.Lobby
                 response.payload.room));
         }
 
-        //´¦Àí·¿¼ä×´Ì¬Í¨Öª
+        //å¤„ç†æˆ¿é—´çŠ¶æ€é€šçŸ¥
         private void HandleRoomStateNotification(string json)
         {
             RoomStateNotificationEnvelope notification = JsonUtility.FromJson<RoomStateNotificationEnvelope>(json);
@@ -456,7 +456,7 @@ namespace OnlineActionRpg.Client.Lobby
             RaiseRoomStateChanged(notification.payload.room);
         }
 
-        //´¦Àí´íÎóÏìÓ¦,¸ù¾İrequestIdÅĞ¶ÏÊÇÄÄ¸öÇëÇóµÄ´íÎóÏìÓ¦£¬²¢Å×³ö¶ÔÓ¦µÄÊÂ¼ş
+        //å¤„ç†é”™è¯¯å“åº”,æ ¹æ®requestIdåˆ¤æ–­æ˜¯å“ªä¸ªè¯·æ±‚çš„é”™è¯¯å“åº”ï¼Œå¹¶æŠ›å‡ºå¯¹åº”çš„äº‹ä»¶
         private void HandleErrorResponse(ProtocolEnvelope response)
         {
             if (response.requestId == _pendingEnterLobbyRequestId)
@@ -500,7 +500,7 @@ namespace OnlineActionRpg.Client.Lobby
             }
         }
 
-        // È·±£ÍøÂç¿Í»§¶ËºÍ»á»°ÒÑ×¼±¸ºÃ
+        // ç¡®ä¿ç½‘ç»œå®¢æˆ·ç«¯å’Œä¼šè¯å·²å‡†å¤‡å¥½
         private bool EnsureReady(out int code, out string message)
         {
             if (networkClient == null)
@@ -529,7 +529,7 @@ namespace OnlineActionRpg.Client.Lobby
             return true;
         }
 
-        //ÔÚÖ÷Ïß³ÌÉÏÅ×³öÊÂ¼ş£¬È·±£ÊÂ¼ş´¦Àí³ÌĞòÔÚÖ÷Ïß³ÌÉÏÖ´ĞĞ
+        //åœ¨ä¸»çº¿ç¨‹ä¸ŠæŠ›å‡ºäº‹ä»¶ï¼Œç¡®ä¿äº‹ä»¶å¤„ç†ç¨‹åºåœ¨ä¸»çº¿ç¨‹ä¸Šæ‰§è¡Œ
         private void RaiseEnterLobbyCompleted(EnterLobbyResult result)
         {
             RaiseOnMainThread(() => EnterLobbyCompleted?.Invoke(result));
@@ -572,7 +572,7 @@ namespace OnlineActionRpg.Client.Lobby
                 return;
             }
 
-            // Èç¹ûµ±Ç° SynchronizationContext ÊÇ Unity µÄÖ÷Ïß³ÌÉÏÏÂÎÄ£¬ÔòÖ±½Óµ÷ÓÃ action£¬·ñÔòÊ¹ÓÃ Post ·½·¨½« action ·¢²¼µ½Ö÷Ïß³ÌÉÏÏÂÎÄÖĞÖ´ĞĞ¡£
+            // å¦‚æœå½“å‰ SynchronizationContext æ˜¯ Unity çš„ä¸»çº¿ç¨‹ä¸Šä¸‹æ–‡ï¼Œåˆ™ç›´æ¥è°ƒç”¨ actionï¼Œå¦åˆ™ä½¿ç”¨ Post æ–¹æ³•å°† action å‘å¸ƒåˆ°ä¸»çº¿ç¨‹ä¸Šä¸‹æ–‡ä¸­æ‰§è¡Œã€‚
             if (_unityContext == null || SynchronizationContext.Current == _unityContext)
             {
                 action.Invoke();
@@ -582,14 +582,14 @@ namespace OnlineActionRpg.Client.Lobby
             _unityContext.Post(_ => action.Invoke(), null);
         }
 
-        //Ğ¡helper
+        //å°helper
         private static long GetUnixTimeMilliseconds()
         {
             return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
     }
 
-    // ½øÈë´óÌü½á¹ûµÄÊı¾İ½á¹¹
+    // è¿›å…¥å¤§å…ç»“æœçš„æ•°æ®ç»“æ„
     public readonly struct EnterLobbyResult
     {
         public readonly bool Success;
@@ -623,7 +623,7 @@ namespace OnlineActionRpg.Client.Lobby
         }
     }
 
-    // ·¿¼äÃüÁî½á¹ûµÄÊı¾İ½á¹¹
+    // æˆ¿é—´å‘½ä»¤ç»“æœçš„æ•°æ®ç»“æ„
     public readonly struct RoomCommandResult
     {
         public readonly bool Success;

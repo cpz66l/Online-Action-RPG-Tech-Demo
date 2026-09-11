@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,12 +32,21 @@ namespace OnlineActionRpg.Client.Battle
 
         private void OnDisable()
         {
-            if (inputReader != null)
+            UnsubscribeInput();
+            Hide();
+        }
+
+        // 统一处理轮盘输入的退订，避免 SetTarget 被多次调用或对象禁用后残留重复回调。
+        private void UnsubscribeInput()
+        {
+            if (inputReader == null)
             {
-                inputReader.EmoteWheelPressed -= HandleWheelPressed;
-                inputReader.EmoteWheelReleased -= HandleWheelReleased;
-                inputReader.EmotePointerChanged -= HandlePointerChanged;
+                return;
             }
+
+            inputReader.EmoteWheelPressed -= HandleWheelPressed;
+            inputReader.EmoteWheelReleased -= HandleWheelReleased;
+            inputReader.EmotePointerChanged -= HandlePointerChanged;
         }
 
         private void ResolveReferences()
@@ -70,7 +79,7 @@ namespace OnlineActionRpg.Client.Battle
 
             RefreshSlots();
             Show();
-            //��ʾ���
+            //显示光标
             ThirdPersonCameraController.UnlockCursor();
         }
 
@@ -85,16 +94,16 @@ namespace OnlineActionRpg.Client.Battle
 
             if (_selectedIndex >= 0 && _selectedIndex < emotes.Length)
             {
-                //��ʼ����ѡ�еı��鶯��
+                //开始播放选中的表情动作
                 emoteController.TryStartEmote(emotes[_selectedIndex]);
             }
 
-            //���ز���ס���
+            //隐藏并锁住光标
             ThirdPersonCameraController.LockCursor();
             Hide();
         }
 
-        //����ָ��λ�ñ仯������ѡ�еı��鶯����λ
+        //处理指针位置变化，更新选中的表情动作槽位
         private void HandlePointerChanged(Vector2 screenPosition)
         {
             if (!_isOpen || wheelRoot == null)
@@ -102,12 +111,12 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
-            //����Ļ����ת��Ϊ���̸��ڵ�ı�������
+            //将屏幕坐标转换为轮盘根节点的本地坐标
             Camera eventCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
                 ? canvas.worldCamera
                 : null;
 
-            //����Ļ����ת��Ϊ���̸��ڵ�ı������꣬�������ָ��������������ĵķ�������
+            //将屏幕坐标转换为轮盘根节点的本地坐标，计算鼠标指针相对于轮盘中心的方向向量
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     wheelRoot,
                     screenPosition,
@@ -117,8 +126,8 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
-            //����ָ��λ�ü���ѡ�еĲ�λ���������ָ�������������ڣ�
-            //��ʹ��Ĭ��ѡ��������������ݷ����������
+            //根据指针位置计算选中的槽位索引，如果指针在中心死区内，
+            //则使用默认选择索引，否则根据方向计算索引
             if (localPoint.magnitude < centerDeadZone)
             {
                 _selectedIndex = Mathf.Clamp(defaultSelectionIndex, 0, GetSlotCount() - 1);
@@ -131,7 +140,7 @@ namespace OnlineActionRpg.Client.Battle
             RefreshSlots();
         }
 
-        //����ָ�뷽�����ѡ�еĲ�λ����
+        //根据指针方向计算选中的槽位索引
         private int GetIndexFromDirection(Vector2 direction)
         {
             int count = GetSlotCount();
@@ -141,12 +150,12 @@ namespace OnlineActionRpg.Client.Battle
                 return -1;
             }
 
-            //����������ת��Ϊ�Ƕȣ�������Ӷ���˳ʱ����ת�ĽǶ�
+            //将方向向量转换为角度，并计算从顶部顺时针旋转的角度
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             float fromTopClockwise = Mathf.Repeat(90f - angle, 360f);
             float step = 360f / count;
 
-            //���ݽǶȼ���ѡ�еĲ�λ������ʹ����������ķ�ʽ����ȷ����������Ч��Χ��
+            //根据角度计算选中的槽位索引，使用四舍五入的方式，并确保索引在有效范围内
             return Mathf.FloorToInt((fromTopClockwise + step * 0.5f) / step) % count;
         }
 
@@ -157,7 +166,7 @@ namespace OnlineActionRpg.Client.Battle
                 : 0;
         }
 
-        //ˢ�²�λ����ʾ״̬��ѡ��״̬
+        //刷新槽位的显示状态和选中状态
         private void RefreshSlots()
         {
             if (emoteController == null || emoteController.Emotes == null)
@@ -167,17 +176,23 @@ namespace OnlineActionRpg.Client.Battle
 
             EmoteDefinition[] emotes = emoteController.Emotes;
 
-            for (int i = 0; i < slotIcons.Length; i++)
+            // slotIcons 和 slotHighlights 是两个独立数组，Inspector 中长度不一致时会越界。
+            // 这里取两者较大长度，并对每个槽位分别做长度与空值保护。
+            int iconCount = slotIcons != null ? slotIcons.Length : 0;
+            int highlightCount = slotHighlights != null ? slotHighlights.Length : 0;
+            int slotCount = Mathf.Max(iconCount, highlightCount);
+
+            for (int i = 0; i < slotCount; i++)
             {
                 bool hasEmote = i < emotes.Length && emotes[i] != null;
 
-                if (slotIcons[i] != null)
+                if (i < iconCount && slotIcons[i] != null)
                 {
                     slotIcons[i].enabled = hasEmote && emotes[i].Icon != null;
                     slotIcons[i].sprite = hasEmote ? emotes[i].Icon : null;
                 }
 
-                if (slotHighlights[i] != null)
+                if (i < highlightCount && slotHighlights[i] != null)
                 {
                     slotHighlights[i].enabled = _isOpen && i == _selectedIndex;
                 }
@@ -233,6 +248,10 @@ namespace OnlineActionRpg.Client.Battle
             {
                 emoteController = target.GetComponent<LocalEmoteController>();
             }
+
+            // 先退订再订阅：SetTarget 可能在重绑流程中被再次调用，
+            // 直接 += 会让同一组回调挂载多次，导致一次输入触发多轮轮盘刷新。
+            UnsubscribeInput();
 
             if (inputReader != null)
             {

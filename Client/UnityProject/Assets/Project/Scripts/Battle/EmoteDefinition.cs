@@ -1,9 +1,9 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 
 namespace OnlineActionRpg.Client.Battle
 {
-    //±íÇé¶¨ÒåÊı¾İ½á¹¹¡£
+    //è¡¨æƒ…å®šä¹‰æ•°æ®ç»“æ„ã€‚
     [Serializable]
     public sealed class EmoteDefinition
     {

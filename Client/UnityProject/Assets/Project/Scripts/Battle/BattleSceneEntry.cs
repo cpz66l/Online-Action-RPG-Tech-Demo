@@ -1,9 +1,8 @@
-using TMPro;
-using UnityEngine;
+ï»¿using UnityEngine;
 
 namespace OnlineActionRpg.Client.Battle
 {
-    // BattleSceneEntry ÊÇÑµÁ·³¡¾°µÄ×îĞ¡Èë¿Ú±ê¼Ç¡£
+    // BattleSceneEntry æ˜¯è®­ç»ƒåœºæ™¯çš„æœ€å°å…¥å£æ ‡è®°ã€‚
     public sealed class BattleSceneEntry : MonoBehaviour
     {
 

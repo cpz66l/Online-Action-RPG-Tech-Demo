@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace OnlineActionRpg.Client.Resource
 {
-    // AddressablesResourceService Ö»¸ºÔğ×ÊÔ´ÏµÍ³ÄÜÁ¦¡£
+    // AddressablesResourceService åªè´Ÿè´£èµ„æºç³»ç»Ÿèƒ½åŠ›ã€‚
     public sealed class AddressablesResourceService : MonoBehaviour
     {
         public event Action<ResourceProgressInfo> ProgressChanged;
@@ -47,10 +47,10 @@ namespace OnlineActionRpg.Client.Resource
 
             RaiseProgress("AddressablesInitializing", 0f, "Initializing Addressables...");
 
-            //Îª false Ê±£¬·µ»ØµÄ AsyncOperationHandle ĞèÒªÊÖ¶¯ÊÍ·Å£¬ÒÔ±ãÔÚ³õÊ¼»¯¹ı³ÌÖĞ¼à¿Ø½ø¶È£»
-            //ÈôÎª true£¬Ôò²Ù×÷Íê³Éºó×Ô¶¯ÊÍ·Å£¬µ«ÎŞ·¨»ñÈ¡ÖĞ¼ä½ø¶È¡£
+            //ä¸º false æ—¶ï¼Œè¿”å›çš„ AsyncOperationHandle éœ€è¦æ‰‹åŠ¨é‡Šæ”¾ï¼Œä»¥ä¾¿åœ¨åˆå§‹åŒ–è¿‡ç¨‹ä¸­ç›‘æ§è¿›åº¦ï¼›
+            //è‹¥ä¸º trueï¼Œåˆ™æ“ä½œå®Œæˆåè‡ªåŠ¨é‡Šæ”¾ï¼Œä½†æ— æ³•è·å–ä¸­é—´è¿›åº¦ã€‚
             AsyncOperationHandle<IResourceLocator> handle = Addressables.InitializeAsync(false);
-            //¼ÓÔØ Addressables µÄÅäÖÃºÍ×ÊÔ´¶¨Î»±í£¨IResourceLocator£©
+            //åŠ è½½ Addressables çš„é…ç½®å’Œèµ„æºå®šä½è¡¨ï¼ˆIResourceLocatorï¼‰
             try
             {
                 while (!handle.IsDone)
@@ -60,7 +60,7 @@ namespace OnlineActionRpg.Client.Resource
                         handle.PercentComplete,
                         "Initializing Addressables...");
 
-                    //µÈ´ıÏÂÒ»Ö¡£¬±ÜÃâ×èÈûÖ÷Ïß³Ì¡£
+                    //ç­‰å¾…ä¸‹ä¸€å¸§ï¼Œé¿å…é˜»å¡ä¸»çº¿ç¨‹ã€‚
                     await Task.Yield();
                 }
 
@@ -90,7 +90,7 @@ namespace OnlineActionRpg.Client.Resource
 
                 if (handle.IsValid())
                 {
-                    //ÊÍ·ÅÓë AsyncOperationHandle ¹ØÁªµÄ×ÊÔ´£¨°üÀ¨ÄÚ²¿Ê¹ÓÃµÄÒıÓÃ¼ÆÊı£©£¬·ÀÖ¹ÄÚ´æĞ¹Â©¡£
+                    //é‡Šæ”¾ä¸ AsyncOperationHandle å…³è”çš„èµ„æºï¼ˆåŒ…æ‹¬å†…éƒ¨ä½¿ç”¨çš„å¼•ç”¨è®¡æ•°ï¼‰ï¼Œé˜²æ­¢å†…å­˜æ³„æ¼ã€‚
                     Addressables.Release(handle);
                 }
 
@@ -101,7 +101,7 @@ namespace OnlineActionRpg.Client.Resource
             }
         }
 
-        // ¼ÓÔØÕ½¶·³¡¾°µÄÒì²½·½·¨£¬·µ»ØÒ»¸ö Task<bool>£¬±íÊ¾¼ÓÔØÊÇ·ñ³É¹¦¡£
+        // åŠ è½½æˆ˜æ–—åœºæ™¯çš„å¼‚æ­¥æ–¹æ³•ï¼Œè¿”å›ä¸€ä¸ª Task<bool>ï¼Œè¡¨ç¤ºåŠ è½½æ˜¯å¦æˆåŠŸã€‚
         public async Task<bool> LoadBattleSceneAsync(string sceneKey, LoadSceneMode loadMode = LoadSceneMode.Additive)
         {
             sceneKey = sceneKey != null ? sceneKey.Trim() : string.Empty;
@@ -167,7 +167,7 @@ namespace OnlineActionRpg.Client.Resource
                 if (loadedScene.IsValid())
                 { 
                     SceneManager.SetActiveScene(loadedScene);
-                    //ÈÃUnityºóĞø´´½¨¶ÔÏóÊ±Ä¬ÈÏ¹éÊôµ½BattleArena_Training
+                    //è®©Unityåç»­åˆ›å»ºå¯¹è±¡æ—¶é»˜è®¤å½’å±åˆ°BattleArena_Training
                 }
 
                 RaiseProgress("BattleSceneLoaded", 1f, $"Battle scene loaded: {sceneKey}");

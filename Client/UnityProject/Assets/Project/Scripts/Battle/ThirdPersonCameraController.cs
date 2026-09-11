@@ -1,10 +1,10 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace OnlineActionRpg.Client.Battle
 {
-    // 04C-0 µÚÈıÈË³ÆÏà»ú£º´Ó PlayerInputReader ¶ÁÈ¡ Look ÊäÈë¡£
-    // µ±Ç°Ö»¸ºÔğ±¾µØ¾µÍ·±íÏÖ£¬²»´¦ÀíËø¶¨Ä¿±êºÍÍøÂçÍ¬²½¡£
+    // 04C-0 ç¬¬ä¸‰äººç§°ç›¸æœºï¼šä» PlayerInputReader è¯»å– Look è¾“å…¥ã€‚
+    // å½“å‰åªè´Ÿè´£æœ¬åœ°é•œå¤´è¡¨ç°ï¼Œä¸å¤„ç†é”å®šç›®æ ‡å’Œç½‘ç»œåŒæ­¥ã€‚
     public sealed class ThirdPersonCameraController : MonoBehaviour
     {
         [Header("Target")]

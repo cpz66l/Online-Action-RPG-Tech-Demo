@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 
 namespace OnlineActionRpg.Client.Battle
@@ -74,7 +74,7 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
-            //Èç¹ûµ±Ç°±íÇé¶¯×÷²»ÊÇÑ­»·µÄ£¬²¢ÇÒÓÐ³ÖÐøÊ±¼ä£¬Ôò¸üÐÂ¼ÆÊ±Æ÷¡£
+            //å¦‚æžœå½“å‰è¡¨æƒ…åŠ¨ä½œä¸æ˜¯å¾ªçŽ¯çš„ï¼Œå¹¶ä¸”æœ‰æŒç»­æ—¶é—´ï¼Œåˆ™æ›´æ–°è®¡æ—¶å™¨ã€‚
             if (!_currentEmote.Loop && _currentEmote.Duration > 0f)
             {
                 _emoteTimer -= Time.deltaTime;
@@ -93,7 +93,7 @@ namespace OnlineActionRpg.Client.Battle
                 return true;
             }
 
-            //¼ì²éÍæ¼ÒÊÇ·ñÔÚµØÃæÉÏ£¬²¢ÇÒÃ»ÓÐ½øÐÐ¹¥»÷»òÉÁ±Ü¶¯×÷¡£
+            //æ£€æŸ¥çŽ©å®¶æ˜¯å¦åœ¨åœ°é¢ä¸Šï¼Œå¹¶ä¸”æ²¡æœ‰è¿›è¡Œæ”»å‡»æˆ–é—ªé¿åŠ¨ä½œã€‚
             return playerController.IsGrounded
                 && !playerController.IsAttacking
                 && !playerController.IsDodging;
@@ -117,7 +117,7 @@ namespace OnlineActionRpg.Client.Battle
             return true;
         }
 
-        //È¡Ïûµ±Ç°µÄ±íÇé¶¯×÷£¬ÓÃÓÚÔÚÒÆ¶¯»òÆäËûÌõ¼þÏÂÖÐ¶Ï±íÇé¶¯×÷¡£
+        //å–æ¶ˆå½“å‰çš„è¡¨æƒ…åŠ¨ä½œï¼Œç”¨äºŽåœ¨ç§»åŠ¨æˆ–å…¶ä»–æ¡ä»¶ä¸‹ä¸­æ–­è¡¨æƒ…åŠ¨ä½œã€‚
         public void CancelEmote()
         {
             if (_currentEmote == null)
@@ -151,7 +151,7 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
-            //Èç¹ûÒÆ¶¯´óÓÚÈ¡Ïû±íÇéµÄãÐÖµ£¬ÔòÈ¡Ïûµ±Ç°µÄ±íÇé¶¯×÷¡£
+            //å¦‚æžœç§»åŠ¨å¤§äºŽå–æ¶ˆè¡¨æƒ…çš„é˜ˆå€¼ï¼Œåˆ™å–æ¶ˆå½“å‰çš„è¡¨æƒ…åŠ¨ä½œã€‚
             if (move.sqrMagnitude >= moveCancelThreshold * moveCancelThreshold)
             {
                 CancelEmote();

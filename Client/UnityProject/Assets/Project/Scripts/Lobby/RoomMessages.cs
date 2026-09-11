@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using OnlineActionRpg.Client.Network;
 
 namespace OnlineActionRpg.Client.Lobby

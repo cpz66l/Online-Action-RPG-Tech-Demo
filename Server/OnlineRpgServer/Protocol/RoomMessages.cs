@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿﻿using System.Text.Json.Serialization;
 using OnlineRpgServer.Room;
 
 namespace OnlineRpgServer.Protocol;

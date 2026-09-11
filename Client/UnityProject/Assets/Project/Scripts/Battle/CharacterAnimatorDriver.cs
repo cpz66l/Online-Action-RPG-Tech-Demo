@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace OnlineActionRpg.Client.Battle
 {
@@ -8,7 +8,6 @@ namespace OnlineActionRpg.Client.Battle
         [Header("References")]
         [SerializeField] private LocalPlayerController playerController;
         [SerializeField] private Animator animator;
-        [SerializeField] private PlayerInputReader inputReader;
         [SerializeField] private LocalEmoteController emoteController;
 
         [Header("Animator Parameters")]
@@ -113,11 +112,6 @@ namespace OnlineActionRpg.Client.Battle
             if (animator == null)
             {
                 animator = GetComponentInChildren<Animator>();
-            }
-
-            if (inputReader == null)
-            {
-                inputReader = GetComponentInParent<PlayerInputReader>();
             }
 
             if (emoteController == null)

@@ -1,11 +1,11 @@
-using System.Text;
+ï»¿using System.Text;
 using OnlineActionRpg.Client.Account;
 using OnlineActionRpg.Client.Loading;
 using UnityEngine;
 
 namespace OnlineActionRpg.Client.Battle
 {
-    // BattleBootstrap ÊÇÕ½¶·³¡¾°µÄÆô¶¯Èë¿Ú¡£
+    // BattleBootstrap æ˜¯æˆ˜æ–—åœºæ™¯çš„å¯åŠ¨å…¥å£ã€‚
     public sealed class BattleBootstrap : MonoBehaviour
     {
         [Header("Runtime References")]
@@ -16,8 +16,8 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private PlayerSpawnPoint[] spawnPoints;
         [SerializeField] private bool collectSpawnPointsOnStart = true;
 
-        //±à¼­Æ÷µ¥³¡¾°²âÊÔ¶µµ×£¬ÔÚÃ»ÓĞ×ßÈ«Á÷³Ì¼ÓÔØÈÎÎñµÄÇé¿öÏÂ£¬
-        //ÔÊĞíÊ¹ÓÃµ÷ÊÔĞÅÏ¢´´½¨BattleContext£¬¶ø²»Ó°ÏìºóĞøµÄÕıÊ½Á÷³Ì¡£
+        //ç¼–è¾‘å™¨å•åœºæ™¯æµ‹è¯•å…œåº•ï¼Œåœ¨æ²¡æœ‰èµ°å…¨æµç¨‹åŠ è½½ä»»åŠ¡çš„æƒ…å†µä¸‹ï¼Œ
+        //å…è®¸ä½¿ç”¨è°ƒè¯•ä¿¡æ¯åˆ›å»ºBattleContextï¼Œè€Œä¸å½±å“åç»­çš„æ­£å¼æµç¨‹ã€‚
         [Header("Editor Fallback")]
         [SerializeField] private bool allowEditorFallbackContext = true;
         [SerializeField] private string debugBattleId = "debug_battle_001";
@@ -46,8 +46,8 @@ namespace OnlineActionRpg.Client.Battle
         {
             ResolveRuntimeReferences();
 
-            // Èç¹ûspawnPointsÎ´ÔÚInspectorÖĞÉèÖÃ£¬
-            // »òÕßcollectSpawnPointsOnStartÎªtrue£¬Ôò×Ô¶¯ÊÕ¼¯³¡¾°ÖĞµÄPlayerSpawnPoint¡£
+            // å¦‚æœspawnPointsæœªåœ¨Inspectorä¸­è®¾ç½®ï¼Œ
+            // æˆ–è€…collectSpawnPointsOnStartä¸ºtrueï¼Œåˆ™è‡ªåŠ¨æ”¶é›†åœºæ™¯ä¸­çš„PlayerSpawnPointã€‚
             if (collectSpawnPointsOnStart || spawnPoints == null || spawnPoints.Length == 0)
             {
                 spawnPoints = FindObjectsByType<PlayerSpawnPoint>(
@@ -90,7 +90,7 @@ namespace OnlineActionRpg.Client.Battle
         {
             string sceneName = gameObject.scene.name;
 
-            // Èç¹ûÓĞÓĞĞ§µÄ¼ÓÔØÈÎÎñ£¬ÔòÊ¹ÓÃ¼ÓÔØÈÎÎñÖĞµÄĞÅÏ¢´´½¨BattleContext¡£
+            // å¦‚æœæœ‰æœ‰æ•ˆçš„åŠ è½½ä»»åŠ¡ï¼Œåˆ™ä½¿ç”¨åŠ è½½ä»»åŠ¡ä¸­çš„ä¿¡æ¯åˆ›å»ºBattleContextã€‚
             if (loadingClient != null && loadingClient.CurrentTask.IsValid)
             {
                 LoadBattleSceneTaskInfo task = loadingClient.CurrentTask;
@@ -107,7 +107,7 @@ namespace OnlineActionRpg.Client.Battle
                     false);
             }
 
-            //Èç¹ûÃ»ÓĞÓĞĞ§µÄ¼ÓÔØÈÎÎñ£¬µ«ÔÊĞí±à¼­Æ÷»ØÍË£¬ÔòÊ¹ÓÃµ÷ÊÔĞÅÏ¢´´½¨BattleContext¡£
+            //å¦‚æœæ²¡æœ‰æœ‰æ•ˆçš„åŠ è½½ä»»åŠ¡ï¼Œä½†å…è®¸ç¼–è¾‘å™¨å›é€€ï¼Œåˆ™ä½¿ç”¨è°ƒè¯•ä¿¡æ¯åˆ›å»ºBattleContextã€‚
             if (allowEditorFallbackContext)
             {
                 return new BattleContext(
@@ -119,7 +119,7 @@ namespace OnlineActionRpg.Client.Battle
                     true);
             }
 
-            // Èç¹ûÃ»ÓĞÓĞĞ§µÄ¼ÓÔØÈÎÎñ£¬Ò²²»ÔÊĞí±à¼­Æ÷»ØÍË£¬Ôò´´½¨Ò»¸öÎŞĞ§µÄBattleContext¡£
+            // å¦‚æœæ²¡æœ‰æœ‰æ•ˆçš„åŠ è½½ä»»åŠ¡ï¼Œä¹Ÿä¸å…è®¸ç¼–è¾‘å™¨å›é€€ï¼Œåˆ™åˆ›å»ºä¸€ä¸ªæ— æ•ˆçš„BattleContextã€‚
             return new BattleContext(
                 string.Empty,
                 string.Empty,
@@ -129,7 +129,7 @@ namespace OnlineActionRpg.Client.Battle
                 false);
         }
 
-        // Éú³ÉspawnPointsµÄÕªÒªĞÅÏ¢£¬ÓÃÓÚµ÷ÊÔºÍÈÕÖ¾Êä³ö¡£
+        // ç”ŸæˆspawnPointsçš„æ‘˜è¦ä¿¡æ¯ï¼Œç”¨äºè°ƒè¯•å’Œæ—¥å¿—è¾“å‡ºã€‚
         private string BuildSpawnPointSummary()
         {
             if (spawnPoints == null || spawnPoints.Length == 0)
@@ -159,10 +159,10 @@ namespace OnlineActionRpg.Client.Battle
             return builder.ToString();
         }
 
-        // ÔÚBattleBootstrapÖĞÉú³É±¾µØÍæ¼ÒÊµÀı¡£
+        // åœ¨BattleBootstrapä¸­ç”Ÿæˆæœ¬åœ°ç©å®¶å®ä¾‹ã€‚
         private void SpawnLocalPlayer()
         {
-            // Èç¹ûLocalPlayerInstanceÒÑ¾­´æÔÚ£¬Ôò²»ÔÙÉú³ÉĞÂµÄÊµÀı¡£
+            // å¦‚æœLocalPlayerInstanceå·²ç»å­˜åœ¨ï¼Œåˆ™ä¸å†ç”Ÿæˆæ–°çš„å®ä¾‹ã€‚
             if (LocalPlayerInstance != null)
             {
                 return;

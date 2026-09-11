@@ -1,4 +1,4 @@
-using System.Text;
+ï»¿using System.Text;
 using OnlineActionRpg.Client.Loading;
 using OnlineActionRpg.Client.Resource;
 using TMPro;
@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace OnlineActionRpg.Client.UI
 {
-    // LoadingPanel Ö»¸ºÔðÏÔÊ¾ Loading ½×¶ÎÐÅÏ¢¡£
+    // LoadingPanel åªè´Ÿè´£æ˜¾ç¤º Loading é˜¶æ®µä¿¡æ¯ã€‚
     public sealed class LoadingPanel : MonoBehaviour
     {
         [Header("Client")]
@@ -35,7 +35,7 @@ namespace OnlineActionRpg.Client.UI
         private string _lastReportedStage = string.Empty;
         private bool _hasSentBattleReady;
 
-        //Ã¿10%½ø¶È¹ã²¥Ò»´Î.
+        //æ¯10%è¿›åº¦å¹¿æ’­ä¸€æ¬¡.
         private const float ProgressReportStep = 0.1f;
 
         private void Awake()
@@ -117,7 +117,7 @@ namespace OnlineActionRpg.Client.UI
             SetText(statusText, "Initializing Addressables...");
             SetText(progressText, "Progress: 0%");
 
-            //¿ªÆô Addressables ³õÊ¼»¯
+            //å¼€å¯ Addressables åˆå§‹åŒ–
             bool initialized = await resourceService.InitializeAsync();
 
             _isInitializingResources = false;
@@ -168,10 +168,10 @@ namespace OnlineActionRpg.Client.UI
             SetText(statusText, $"Battle start received. ServerStartTime: {info.ServerStartTime}");
             SetText(progressText, "Progress: all players ready.");
 
-            // ÏÂÒ»½×¶ÎÔÙÔÚÕâÀï½Ó SceneManager / Addressables scene loading¡£
+            // ä¸‹ä¸€é˜¶æ®µå†åœ¨è¿™é‡ŒæŽ¥ SceneManager / Addressables scene loadingã€‚
         }
 
-        // ´¦Àí×ÊÔ´¼ÓÔØ½ø¶È±ä»¯ÊÂ¼þ£¬UI¸üÐÂÏÔÊ¾¼ÓÔØ½ø¶È¡£Ã¿Ö¡ÂÖÑ¯£¬È·±£UIÏÔÊ¾×îÐÂµÄ¼ÓÔØ½ø¶È¡£
+        // å¤„ç†èµ„æºåŠ è½½è¿›åº¦å˜åŒ–äº‹ä»¶ï¼ŒUIæ›´æ–°æ˜¾ç¤ºåŠ è½½è¿›åº¦ã€‚æ¯å¸§è½®è¯¢ï¼Œç¡®ä¿UIæ˜¾ç¤ºæœ€æ–°çš„åŠ è½½è¿›åº¦ã€‚
         private void HandleResourceProgressChanged(ResourceProgressInfo progress)
         {
             if (progressSlider != null)
@@ -181,7 +181,7 @@ namespace OnlineActionRpg.Client.UI
 
             SetText(progressText, $"Progress: {progress.Progress:P0}");
             SetText(statusText, $"{progress.Stage}: {progress.Message}");
-            //Ã¿Ö¡ÂÖÑ¯£¬Ö»ÓÐÏà±ÈÉÏ´Î¹ã²¥½ø¶È±ä»¯10%½ø¶ÈÔÙ¹ã²¥¡£
+            //æ¯å¸§è½®è¯¢ï¼Œåªæœ‰ç›¸æ¯”ä¸Šæ¬¡å¹¿æ’­è¿›åº¦å˜åŒ–10%è¿›åº¦å†å¹¿æ’­ã€‚
             TryReportLoadProgress(progress);
         }
 
@@ -201,7 +201,7 @@ namespace OnlineActionRpg.Client.UI
             bool completedFirstTime = currentProgress >= 0.999f &&
                                       _lastReportedProgress < 0.999f;
 
-            //µ±½×¶Î·¢Éú±ä»¯£¬»òÕß½ø¶È´ïµ½10%²½³¤£¬»òÕßµÚÒ»´ÎÍê³ÉÊ±£¬²Å¹ã²¥½ø¶È¡£
+            //å½“é˜¶æ®µå‘ç”Ÿå˜åŒ–ï¼Œæˆ–è€…è¿›åº¦è¾¾åˆ°10%æ­¥é•¿ï¼Œæˆ–è€…ç¬¬ä¸€æ¬¡å®Œæˆæ—¶ï¼Œæ‰å¹¿æ’­è¿›åº¦ã€‚
             if (!stageChanged && !reachedStep && !completedFirstTime)
             {
                 return;
@@ -210,7 +210,7 @@ namespace OnlineActionRpg.Client.UI
             _lastReportedStage = currentStage;
             _lastReportedProgress = currentProgress;
 
-            //¹ã²¥¼ÓÔØ½ø¶È¸ø·þÎñÆ÷
+            //å¹¿æ’­åŠ è½½è¿›åº¦ç»™æœåŠ¡å™¨
             _ = loadingClient.SendLoadProgressAsync(
                 _currentTask.BattleId,
                 _currentTask.RoomId,

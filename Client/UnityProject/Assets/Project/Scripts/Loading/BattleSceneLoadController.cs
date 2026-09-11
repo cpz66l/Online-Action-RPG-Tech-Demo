@@ -1,11 +1,11 @@
-using OnlineActionRpg.Client.Resource;
+ï»¿using OnlineActionRpg.Client.Resource;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace OnlineActionRpg.Client.Loading
 {
-    // BattleSceneLoadController ¸ºÔğ°Ñ BattleStartNtf ×ª³ÉÊµ¼Ê³¡¾°¼ÓÔØ¶¯×÷¡£
-    // ËüÊÇÁ÷³Ì¿ØÖÆ²ã£¬²»¸ºÔğ UI ÏÔÊ¾£¬Ò²²»¸ºÔğ½ÇÉ«Éú³ÉºÍÕ½¶·Âß¼­¡£
+    // BattleSceneLoadController è´Ÿè´£æŠŠ BattleStartNtf è½¬æˆå®é™…åœºæ™¯åŠ è½½åŠ¨ä½œã€‚
+    // å®ƒæ˜¯æµç¨‹æ§åˆ¶å±‚ï¼Œä¸è´Ÿè´£ UI æ˜¾ç¤ºï¼Œä¹Ÿä¸è´Ÿè´£è§’è‰²ç”Ÿæˆå’Œæˆ˜æ–—é€»è¾‘ã€‚
     public sealed class BattleSceneLoadController : MonoBehaviour
     {
         [SerializeField] private LoadingClient loadingClient;
@@ -89,7 +89,7 @@ namespace OnlineActionRpg.Client.Loading
 
             Debug.Log($"Loading battle scene from BattleStartNtf. SceneKey={currentTask.SceneKey}");
 
-            //¿ªÊ¼¼ÓÔØÕ½¶·³¡¾°
+            //å¼€å§‹åŠ è½½æˆ˜æ–—åœºæ™¯
             bool loaded = await resourceService.LoadBattleSceneAsync(
                 currentTask.SceneKey,
                 loadSceneMode);

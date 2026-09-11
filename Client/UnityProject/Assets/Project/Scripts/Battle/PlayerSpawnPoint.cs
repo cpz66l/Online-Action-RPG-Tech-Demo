@@ -1,8 +1,8 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 namespace OnlineActionRpg.Client.Battle
 {
-    // PlayerSpawnPoint ÊÇÑµÁ·³¡ÖĞµÄ³öÉúµã±ê¼Ç¡£
+    // PlayerSpawnPoint æ˜¯è®­ç»ƒåœºä¸­çš„å‡ºç”Ÿç‚¹æ ‡è®°ã€‚
     public sealed class PlayerSpawnPoint : MonoBehaviour
     {
         [SerializeField] private string spawnId = "spawn_local_01";
@@ -17,7 +17,7 @@ namespace OnlineActionRpg.Client.Battle
         public Vector3 Position => transform.position;
         public Quaternion Rotation => transform.rotation;
 
-        //ÔÚ±à¼­Æ÷ÖĞĞŞ¸ÄspawnIdÎª¿ÕÊ±£¬×Ô¶¯Ê¹ÓÃgameObject.name×÷ÎªspawnId
+        //åœ¨ç¼–è¾‘å™¨ä¸­ä¿®æ”¹spawnIdä¸ºç©ºæ—¶ï¼Œè‡ªåŠ¨ä½¿ç”¨gameObject.nameä½œä¸ºspawnId
         private void OnValidate()
         {
             if (string.IsNullOrWhiteSpace(spawnId))
@@ -26,7 +26,7 @@ namespace OnlineActionRpg.Client.Battle
             }
         }
 
-        //ÓÃÓÚÔÚsceneÊÓÍ¼µÄÉúµãÔÚ±à¼­Æ÷ÖĞÏÔÊ¾Gizmos£¬·½±ãÅĞ¶ÏÉúµãÎ»ÖÃºÍ³¯Ïò
+        //ç”¨äºåœ¨sceneè§†å›¾çš„ç”Ÿç‚¹åœ¨ç¼–è¾‘å™¨ä¸­æ˜¾ç¤ºGizmosï¼Œæ–¹ä¾¿åˆ¤æ–­ç”Ÿç‚¹ä½ç½®å’Œæœå‘
         private void OnDrawGizmos()
         {
             Gizmos.color = gizmoColor;

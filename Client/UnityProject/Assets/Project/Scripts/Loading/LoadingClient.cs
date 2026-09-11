@@ -1,4 +1,4 @@
-using OnlineActionRpg.Client.Account;
+ï»¿using OnlineActionRpg.Client.Account;
 using OnlineActionRpg.Client.Lobby;
 using OnlineActionRpg.Client.Network;
 using System;
@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace OnlineActionRpg.Client.Loading
 {
-    // LoadingClient Ö»¸ºÔğ Loading ½×¶ÎĞ­Òé¡£
+    // LoadingClient åªè´Ÿè´£ Loading é˜¶æ®µåè®®ã€‚
     public sealed class LoadingClient : MonoBehaviour
     {
         [SerializeField] private NetworkClient networkClient;
@@ -52,7 +52,7 @@ namespace OnlineActionRpg.Client.Loading
             }
         }
 
-        // ´¦Àí½ÓÊÕµ½µÄÎÄ±¾ÏûÏ¢£¬¸ù¾İÏûÏ¢ÀàĞÍ·Ö·¢µ½²»Í¬µÄ´¦Àí·½·¨¡£
+        // å¤„ç†æ¥æ”¶åˆ°çš„æ–‡æœ¬æ¶ˆæ¯ï¼Œæ ¹æ®æ¶ˆæ¯ç±»å‹åˆ†å‘åˆ°ä¸åŒçš„å¤„ç†æ–¹æ³•ã€‚
         private void HandleTextMessageReceived(string json)
         {
             ProtocolEnvelope envelope = JsonUtility.FromJson<ProtocolEnvelope>(json);
@@ -82,7 +82,7 @@ namespace OnlineActionRpg.Client.Loading
             }
         }
 
-        //´¦Àí LoadBattleSceneNtf ÏûÏ¢£¬½âÎö¸ºÔØ²¢´¥·¢ LoadBattleSceneReceived ÊÂ¼ş¡£
+        //å¤„ç† LoadBattleSceneNtf æ¶ˆæ¯ï¼Œè§£æè´Ÿè½½å¹¶è§¦å‘ LoadBattleSceneReceived äº‹ä»¶ã€‚
         private void HandleLoadBattleSceneNotification(string json)
         {
             LoadBattleSceneNotificationEnvelope notification =
@@ -112,7 +112,7 @@ namespace OnlineActionRpg.Client.Loading
             });
         }
 
-        //´¦Àí ClientBattleReadyRes ÏûÏ¢£¬½âÎö¸ºÔØ²¢´¥·¢ BattleReadyCompleted ÊÂ¼ş¡£
+        //å¤„ç† ClientBattleReadyRes æ¶ˆæ¯ï¼Œè§£æè´Ÿè½½å¹¶è§¦å‘ BattleReadyCompleted äº‹ä»¶ã€‚
         private void HandleClientBattleReadyResponse(string json)
         {
             ClientBattleReadyResponseEnvelope response =
@@ -131,7 +131,7 @@ namespace OnlineActionRpg.Client.Loading
                 response.payload.room));
         }
 
-        //´¦Àí BattleStartNtf ÏûÏ¢£¬½âÎö¸ºÔØ²¢´¥·¢ BattleStartReceived ÊÂ¼ş¡£
+        //å¤„ç† BattleStartNtf æ¶ˆæ¯ï¼Œè§£æè´Ÿè½½å¹¶è§¦å‘ BattleStartReceived äº‹ä»¶ã€‚
         private void HandleBattleStartNotification(string json)
         {
             BattleStartNotificationEnvelope notification =
@@ -160,7 +160,7 @@ namespace OnlineActionRpg.Client.Loading
             });
         }
 
-        //´¦Àí ErrorRes ÏûÏ¢£¬Èç¹ûÇëÇóIDÆ¥Åä£¬Ôò´¥·¢ BattleReadyCompleted ÊÂ¼ş£¬±íÊ¾ÇëÇóÊ§°Ü¡£
+        //å¤„ç† ErrorRes æ¶ˆæ¯ï¼Œå¦‚æœè¯·æ±‚IDåŒ¹é…ï¼Œåˆ™è§¦å‘ BattleReadyCompleted äº‹ä»¶ï¼Œè¡¨ç¤ºè¯·æ±‚å¤±è´¥ã€‚
         private void HandleErrorResponse(ProtocolEnvelope response)
         {
             if (response.requestId == _pendingBattleReadyRequestId)
@@ -170,7 +170,7 @@ namespace OnlineActionRpg.Client.Loading
             }
         }
 
-        //½«¿Í»§¶Ë¼ÓÔØ½ø¶È·¢ËÍ¸ø·şÎñÆ÷£¬°üº¬Õ½¶·ID¡¢·¿¼äID¡¢¼ÓÔØ½ø¶È¡¢½×¶ÎºÍÏûÏ¢¡£
+        //å°†å®¢æˆ·ç«¯åŠ è½½è¿›åº¦å‘é€ç»™æœåŠ¡å™¨ï¼ŒåŒ…å«æˆ˜æ–—IDã€æˆ¿é—´IDã€åŠ è½½è¿›åº¦ã€é˜¶æ®µå’Œæ¶ˆæ¯ã€‚
         public async Task SendLoadProgressAsync(string battleId,
             string roomId,
             float progress,
@@ -217,7 +217,7 @@ namespace OnlineActionRpg.Client.Loading
             await networkClient.SendJsonAsync(json);
         }
 
-        //·¢ËÍ¿Í»§¶Ë×¼±¸¾ÍĞ÷ÏûÏ¢¸ø·şÎñÆ÷£¬°üº¬Õ½¶·IDºÍ·¿¼äID£¬²¢´¦ÀíÏìÓ¦¡£
+        //å‘é€å®¢æˆ·ç«¯å‡†å¤‡å°±ç»ªæ¶ˆæ¯ç»™æœåŠ¡å™¨ï¼ŒåŒ…å«æˆ˜æ–—IDå’Œæˆ¿é—´IDï¼Œå¹¶å¤„ç†å“åº”ã€‚
         public async Task SendBattleReadyAsync(string battleId, string roomId)
         {
             if (!EnsureReady(out int code, out string message))
@@ -283,7 +283,7 @@ namespace OnlineActionRpg.Client.Loading
             return true;
         }
 
-        //½«ClientBattleReadyResultÅ×µ½Ö÷Ïß³ÌÉÏ¡£
+        //å°†ClientBattleReadyResultæŠ›åˆ°ä¸»çº¿ç¨‹ä¸Šã€‚
         private void RaiseBattleReadyCompleted(ClientBattleReadyResult result)
         {
             RaiseOnMainThread(() => BattleReadyCompleted?.Invoke(result));
@@ -307,7 +307,7 @@ namespace OnlineActionRpg.Client.Loading
     }
 
 
-    // LoadBattleSceneTaskInfo ½á¹¹ÌåÓÃÓÚ·â×°¼ÓÔØÕ½¶·³¡¾°ÈÎÎñµÄĞÅÏ¢¡£
+    // LoadBattleSceneTaskInfo ç»“æ„ä½“ç”¨äºå°è£…åŠ è½½æˆ˜æ–—åœºæ™¯ä»»åŠ¡çš„ä¿¡æ¯ã€‚
     public readonly struct LoadBattleSceneTaskInfo
     {
         public readonly string BattleId;
@@ -322,7 +322,7 @@ namespace OnlineActionRpg.Client.Loading
 
         public int RequiredAssetCount => RequiredAssets != null ? RequiredAssets.Length : 0;
 
-        //¹¹Ôìº¯ÊıË½ÓĞ»¯£¬È·±£Ö»ÄÜÍ¨¹ı FromPayload ·½·¨´´½¨ÊµÀı¡£
+        //æ„é€ å‡½æ•°ç§æœ‰åŒ–ï¼Œç¡®ä¿åªèƒ½é€šè¿‡ FromPayload æ–¹æ³•åˆ›å»ºå®ä¾‹ã€‚
         private LoadBattleSceneTaskInfo(
             string battleId,
             string roomId,
@@ -335,7 +335,7 @@ namespace OnlineActionRpg.Client.Loading
             RequiredAssets = requiredAssets ?? Array.Empty<string>();
         }
 
-        // ´Ó LoadBattleSceneNotificationPayload ´´½¨ LoadBattleSceneTaskInfo ÊµÀı¡£
+        // ä» LoadBattleSceneNotificationPayload åˆ›å»º LoadBattleSceneTaskInfo å®ä¾‹ã€‚
         public static LoadBattleSceneTaskInfo FromPayload(LoadBattleSceneNotificationPayload payload)
         {
             if (payload == null)
@@ -351,7 +351,7 @@ namespace OnlineActionRpg.Client.Loading
         }
     }
 
-    //ÓÃÓÚ·â×°¿Í»§¶Ë×¼±¸¾ÍĞ÷ÇëÇóµÄ½á¹ûĞÅÏ¢¡£
+    //ç”¨äºå°è£…å®¢æˆ·ç«¯å‡†å¤‡å°±ç»ªè¯·æ±‚çš„ç»“æœä¿¡æ¯ã€‚
     public readonly struct ClientBattleReadyResult
     {
         public readonly bool Success;
@@ -380,7 +380,7 @@ namespace OnlineActionRpg.Client.Loading
         }
     }
 
-    //ÓÃÓÚÊÕµ½·şÎñÆ÷µÄÕ½¶·¿ªÊ¼¹ã²¥Ê±£¬·â×°Õ½¶·¿ªÊ¼ĞÅÏ¢µÄ½á¹¹Ìå¡£
+    //ç”¨äºæ”¶åˆ°æœåŠ¡å™¨çš„æˆ˜æ–—å¼€å§‹å¹¿æ’­æ—¶ï¼Œå°è£…æˆ˜æ–—å¼€å§‹ä¿¡æ¯çš„ç»“æ„ä½“ã€‚
     public readonly struct BattleStartInfo
     {
         public readonly string BattleId;

@@ -1,4 +1,4 @@
-﻿namespace OnlineRpgServer.Account;
+﻿﻿namespace OnlineRpgServer.Account;
 
 // 服务端内存中的账号记录。服务端重启前一直存在内存里。
 // MVP 阶段先明文保存密码，只用于本地 Demo 验证；正式项目应使用加密哈希和持久化存储。

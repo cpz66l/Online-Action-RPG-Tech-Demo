@@ -1,4 +1,4 @@
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using OnlineRpgServer.Account;
@@ -93,13 +93,28 @@ static async Task HandleConnectionAsync(
 
     while (socket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
     {
-        // 统一接收完整的一条 Text Message。返回 null 表示客户端主动断开。
-        var result = await ReceiveTextAsync(socket, buffer, cancellationToken);//将客户端发来的数据进行处理
+        // 统一接收完整的一条 Text Message。
+        ReceiveResult receive = await ReceiveTextAsync(socket, buffer, cancellationToken);//将客户端发来的数据进行处理
 
-        if (result is null)
+        if (receive.Kind == ReceiveKind.Closed)
         {
             break;
         }
+
+        // 非文本帧的协议错误在这里直接回复，不进入业务分发，也不断开连接。
+        // 之前把错误响应字符串当成“收到的消息”返回，外层会再走一次 BuildResponse，
+        // 最终给客户端回一个看不懂的 "Unsupported message type: ErrorRes"。
+        if (receive.Kind == ReceiveKind.UnsupportedFrame)
+        {
+            var unsupportedFrameError = JsonSerializer.Serialize(
+                CreateErrorResponse(null, 1001, "Only text JSON messages are supported."));
+
+            await connection.SendTextAsync(unsupportedFrameError, cancellationToken);
+            logger.LogInformation("Send {ConnectionId}: {Message}", connection.ConnectionId, unsupportedFrameError);
+            continue;
+        }
+
+        string result = receive.Text!;
 
         logger.LogInformation("Recv {ConnectionId}: {Message}", connection.ConnectionId, result);
 
@@ -146,7 +161,7 @@ static async Task HandleConnectionAsync(
     }
 }
 
-static async Task<string?> ReceiveTextAsync(WebSocket socket, byte[] buffer, CancellationToken cancellationToken)
+static async Task<ReceiveResult> ReceiveTextAsync(WebSocket socket, byte[] buffer, CancellationToken cancellationToken)
 {
     // WebSocket 一条消息可能被拆成多个 frame，因此先写入 MemoryStream，等 EndOfMessage 再转字符串。
     using var stream = new MemoryStream();
@@ -160,30 +175,31 @@ static async Task<string?> ReceiveTextAsync(WebSocket socket, byte[] buffer, Can
         if (result.MessageType == WebSocketMessageType.Close)
         {
             await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closed", cancellationToken);
-            return null;
+            return new ReceiveResult(ReceiveKind.Closed, null);
         }
 
         // MVP 协议只接受文本 JSON；二进制包留到 MessagePack / Protobuf 阶段再考虑。
+        // 这里只标记为“不支持的帧”，由调用方负责回复协议错误。
         if (result.MessageType != WebSocketMessageType.Text)
         {
-            return JsonSerializer.Serialize(CreateErrorResponse(null, 1001, "Only text JSON messages are supported."));
+            // 二进制消息可能是分片的，先把剩余 fragment 读完再返回，
+            // 避免一个二进制消息触发多次错误回复。
+            if (!result.EndOfMessage)
+            {
+                continue;
+            }
+
+            return new ReceiveResult(ReceiveKind.UnsupportedFrame, null);
         }
 
         stream.Write(buffer, 0, result.Count);
 
         if (result.EndOfMessage)
         {
-            return Encoding.UTF8.GetString(stream.ToArray());
+            return new ReceiveResult(ReceiveKind.Message, Encoding.UTF8.GetString(stream.ToArray()));
         }
     }
 }
-
-/*static async Task SendTextAsync(WebSocket socket, string message, CancellationToken cancellationToken)
-{
-    // 当前协议格式是 JSON 文本，所以按 UTF-8 发送 WebSocket Text Message。
-    var bytes = Encoding.UTF8.GetBytes(message);
-    await socket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken);
-}*/
 
 static MessageDispatchResult BuildResponse(
     string rawMessage,
@@ -943,6 +959,16 @@ static long? TryGetPayloadClientTime(JsonElement payload)
 }
 
 static long UnixTimeMilliseconds() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+// ReceiveTextAsync 的返回值：区分“收到文本消息”“连接已关闭”“收到非文本帧但连接仍可用”三种情况。
+enum ReceiveKind
+{
+    Message,
+    Closed,
+    UnsupportedFrame
+}
+
+readonly record struct ReceiveResult(ReceiveKind Kind, string? Text);
 
 //消息派发，大部分情况需要返回 ResponseJson，
 //少数情况不需要进行回包，如客户端广播加载进度通知时，

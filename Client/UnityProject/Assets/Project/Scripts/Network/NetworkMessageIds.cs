@@ -1,4 +1,4 @@
-namespace OnlineActionRpg.Client.Network
+﻿namespace OnlineActionRpg.Client.Network
 {
     public static class NetworkMessageIds
     {
