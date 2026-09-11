@@ -1,5 +1,81 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2442790381955871043
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2324568049425958460}
+  - component: {fileID: 6431944511819935980}
+  - component: {fileID: 6407860661854266952}
+  m_Layer: 0
+  m_Name: HitBox_Melee
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2324568049425958460
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2442790381955871043}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.949, z: 0.441}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6599375981442368864}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6431944511819935980
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2442790381955871043}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.8, y: 0.96, z: 0.8}
+  m_Center: {x: 0, y: -0.51, z: 0}
+--- !u!114 &6407860661854266952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2442790381955871043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fe717b08d8b256499c0d951cfadf325, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Combat.HitBox
+  playerController: {fileID: 8130470294917285336}
+  attackerId: 
+  damage: 12
+  queryMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  queryTriggerInteraction: 2
+  maxTargetsPerSwing: 4
+  drawDebug: 1
+  debugColor: {r: 1, g: 0.35, b: 0.2, a: 0.85}
 --- !u!1 &7285213668682058830
 GameObject:
   m_ObjectHideFlags: 0
@@ -35,6 +111,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2762832841547541258}
+  - {fileID: 2324568049425958460}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &5623508188092267604
@@ -102,6 +179,10 @@ MonoBehaviour:
   attackImpulseBrake: 30
   attackInputBufferTime: 0.12
   comboResetWindow: 0.55
+  rightPunchHitStart01: 0.3
+  rightPunchHitEnd01: 0.55
+  leftPunchHitStart01: 0.28
+  leftPunchHitEnd01: 0.52
 --- !u!114 &7367967369394817888
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,7 +197,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Battle.CharacterAnimatorDriver
   playerController: {fileID: 8130470294917285336}
   animator: {fileID: 8122137475620843888}
-  inputReader: {fileID: 8763788044651070870}
   emoteController: {fileID: 0}
   idleStateName: Idle_Loop
   moveSpeedParameter: MoveSpeed

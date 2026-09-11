@@ -62,6 +62,16 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private float attackInputBufferTime = 0.12f;
         [SerializeField] private float comboResetWindow = 0.55f;
 
+        [Header("Attack Hit Window")]
+        [SerializeField, Range(0f, 1f)] private float rightPunchHitStart01 = 0.30f;
+        [SerializeField, Range(0f, 1f)] private float rightPunchHitEnd01 = 0.55f;
+        [SerializeField, Range(0f, 1f)] private float leftPunchHitStart01 = 0.28f;
+        [SerializeField, Range(0f, 1f)] private float leftPunchHitEnd01 = 0.52f;
+
+        // 命中窗口用归一化进度表达：0 = 攻击起手，1 = 攻击结束。
+        // 用代码时间窗而不是 Animation Event，是为了让“这一击什么时候能命中”
+        // 留在玩法层；动画替换、重定向或将来做服务端校验时都不受影响。
+
         // ==================== Runtime State ====================
         private CharacterController _characterController;
 
@@ -90,6 +100,7 @@ namespace OnlineActionRpg.Client.Battle
         private float _comboWindowTimer;
         private Vector3 _attackImpulseDirection;
         private float _attackImpulseTimer;
+        private bool _isInAttackHitWindow;
 
         // ==================== Public State / Events ====================
         public float VerticalSpeed => _verticalVelocity;
@@ -102,6 +113,8 @@ namespace OnlineActionRpg.Client.Battle
         public float AttackCooldownRemaining => _attackCooldownTimer;
         public float ComboWindowRemaining => _comboWindowTimer;
         public AttackVariant CurrentAttackVariant { get; private set; } = AttackVariant.RightPunch;
+        public bool IsInAttackHitWindow => _isInAttackHitWindow;
+        public float AttackProgress01 { get; private set; }
 
         public bool IsWalking => _currentLocomotionMode == LocomotionMode.Walk && CurrentMoveSpeed01 > 0.05f;
         public bool IsRunning => _currentLocomotionMode == LocomotionMode.Run && CurrentMoveSpeed01 > 0.05f;
@@ -115,6 +128,8 @@ namespace OnlineActionRpg.Client.Battle
         public event Action DodgeEnded;
         public event Action AttackStarted;
         public event Action AttackEnded;
+        public event Action<AttackVariant> AttackHitWindowOpened;
+        public event Action AttackHitWindowClosed;
 
         // ==================== Unity Lifecycle ====================
         private void Awake()
@@ -466,12 +481,16 @@ namespace OnlineActionRpg.Client.Battle
 
             if (_attackTimer > 0f)
             {
+                UpdateAttackHitWindow();
                 return;
             }
 
+            //攻击结束
             _isAttacking = false;
             _attackImpulseTimer = 0f;
             _comboWindowTimer = comboResetWindow;
+
+            CloseAttackHitWindow();
 
             _horizontalVelocity = Vector3.MoveTowards(
                 _horizontalVelocity,
@@ -520,6 +539,7 @@ namespace OnlineActionRpg.Client.Battle
             _attackTimer = attackDuration;
             _attackCooldownTimer = attackDuration + attackCooldown;
             _comboWindowTimer = 0f;
+            AttackProgress01 = 0f;
 
             StartAttackImpulse();
 
@@ -573,6 +593,56 @@ namespace OnlineActionRpg.Client.Battle
                 : AttackVariant.RightPunch;
         }
 
+        // 把“这次攻击进行到哪、现在能不能命中”算清楚，并用事件把窗口开合广播出去。
+        // HitBox 只订阅事件和读 IsInAttackHitWindow，不需要自己复算攻击计时。
+        private void UpdateAttackHitWindow()
+        {
+            float duration = attackDuration > 0f ? attackDuration : 0.0001f;
+            //AttackProgress用于将attackDuration归一化攻击进度，0 = 攻击起手，1 = 攻击结束。
+            AttackProgress01 = Mathf.Clamp01(1f - (_attackTimer / duration));
+
+            float start = CurrentAttackVariant == AttackVariant.LeftPunch
+                ? leftPunchHitStart01
+                : rightPunchHitStart01;
+
+            float end = CurrentAttackVariant == AttackVariant.LeftPunch
+                ? leftPunchHitEnd01
+                : rightPunchHitEnd01;
+
+            //避免调试时出现 start > end 的情况，导致命中窗口永远不会开。
+            if (start > end)
+            {
+                (start, end) = (end, start);
+            }
+
+            bool inWindow = AttackProgress01 >= start && AttackProgress01 <= end;
+
+            if (inWindow == _isInAttackHitWindow)
+            {
+                return;
+            }
+
+            if (inWindow)
+            {
+                _isInAttackHitWindow = true;
+                AttackHitWindowOpened?.Invoke(CurrentAttackVariant);
+            }
+            else
+            {
+                CloseAttackHitWindow();
+            }
+        }
+
+        private void CloseAttackHitWindow()
+        {
+            if (!_isInAttackHitWindow)
+            {
+                return;
+            }
+
+            _isInAttackHitWindow = false;
+            AttackHitWindowClosed?.Invoke();
+        }
         private void ResetAttackCombo()
         {
             _comboWindowTimer = 0f;
