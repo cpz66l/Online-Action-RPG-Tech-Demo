@@ -22,12 +22,17 @@ namespace OnlineActionRpg.Client.Combat
 
         [Header("Debug")]
         [SerializeField] private bool drawDebug = true;
-        [SerializeField] private Color debugColor = new Color(1f, 0.35f, 0.2f, 0.85f);
 
         private BoxCollider _boxCollider;
         private readonly HashSet<HurtBox> _hitThisSwing = new();//用于一次攻击窗口的去重
 
+        // 这个属性用与桥接 LocalPlayerController 的攻击窗口状态，决定是否进行命中检测。
         public bool IsHitWindowOpen => playerController != null && playerController.IsInAttackHitWindow;
+
+        // 本次挥击的命中情况，供调试可视化与 HUD 读取。
+        public bool HasHitThisSwing => _hitThisSwing.Count > 0;
+        public int HitCountThisSwing => _hitThisSwing.Count;
+
 
         private void Awake()
         {
@@ -167,7 +172,12 @@ namespace OnlineActionRpg.Client.Combat
             return playerController != null ? playerController.name : name;
         }
 
-        private void OnDrawGizmosSelected()
+
+        private static readonly Color WindowClosedColor = new Color(0.55f, 0.55f, 0.55f, 0.85f);//灰色表示窗口未开
+        private static readonly Color WindowOpenNoHitColor = new Color(1f, 0.85f, 0.2f, 0.9f);//黄色表示窗口开着但未命中
+        private static readonly Color WindowOpenHitColor = new Color(1f, 0.25f, 0.2f, 0.95f);//红色表示本次挥击已命中
+
+        private void OnDrawGizmos()
         {
             if (!drawDebug)
             {
@@ -181,9 +191,29 @@ namespace OnlineActionRpg.Client.Combat
                 return;
             }
 
+            // 三态：灰=窗口未开，黄=窗口开着未命中，红=本次挥击已命中。
+            // 红态用“本次挥击”而不是“本帧”，否则只亮一帧，肉眼抓不到。
+            Color color = !IsHitWindowOpen
+                ? WindowClosedColor
+                : (HasHitThisSwing ? WindowOpenHitColor : WindowOpenNoHitColor);
+
+            Matrix4x4 previousMatrix = Gizmos.matrix;//保存当前 Gizmos 的矩阵状态
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
-            Gizmos.color = IsHitWindowOpen ? Color.red : debugColor;
+            //设置 Gizmos 的矩阵为物体的世界变换矩阵
+
+            // 绘制半透明填充的立方体
+            Color fill = color;
+            fill.a = 0.12f;
+            Gizmos.color = fill;
+            Gizmos.DrawCube(box.center, box.size);
+
+            // 绘制线框立方体
+            Gizmos.color = color;
             Gizmos.DrawWireCube(box.center, box.size);
+
+            // 必须复原，否则会影响同一帧后续其它 Gizmo 的绘制坐标系。
+            Gizmos.matrix = previousMatrix;
         }
+
     }
 }

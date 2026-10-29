@@ -60,5 +60,45 @@ namespace OnlineActionRpg.Client.Combat
             target.ApplyDamage(hit);
             return true;
         }
+
+        //调试可视化，可在 Inspector 中关闭
+        [SerializeField] private bool drawDebug = true;
+        private static readonly Color HurtBoxColor = new Color(0.2f, 0.75f, 1f, 0.9f);//淡蓝色
+
+        private void OnDrawGizmos()
+        {
+            if (!drawDebug)
+            {
+                return;
+            }
+
+            Collider target = GetComponent<Collider>();
+
+            if (target == null)
+            {
+                target = GetComponentInChildren<Collider>();
+            }
+
+            if (target == null)
+            {
+                return;
+            }
+
+            Bounds bounds = target.bounds;
+
+            if (bounds.size.sqrMagnitude <= 0.0001f)
+            {
+                return;
+            }
+
+            Color fill = HurtBoxColor;
+            fill.a = 0.10f;
+            Gizmos.color = fill;
+            Gizmos.DrawCube(bounds.center, bounds.size);//画出半透明立方体
+
+            Gizmos.color = HurtBoxColor;
+            Gizmos.DrawWireCube(bounds.center, bounds.size);//画出线框立方体
+        }
+
     }
 }
