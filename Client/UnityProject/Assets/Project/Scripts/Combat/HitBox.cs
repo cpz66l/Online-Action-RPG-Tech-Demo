@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using OnlineActionRpg.Client.Battle;
 using UnityEngine;
+using System;
 
 namespace OnlineActionRpg.Client.Combat
 {
@@ -32,6 +33,10 @@ namespace OnlineActionRpg.Client.Combat
         // 本次挥击的命中情况，供调试可视化与 HUD 读取。
         public bool HasHitThisSwing => _hitThisSwing.Count > 0;
         public int HitCountThisSwing => _hitThisSwing.Count;
+
+        // 一次挥击确认命中后广播，携带受击方与命中数据。
+        // 调试 HUD 与后续战斗事件同步共用这一条数据源。
+        public event Action<HurtBox, HitInfo> HitLanded;
 
 
         private void Awake()
@@ -132,7 +137,6 @@ namespace OnlineActionRpg.Client.Combat
                     continue;
                 }
 
-                _hitThisSwing.Add(hurtBox);
                 hitCount++;
             }
         }
@@ -156,8 +160,12 @@ namespace OnlineActionRpg.Client.Combat
                 return false;
             }
 
-            Debug.Log($"[Combat] Hit {hurtBox.name} for {damage:0.##}. " +
+            Debug.Log($"[Combat] Hit {hurtBox.OwnerName} for {damage:0.##}. " +
                       $"Attack={hit.AttackId}, Attacker={hit.AttackerId}");
+
+            // 先记账再广播：保证订阅方在回调里读到的 HitCountThisSwing 已是更新后的值。
+            _hitThisSwing.Add(hurtBox);
+            HitLanded?.Invoke(hurtBox, hit);
 
             return true;
         }

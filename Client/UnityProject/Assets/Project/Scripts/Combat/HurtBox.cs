@@ -27,6 +27,17 @@ namespace OnlineActionRpg.Client.Combat
             }
         }
 
+        // HurtBox 自身通常挂在子物体上，name 只能得到 "HurtBox" 这类子对象名。
+        // 这里返回真正受击方（IDamageable 实现者）的对象名，用于日志与调试显示。
+        public string OwnerName
+        {
+            get
+            {
+                IDamageable target = Damageable;
+                return target is Component component ? component.name : name;
+            }
+        }
+
         private void Awake()
         {
             ResolveDamageable();

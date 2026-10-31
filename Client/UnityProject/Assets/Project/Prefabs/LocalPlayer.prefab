@@ -288,8 +288,9 @@ MonoBehaviour:
   playerController: {fileID: 0}
   hitBox: {fileID: 0}
   visible: 0
-  toggleKey: 94
+  toggleKey: 40
   screenOffset: {x: 12, y: 12}
+  maxLogEntries: 8
 --- !u!1001 &2440164476520238305
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -19,6 +19,21 @@ namespace OnlineActionRpg.Client.Combat
         [SerializeField] private Key toggleKey = Key.F1;
         [SerializeField] private Vector2 screenOffset = new Vector2(12f, 12f);
 
+        [Header("Hit Log")]
+        [SerializeField, Range(1, 16)] private int maxLogEntries = 8;
+
+        private HitLogEntry[] _entries;
+        private int _entryCount;
+        private int _nextIndex;
+
+        private struct HitLogEntry
+        {
+            public float Time;
+            public string AttackId;
+            public string TargetName;
+            public float Damage;
+        }
+
         private readonly StringBuilder _builder = new StringBuilder(256);
         private readonly GUIContent _content = new GUIContent();
 
@@ -37,6 +52,25 @@ namespace OnlineActionRpg.Client.Combat
             {
                 hitBox = GetComponentInChildren<HitBox>();
             }
+
+            _entries = new HitLogEntry[Mathf.Clamp(maxLogEntries, 1, 16)];
+
+        }
+        private void OnEnable()
+        {
+            if (hitBox == null)
+            {
+                hitBox = GetComponentInChildren<HitBox>();
+            }
+
+            if (hitBox == null)
+            {
+                return;
+            }
+
+            // 先退订再订阅，避免重绑或重生时重复挂载回调。
+            hitBox.HitLanded -= HandleHitLanded;
+            hitBox.HitLanded += HandleHitLanded;
         }
 
         private void OnDestroy()
@@ -44,6 +78,11 @@ namespace OnlineActionRpg.Client.Combat
             if (_background != null)
             {
                 Destroy(_background);
+            }
+
+            if (hitBox != null)
+            {
+                hitBox.HitLanded -= HandleHitLanded;
             }
         }
 
@@ -127,6 +166,11 @@ namespace OnlineActionRpg.Client.Combat
                 .Append("   Vy ")
                 .Append(playerController.VerticalSpeed.ToString("0.0"));
 
+            _builder.AppendLine();
+
+            //命中日志
+            AppendHitLog();
+
             _cachedText = _builder.ToString();
         }
 
@@ -202,6 +246,58 @@ namespace OnlineActionRpg.Client.Combat
                 };
                 _background.SetPixel(0, 0, new Color(0f, 0f, 0f, 0.62f));
                 _background.Apply();
+            }
+        }
+
+        // 处理命中事件：记录命中日志
+        private void HandleHitLanded(HurtBox target, HitInfo hit)
+        {
+            if (_entries == null || _entries.Length == 0)
+            {
+                return;
+            }
+
+            _entries[_nextIndex] = new HitLogEntry
+            {
+                Time = Time.time,
+                AttackId = hit.AttackId,
+                TargetName = target != null ? target.OwnerName : "(destroyed)",
+                Damage = hit.Damage
+            };
+
+            _nextIndex = (_nextIndex + 1) % _entries.Length;// 环形缓冲
+
+            if (_entryCount < _entries.Length)
+            {
+                _entryCount++;
+            }
+        }
+
+        // 把命中日志写入文本
+        private void AppendHitLog()
+        {
+            _builder.AppendLine("--- HIT LOG ---");
+
+            if (_entryCount == 0)
+            {
+                _builder.Append("(no hit)");
+                return;
+            }
+
+            // 从最新一条往回读，环形缓冲里最新的位置是 _nextIndex - 1。
+            for (int i = 0; i < _entryCount; i++)
+            {
+                int index = (_nextIndex - 1 - i + _entries.Length) % _entries.Length;
+                HitLogEntry entry = _entries[index];
+
+                _builder.Append(entry.Time.ToString("0.0"))
+                    .Append("s  ")
+                    .Append(entry.AttackId)
+                    .Append(" -> ")
+                    .Append(entry.TargetName)
+                    .Append("  ")
+                    .Append(entry.Damage.ToString("0.##"))
+                    .AppendLine();
             }
         }
     }
