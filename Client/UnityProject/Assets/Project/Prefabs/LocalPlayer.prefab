@@ -90,6 +90,7 @@ GameObject:
   - component: {fileID: 8763788044651070870}
   - component: {fileID: 1598369282948082989}
   - component: {fileID: 2248659431840571657}
+  - component: {fileID: 3761470166573808282}
   m_Layer: 0
   m_Name: LocalPlayer
   m_TagString: LocalPlayer
@@ -291,6 +292,24 @@ MonoBehaviour:
   toggleKey: 40
   screenOffset: {x: 12, y: 12}
   maxLogEntries: 8
+--- !u!114 &3761470166573808282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285213668682058830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e39b7c0107132bf4186b3c4219364095, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Battle.PlayerTargetLock
+  maxDistance: 20
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 8
+  targetFaction: 1
+  anglePenaltyDistance: 6
 --- !u!1001 &2440164476520238305
 PrefabInstance:
   m_ObjectHideFlags: 0
