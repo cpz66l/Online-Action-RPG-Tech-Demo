@@ -1889,7 +1889,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Combat.CombatTarget
   faction: 1
   targetable: 1
-  lockPoint: {fileID: 6936614850932440467}
+  lockPoint: {fileID: 0}
   fallbackLockHeight: 1.2
 --- !u!1 &5373942782922446312
 GameObject:
