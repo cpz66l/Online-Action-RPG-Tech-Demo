@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 namespace OnlineActionRpg.Client.Battle
 {
@@ -43,10 +44,16 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private float collisionRadius = 0.25f;
         [SerializeField] private float collisionPadding = 0.15f;
 
+        [Header("Lock On")]
+        [SerializeField] private float lockYawSharpness = 6f;// 追踪锁定目标时的旋转平滑度。
+
         private float _yaw;
         private float _pitch = 18f;
         private float _targetDistance;
         private float _currentDistance;
+
+        // 锁定态朝向提供者：返回目标 yaw（度），null 表示不接管。
+        public Func<float?> YawOverrideProvider { get; set; }
 
         private void Awake()
         {
@@ -155,8 +162,34 @@ namespace OnlineActionRpg.Client.Battle
             }
 
             Vector2 lookInput = inputReader != null ? inputReader.Look : Vector2.zero;
+            bool hasLook = lookInput.sqrMagnitude > 0.0001f;
 
-            if (lookInput.sqrMagnitude <= 0.0001f)
+            // 锁定态：左右朝向交给外部，上下仍由玩家控制。
+            float? overrideYaw = YawOverrideProvider?.Invoke();
+
+            if (overrideYaw.HasValue)
+            {
+                float lockT = 1f - Mathf.Exp(-lockYawSharpness * Time.deltaTime);// 追踪锁定目标时的旋转平滑度。
+                _yaw = Mathf.LerpAngle(_yaw, overrideYaw.Value, lockT);// 旋转角度插值，避免瞬间跳转。
+
+                // 上下仍由玩家控制。
+                if (hasLook)
+                {
+                    bool mouseActive = Mouse.current != null &&
+                                       Mouse.current.delta.ReadValue().sqrMagnitude > 0.0001f;
+
+                    float pitchSensitivity = mouseActive
+                        ? mouseSensitivity
+                        : gamepadSensitivity * Time.deltaTime;
+
+                    _pitch -= lookInput.y * pitchSensitivity;
+                    _pitch = Mathf.Clamp(_pitch, minPitch, maxPitch);
+                }
+
+                return;
+            }
+
+            if (!hasLook)
             {
                 return;
             }
@@ -171,6 +204,7 @@ namespace OnlineActionRpg.Client.Battle
             _pitch -= lookInput.y * sensitivity;
             _pitch = Mathf.Clamp(_pitch, minPitch, maxPitch);
         }
+
 
         private void UpdateZoomInput()
         {

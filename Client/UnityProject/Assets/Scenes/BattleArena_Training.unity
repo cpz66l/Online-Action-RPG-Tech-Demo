@@ -832,6 +832,7 @@ MonoBehaviour:
   spawnedLocalPlayerName: LocalPlayer
   cameraController: {fileID: 961739754}
   emoteWheelView: {fileID: 0}
+  lockOnCamera: {fileID: 0}
 --- !u!4 &811815603
 Transform:
   m_ObjectHideFlags: 0
@@ -860,6 +861,7 @@ GameObject:
   - component: {fileID: 961739751}
   - component: {fileID: 961739750}
   - component: {fileID: 961739754}
+  - component: {fileID: 961739755}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1021,6 +1023,21 @@ MonoBehaviour:
     m_Bits: 4294967295
   collisionRadius: 0.25
   collisionPadding: 0.15
+  lockYawSharpness: 12
+--- !u!114 &961739755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961739749}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8ac8d24352b4744fa1c1de701bc1fbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnlineActionRpg.Client.Battle.LockOnCamera
+  cameraController: {fileID: 0}
+  targetLock: {fileID: 0}
 --- !u!1001 &1047762911
 PrefabInstance:
   m_ObjectHideFlags: 0

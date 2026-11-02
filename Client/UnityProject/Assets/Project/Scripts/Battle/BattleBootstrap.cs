@@ -31,6 +31,7 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private string spawnedLocalPlayerName = "LocalPlayer";
         [SerializeField] private ThirdPersonCameraController cameraController;
         [SerializeField] private EmoteWheelView emoteWheelView;
+        [SerializeField] private LockOnCamera lockOnCamera;
 
         public GameObject LocalPlayerInstance { get; private set; }
 
@@ -192,6 +193,7 @@ namespace OnlineActionRpg.Client.Battle
             LocalPlayerController playerController = LocalPlayerInstance.GetComponent<LocalPlayerController>();
             PlayerInputReader inputReader = LocalPlayerInstance.GetComponent<PlayerInputReader>();
             LocalEmoteController emoteController = LocalPlayerInstance.GetComponent<LocalEmoteController>();
+            PlayerTargetLock targetLock = LocalPlayerInstance.GetComponent<PlayerTargetLock>();
 
             if (cameraController == null)
             {
@@ -201,6 +203,11 @@ namespace OnlineActionRpg.Client.Battle
             if (emoteWheelView == null)
             {
                 emoteWheelView = FindFirstObjectByType<EmoteWheelView>();
+            }
+
+            if (lockOnCamera == null)
+            {
+                lockOnCamera = FindFirstObjectByType<LockOnCamera>();
             }
 
             if (cameraController != null)
@@ -216,6 +223,11 @@ namespace OnlineActionRpg.Client.Battle
             if (emoteWheelView != null)
             {
                 emoteWheelView.SetTarget(LocalPlayerInstance.transform);
+            }
+
+            if (lockOnCamera != null && targetLock != null)
+            {
+                lockOnCamera.Bind(targetLock);
             }
 
             Debug.Log($"Local player spawned. PlayerId={CurrentContext.LocalPlayerId}, " +
