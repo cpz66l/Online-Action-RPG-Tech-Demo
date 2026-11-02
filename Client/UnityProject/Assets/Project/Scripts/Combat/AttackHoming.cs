@@ -38,6 +38,7 @@ namespace OnlineActionRpg.Client.Combat
             if (playerController != null)
             {
                 playerController.AttackFacingResolver = _resolver;
+                //用委托的方式将方法传递，避免直接引用本组件，导致 OnDisable 时无法清空。
             }
         }
 

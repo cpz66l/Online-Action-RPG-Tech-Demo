@@ -136,7 +136,8 @@ namespace OnlineActionRpg.Client.Battle
         public event Action<AttackVariant> AttackHitWindowOpened;
         public event Action AttackHitWindowClosed;
 
-        public Func<Vector3?> AttackFacingResolver { get; set; }// 攻击起手前由外部解析“这一拳朝哪打”。返回 null 表示不介入，沿用当前朝向。控制器不感知“锁定”，只接受一个方向。
+        // 攻击起手前由外部解析“这一拳朝哪打”。返回 null 表示不介入，沿用当前朝向。控制器不感知“锁定”，只接受一个方向。
+        public Func<Vector3?> AttackFacingResolver { get; set; }
 
 
         // ==================== Unity Lifecycle ====================
