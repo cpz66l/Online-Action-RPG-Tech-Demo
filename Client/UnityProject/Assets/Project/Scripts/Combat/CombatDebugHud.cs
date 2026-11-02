@@ -12,6 +12,8 @@ namespace OnlineActionRpg.Client.Combat
         [Header("References")]
         [SerializeField] private LocalPlayerController playerController;
         [SerializeField] private HitBox hitBox;
+        [SerializeField] private PlayerTargetLock targetLock;
+
 
         [Header("Display")]
         // 默认关闭：HUD 只在对状态有疑问时按 F1 打开，平时不占用画面。
@@ -52,6 +54,12 @@ namespace OnlineActionRpg.Client.Combat
             {
                 hitBox = GetComponentInChildren<HitBox>();
             }
+
+            if (targetLock == null)
+            {
+                targetLock = GetComponent<PlayerTargetLock>();
+            }
+
 
             _entries = new HitLogEntry[Mathf.Clamp(maxLogEntries, 1, 16)];
 
@@ -149,6 +157,26 @@ namespace OnlineActionRpg.Client.Combat
             else
             {
                 _builder.Append('0');
+            }
+
+            _builder.AppendLine();
+
+            //锁定目标：名字 + 距离，若无锁定目标则显示 "-"
+            CombatTarget lockedTarget = targetLock != null ? targetLock.CurrentTarget : null;
+
+            if (lockedTarget != null)
+            {
+                float targetDistance = (lockedTarget.LockPosition - transform.position).magnitude;
+
+                _builder.Append("TARGET     ")
+                    .Append(lockedTarget.name)
+                    .Append("  ")
+                    .Append(targetDistance.ToString("0.0"))
+                    .AppendLine();
+            }
+            else
+            {
+                _builder.AppendLine("TARGET     -");
             }
 
             _builder.AppendLine();
