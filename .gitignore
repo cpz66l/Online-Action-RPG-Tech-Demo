@@ -64,6 +64,9 @@ TestResults/
 Docs/开发日志/
 Docs/导师手册.md
 
+# Assist tool session memory and project context (local only)
+.workbuddy/
+
 # OS files
 .DS_Store
 Thumbs.db
