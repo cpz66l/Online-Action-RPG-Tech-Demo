@@ -68,6 +68,10 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField, Range(0f, 1f)] private float leftPunchHitStart01 = 0.28f;
         [SerializeField, Range(0f, 1f)] private float leftPunchHitEnd01 = 0.52f;
 
+        [Header("Attack Homing")]
+        [SerializeField] private float attackHomingTurnSpeed = 720f;//攻击吸附的转向速度
+
+
         // 命中窗口用归一化进度表达：0 = 攻击起手，1 = 攻击结束。
         // 用代码时间窗而不是 Animation Event，是为了让“这一击什么时候能命中”
         // 留在玩法层；动画替换、重定向或将来做服务端校验时都不受影响。
@@ -101,6 +105,7 @@ namespace OnlineActionRpg.Client.Battle
         private Vector3 _attackImpulseDirection;
         private float _attackImpulseTimer;
         private bool _isInAttackHitWindow;
+        private Vector3? _attackFacingDirection; //攻击吸附的朝向，null = 不吸附
 
         // ==================== Public State / Events ====================
         public float VerticalSpeed => _verticalVelocity;
@@ -130,6 +135,9 @@ namespace OnlineActionRpg.Client.Battle
         public event Action AttackEnded;
         public event Action<AttackVariant> AttackHitWindowOpened;
         public event Action AttackHitWindowClosed;
+
+        public Func<Vector3?> AttackFacingResolver { get; set; }// 攻击起手前由外部解析“这一拳朝哪打”。返回 null 表示不介入，沿用当前朝向。控制器不感知“锁定”，只接受一个方向。
+
 
         // ==================== Unity Lifecycle ====================
         private void Awake()
@@ -285,6 +293,13 @@ namespace OnlineActionRpg.Client.Battle
 
         private void ApplyRotation()
         {
+            // 攻击期间如果外部给了“这一拳朝哪打”，优先朝它转。
+            if (_isAttacking && _attackFacingDirection.HasValue)
+            {
+                ApplyHomingRotation(_attackFacingDirection.Value);
+                return;
+            }
+
             Vector3 flatVelocity = _horizontalVelocity;
             flatVelocity.y = 0f;
 
@@ -302,6 +317,18 @@ namespace OnlineActionRpg.Client.Battle
                 turnSmoothTime);
 
             transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
+        }
+        // 攻击期间如果外部给了“这一拳朝哪打”，优先朝它转。
+        private void ApplyHomingRotation(Vector3 direction)
+        {
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+
+            float nextAngle = Mathf.MoveTowardsAngle(
+                transform.eulerAngles.y,
+                targetAngle,
+                attackHomingTurnSpeed * Time.deltaTime);
+
+            transform.rotation = Quaternion.Euler(0f, nextAngle, 0f);
         }
 
         private void ApplyMovement()
@@ -489,6 +516,7 @@ namespace OnlineActionRpg.Client.Battle
             _isAttacking = false;
             _attackImpulseTimer = 0f;
             _comboWindowTimer = comboResetWindow;
+            _attackFacingDirection = null;
 
             CloseAttackHitWindow();
 
@@ -541,6 +569,8 @@ namespace OnlineActionRpg.Client.Battle
             _comboWindowTimer = 0f;
             AttackProgress01 = 0f;
 
+            _attackFacingDirection = ResolveAttackFacingDirection();
+
             StartAttackImpulse();
 
             AttackStarted?.Invoke();
@@ -548,7 +578,7 @@ namespace OnlineActionRpg.Client.Battle
 
         private void StartAttackImpulse()
         {
-            Vector3 direction = transform.forward;
+            Vector3 direction = _attackFacingDirection ?? transform.forward;//优先使用攻击朝向，如果没有则沿用当前朝向
             direction.y = 0f;
 
             if (direction.sqrMagnitude <= 0.0001f)
@@ -560,6 +590,28 @@ namespace OnlineActionRpg.Client.Battle
             _attackImpulseTimer = attackImpulseDuration;
             _horizontalVelocity = _attackImpulseDirection * attackImpulseSpeed;
         }
+
+        //解析攻击朝向
+        private Vector3? ResolveAttackFacingDirection()
+        {
+            if (AttackFacingResolver == null)
+            {
+                return null;
+            }
+
+            Vector3? direction = AttackFacingResolver.Invoke();
+
+            if (!direction.HasValue)
+            {
+                return null;
+            }
+
+            Vector3 flat = direction.Value;
+            flat.y = 0f;
+
+            return flat.sqrMagnitude > 0.0001f ? flat.normalized : (Vector3?)null;
+        }
+
 
         private void UpdateAttackMovement(float deltaTime)
         {
