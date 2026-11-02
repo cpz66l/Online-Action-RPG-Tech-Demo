@@ -16,6 +16,18 @@ public sealed class ConnectionRegistry
     private readonly Dictionary<string, string> _connectionIdByPlayerId =
         new(StringComparer.OrdinalIgnoreCase);
 
+    // 当前在线连接数。供 BattleService 的 Tick 日志与后续网络面板读取。
+    public int Count
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _connectionsById.Count;
+            }
+        }
+    }
+
     public ClientConnection Add(string connectionId, WebSocket socket)
     {
         ClientConnection connection = new(connectionId, socket);
