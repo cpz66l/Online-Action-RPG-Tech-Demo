@@ -14,9 +14,9 @@ namespace OnlineRpgServer.Broadcast;
 public sealed class ServerBroadcaster
 {
     private readonly ConnectionRegistry _connectionRegistry;
-    private readonly ILogger _logger;
+    private readonly ILogger<ServerBroadcaster> _logger;
 
-    public ServerBroadcaster(ConnectionRegistry connectionRegistry, ILogger logger)
+    public ServerBroadcaster(ConnectionRegistry connectionRegistry, ILogger<ServerBroadcaster> logger)
     {
         _connectionRegistry = connectionRegistry;
         _logger = logger;

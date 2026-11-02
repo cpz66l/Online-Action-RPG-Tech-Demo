@@ -19,23 +19,36 @@ builder.Logging.AddSimpleConsole(options =>
 builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Information);
 
+// 业务日志按模块分类：每个类注入自己的 ILogger<T>，控制台会显示到命名空间一级。
+// BattleService 的 Tick 心跳用 LogDebug 打，默认（Information）不输出。
+// 需要观察推进循环时用环境变量临时打开，不必改代码：
+//   Logging__LogLevel__OnlineRpgServer.Battle.BattleService = Debug
+// 反过来，如果某个模块太吵，也可以单独压到 Warning。
+
 
 var app = builder.Build();  //生成真正可运行的WebApplication
-var logger = app.Logger;    //拿到日志对象
 var accountService = new AccountService();  //实例化账号服务
 var roomService = new RoomService();        //实例化房间服务
 var connectionRegistry = new ConnectionRegistry(); // 记录玩家和 WebSocket 连接的绑定关系
 
-// 战斗推进循环。05-0 只有 Tick 骨架，战斗实例与快照广播在后续小步填入。
+// 每个模块注入自己的 ILogger<T>，日志分类才会带上模块名。
+// 这样控制台能分辨"这条是连接层打的"还是"战斗层打的"，
+// 也能按分类单独调级别，不必为了去看 tick 而全局降到 Debug。
 var battleService = new BattleService(
     app.Services.GetRequiredService<ILogger<BattleService>>(),
     connectionRegistry);
 
 // 分发层：只把消息变成"回什么包 + 要顺带广播什么"，不直接写 socket。
-var messageRouter = new MessageRouter(accountService, roomService, connectionRegistry, logger);
+var messageRouter = new MessageRouter(
+    accountService,
+    roomService,
+    connectionRegistry,
+    app.Services.GetRequiredService<ILogger<MessageRouter>>());
 
 // 广播层：唯一往连接上写业务通知的地方。迭代05 起，BattleService 的 Tick 也从这里广播。
-var broadcaster = new ServerBroadcaster(connectionRegistry, logger);
+var broadcaster = new ServerBroadcaster(
+    connectionRegistry,
+    app.Services.GetRequiredService<ILogger<ServerBroadcaster>>());
 
 // 连接层：串起收消息、分发、回包、按需广播和断线清理。
 var connectionHandler = new ConnectionHandler(
@@ -43,7 +56,7 @@ var connectionHandler = new ConnectionHandler(
     broadcaster,
     roomService,
     connectionRegistry,
-    logger);
+    app.Services.GetRequiredService<ILogger<ConnectionHandler>>());
 
 
 // 固定本地开发端口，方便 Unity 客户端和 smoke test 使用同一个地址。
@@ -77,15 +90,15 @@ app.Map("/ws", async context =>
     // 握手通过后，HTTP 连接升级成 WebSocket 双向长连接。
     using var socket = await context.WebSockets.AcceptWebSocketAsync();
     var connectionId = Guid.NewGuid().ToString("N")[..8];
-    logger.LogInformation("Client connected: {ConnectionId}", connectionId);
 
     var connection = connectionRegistry.Add(connectionId, socket);
 
     // 收消息、分发、断线清理都在 ConnectionHandler 里，端点只负责握手与注册。
-    await connectionHandler.ServeAsync(connection, context.RequestAborted);
+    await connectionHandler.ServeAsync(connection, context.RequestAborted);     //！！！业务服务入口，阻塞当前线程直到连接断开
+    //！！！每条连接一个独立 ServeAsync 循环
 });
 
-logger.LogInformation("OnlineRpgServer starting. WebSocket endpoint: ws://localhost:5050/ws");
+app.Logger.LogInformation("OnlineRpgServer starting. WebSocket endpoint: ws://localhost:5050/ws");
 
 // 在开始监听前启动推进循环，保证第一个客户端进来时 Tick 已经在跑。
 battleService.Start();

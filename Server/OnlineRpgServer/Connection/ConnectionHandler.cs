@@ -8,7 +8,7 @@ using static OnlineRpgServer.Protocol.ProtocolErrors;
 
 namespace OnlineRpgServer.Connection;
 
-// 单条连接的生命周期：收消息 → 分发 → 回包 → 按需广播 → 断线清理。
+// ！！！单条连接的生命周期：收消息 → 分发 → 回包 → 按需广播 → 断线清理。
 //
 // 它负责"顺序"和"副作用"，不负责"业务判断"（那个在 MessageRouter）和
 // "怎么写 socket"（那个在 ServerBroadcaster）。
@@ -18,14 +18,14 @@ public sealed class ConnectionHandler
     private readonly ServerBroadcaster _broadcaster;
     private readonly RoomService _roomService;
     private readonly ConnectionRegistry _connectionRegistry;
-    private readonly ILogger _logger;
+    private readonly ILogger<ConnectionHandler> _logger;
 
     public ConnectionHandler(
         MessageRouter messageRouter,
         ServerBroadcaster broadcaster,
         RoomService roomService,
         ConnectionRegistry connectionRegistry,
-        ILogger logger)
+        ILogger<ConnectionHandler> logger)
     {
         _messageRouter = messageRouter;
         _broadcaster = broadcaster;
@@ -37,6 +37,10 @@ public sealed class ConnectionHandler
     // 一条连接的完整生命周期。WebSocket 端点只调这一个方法。
     public async Task ServeAsync(ClientConnection connection, CancellationToken cancellationToken)
     {
+        // connected / disconnected 成对出现在同一个日志分类下，
+        // 排查连接问题时不用在两个 category 之间来回看。
+        _logger.LogInformation("Client connected: {ConnectionId}", connection.ConnectionId);
+
         try
         {
             await HandleMessageLoopAsync(connection, cancellationToken);

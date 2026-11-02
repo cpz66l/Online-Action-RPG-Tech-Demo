@@ -74,7 +74,11 @@ public sealed class BattleService : IDisposable
 
         _lastLoggedTick = tick;
 
-        _logger.LogInformation(
+        // 用 Debug 而不是 Information：tick 心跳是运行状态，不是业务事件。
+        // 控制台默认最低级别是 Information，所以它默认不出现；
+        // 需要观察时用环境变量把本模块调到 Debug，不必改代码：
+        //   Logging__LogLevel__OnlineRpgServer.Battle.BattleService = Debug
+        _logger.LogDebug(
             "[Battle] tick={Tick} alive, connections={ConnectionCount}",
             tick,
             _connectionRegistry.Count);

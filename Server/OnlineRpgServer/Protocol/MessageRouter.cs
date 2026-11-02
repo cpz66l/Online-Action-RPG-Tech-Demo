@@ -18,13 +18,13 @@ public sealed class MessageRouter
     private readonly AccountService _accountService;
     private readonly RoomService _roomService;
     private readonly ConnectionRegistry _connectionRegistry;
-    private readonly ILogger _logger;
+    private readonly ILogger<MessageRouter> _logger;
 
     public MessageRouter(
         AccountService accountService,
         RoomService roomService,
         ConnectionRegistry connectionRegistry,
-        ILogger logger)
+        ILogger<MessageRouter> logger)
     {
         _accountService = accountService;
         _roomService = roomService;
