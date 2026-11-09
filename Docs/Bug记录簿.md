@@ -60,6 +60,19 @@
 - 沉淀规则：**调试输出必须复用判定逻辑的输入。** 日志另算一遍，会在错误的地方给出“看起来合理”的数字，比没有日志更难排查。另外，凡是用 `Vector3.Angle` 计算“正面夹角”，先确认两个向量是否在同一平面。
 - 是否已回归：是
 
+## BUG-005：生成远端玩家后本地角色无法操控
+
+- 发现日期：2026-11-09
+- 所属模块：战斗 / 输入
+- 严重程度：高（联机流程下完全无法操作）
+- 现象：05-1 首次在完整流程中跑通，客户端进入战斗场景并成功生成远端玩家，但本地角色的移动、跳跃、攻击全部失效，键盘鼠标无任何响应。日志时间戳显示 `Remote players spawned. new=1, total=1` 之后立即失去操控。
+- 排查过程：先确认角色已生成且位置正确（`Local player spawned. PlayerId=p_10002, Source=Server(spawnIndex=0)`），排除生成失败；再对比“Editor 单机兜底”与“完整流程”的差异，发现只有后者会调用 `RemotePlayerRegistry.SpawnMissing`；沿调用链读 `DisableLocalOnlyComponents`，确认它禁用了远端玩家实例上的 `PlayerInputReader`；再读 `PlayerInputReader.OnDisable`，看到它逐个调用 `DisableAction(...)`。
+- 根因：`PlayerInputReader` 持有的 `InputActionReference` 指向**共享 InputActionAsset** 里的 action。`InputAction.Disable()` 影响的是 action 本身，而不是“这个组件这一份订阅”。远端玩家的组件被禁用时触发 `OnDisable`，把本地玩家正在使用的同一批 action 一并关闭，本地输入因此全部失效。原写法在“一个实例一个 action”的前提下成立，而这里全局只有一个 Asset。
+- 修复方案：`PlayerInputReader.OnDisable` 只做 `Unsubscribe()` 与状态清零，不再禁用共享 action；同时删除两个已无调用者的 `DisableAction` 重载，避免留下“看起来还在管输入开关”的死代码。
+- 验证方式：重新走完整流程，本地角色移动 / 跳跃 / 攻击恢复正常，远端角色保持静止；`Remote players spawned. new=1` 照常出现。
+- 沉淀规则：**禁用组件时，不要改动被多个实例共享的资源。** `InputAction`、`ScriptableObject`、材质、静态事件都属于这一类。判断标准只有一句：“这个对象是不是只有我一份”，不是，就只清理自己的订阅与缓存。另外，`OnDisable` 里出现 `Xxx.Disable()` 要格外警惕——它往往隐含“我拥有这个对象”的错误假设。这个 Bug 只在联机时出现，因为单机 Editor 兜底根本不生成远端玩家，走不到这条路径。
+- 是否已回归：是
+
 ---
 
 ## 记录模板
