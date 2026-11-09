@@ -64,14 +64,14 @@ namespace OnlineActionRpg.Client.Battle
         {
             Unsubscribe();
 
-            DisableAction(moveAction);
-            DisableAction(lookAction);
-            DisableAction(attackAction);
-            DisableAction(dodgeAction);
-            DisableAction(jumpAction);
-            DisableAction(_walkModeRuntimeAction);
-            DisableAction(_emoteWheelRuntimeAction);
-            DisableAction(_emotePointerRuntimeAction);
+            // 这里刻意不禁用 InputActionReference 指向的 action。
+            //
+            // 它们属于共享的 InputActionAsset：一旦禁用，所有引用同一个 action 的实例都会失效。
+            // 典型症状是「生成远端玩家后本地角色无法操控」——
+            // 远端玩家必须禁用自己的 PlayerInputReader 才不会跟随本机输入，
+            // 而那次 OnDisable 会把本地玩家正在使用的 action 一并关掉。
+            //
+            // 订阅已经在 Unsubscribe 里退掉，action 即使保持 enabled 也不会有回调进来。
 
             Move = Vector2.zero;
             Look = Vector2.zero;
@@ -275,27 +275,11 @@ namespace OnlineActionRpg.Client.Battle
             }
         }
 
-        private static void DisableAction(InputActionReference actionReference)
-        {
-            if (actionReference != null && actionReference.action != null)
-            {
-                actionReference.action.Disable();
-            }
-        }
-
         private static void EnableAction(InputAction action)
         {
             if (action != null)
             {
                 action.Enable();
-            }
-        }
-
-        private static void DisableAction(InputAction action)
-        {
-            if (action != null)
-            {
-                action.Disable();
             }
         }
     }
