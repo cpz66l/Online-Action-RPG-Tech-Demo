@@ -33,6 +33,9 @@ namespace OnlineActionRpg.Client.Battle
         [SerializeField] private EmoteWheelView emoteWheelView;
         [SerializeField] private LockOnCamera lockOnCamera;
 
+        // 远端玩家的容器。普通类，随 BattleBootstrap 一起创建，不需要在场景里挂载。
+        private RemotePlayerRegistry _remotePlayers;
+
         public GameObject LocalPlayerInstance { get; private set; }
 
         public BattleContext CurrentContext { get; private set; }
@@ -175,19 +178,23 @@ namespace OnlineActionRpg.Client.Battle
                 return;
             }
 
-            PlayerSpawnPoint spawnPoint = GetDefaultSpawnPoint();
-
-            if (spawnPoint == null)
+            // 优先用服务端下发的出生点；拿不到才回退到场景里的出生点标记。
+            if (!TryResolveServerSpawn(out Vector3 spawnPosition, out Quaternion spawnRotation, out string spawnSource))
             {
-                Debug.LogWarning("BattleBootstrap cannot spawn local player: no PlayerSpawnPoint found.");
-                return;
+                PlayerSpawnPoint spawnPoint = GetDefaultSpawnPoint();
+
+                if (spawnPoint == null)
+                {
+                    Debug.LogWarning("BattleBootstrap cannot spawn local player: no PlayerSpawnPoint found.");
+                    return;
+                }
+
+                spawnPosition = spawnPoint.Position;
+                spawnRotation = spawnPoint.Rotation;
+                spawnSource = $"SceneSpawnPoint({spawnPoint.SpawnId})";
             }
 
-            LocalPlayerInstance = Instantiate(
-                localPlayerPrefab,
-                spawnPoint.Position,
-                spawnPoint.Rotation);
-
+            LocalPlayerInstance = Instantiate(localPlayerPrefab, spawnPosition, spawnRotation);
             LocalPlayerInstance.name = spawnedLocalPlayerName;
 
             LocalPlayerController playerController = LocalPlayerInstance.GetComponent<LocalPlayerController>();
@@ -231,7 +238,9 @@ namespace OnlineActionRpg.Client.Battle
             }
 
             Debug.Log($"Local player spawned. PlayerId={CurrentContext.LocalPlayerId}, " +
-                      $"SpawnId={spawnPoint.SpawnId}, Position={spawnPoint.Position}");
+                      $"Source={spawnSource}, Position={spawnPosition}");
+
+            SpawnRemotePlayers();
         }
 
         private PlayerSpawnPoint GetDefaultSpawnPoint()
@@ -252,6 +261,71 @@ namespace OnlineActionRpg.Client.Battle
             }
 
             return spawnPoints[0];
+        }
+
+        // 服务端在 BattleStartNtf 里下发了每个人的出生点。
+        // 拿到就用它；拿不到（编辑器兜底、或对端没带 players）回退到场景里的出生点标记。
+        private bool TryResolveServerSpawn(
+            out Vector3 position,
+            out Quaternion rotation,
+            out string source)
+        {
+            position = Vector3.zero;
+            rotation = Quaternion.identity;
+            source = string.Empty;
+
+            if (loadingClient == null || CurrentContext.IsEditorFallback)
+            {
+                return false;
+            }
+
+            BattleStartInfo startInfo = loadingClient.LastBattleStart;
+
+            if (!startInfo.TryFindPlayer(CurrentContext.LocalPlayerId, out BattlePlayerSpawnInfo spawn))
+            {
+                Debug.LogWarning(
+                    $"BattleStartNtf has no spawn for local player {CurrentContext.LocalPlayerId}. " +
+                    "Falling back to scene spawn point.");
+
+                return false;
+            }
+
+            position = spawn.Position;
+            rotation = spawn.Rotation;
+            source = $"Server(spawnIndex={spawn.SpawnIndex})";
+
+            return true;
+        }
+
+        // 按服务端下发的名单生成远端玩家。
+        // 05-1 只摆位置，不接快照、不做插值 —— 那是 05-3 的事。
+        private void SpawnRemotePlayers()
+        {
+            if (CurrentContext.IsEditorFallback || loadingClient == null)
+            {
+                return;
+            }
+
+            BattleStartInfo startInfo = loadingClient.LastBattleStart;
+
+            if (startInfo.Players == null || startInfo.Players.Length == 0)
+            {
+                Debug.LogWarning("BattleStartNtf carries no players; remote players will not be spawned.");
+                return;
+            }
+
+            if (_remotePlayers == null)
+            {
+                _remotePlayers = new RemotePlayerRegistry();
+            }
+
+            int spawned = _remotePlayers.SpawnMissing(
+                startInfo.Players,
+                CurrentContext.LocalPlayerId,
+                localPlayerPrefab);
+
+            Debug.Log($"Remote players spawned. new={spawned}, " +
+                      $"total={_remotePlayers.Count}, expected={startInfo.Players.Length - 1}");
         }
     }
 }

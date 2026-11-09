@@ -24,6 +24,10 @@ namespace OnlineActionRpg.Client.Loading
 
         public LoadBattleSceneTaskInfo CurrentTask { get; private set; }
 
+        // 最近一次收到的开战信息。
+        // BattleBootstrap 在战斗场景里读它，取本玩家的出生点与同伴名单。
+        public BattleStartInfo LastBattleStart { get; private set; }
+
         private void Awake()
         {
             _unityContext = SynchronizationContext.Current;
@@ -152,9 +156,12 @@ namespace OnlineActionRpg.Client.Loading
 
             RaiseOnMainThread(() =>
             {
+                LastBattleStart = info;
+
                 Debug.Log(
                     $"BattleStartNtf received. BattleId={info.BattleId}, " +
-                    $"RoomId={info.RoomId}, ServerStartTime={info.ServerStartTime}");
+                    $"RoomId={info.RoomId}, ServerStartTime={info.ServerStartTime}, " +
+                    $"Players={info.Players.Length}");
 
                 BattleStartReceived?.Invoke(info);
             });
@@ -387,26 +394,107 @@ namespace OnlineActionRpg.Client.Loading
         public readonly string RoomId;
         public readonly long ServerStartTime;
 
+        // 服务端分配的本场成员与出生点。为空时说明对端是旧版本或字段缺失。
+        public readonly BattlePlayerSpawnInfo[] Players;
+
         public bool IsValid =>
             !string.IsNullOrWhiteSpace(BattleId) &&
             !string.IsNullOrWhiteSpace(RoomId) &&
             ServerStartTime > 0;
 
-        private BattleStartInfo(string battleId, string roomId, long serverStartTime)
+        private BattleStartInfo(
+            string battleId,
+            string roomId,
+            long serverStartTime,
+            BattlePlayerSpawnInfo[] players)
         {
             BattleId = battleId ?? string.Empty;
             RoomId = roomId ?? string.Empty;
             ServerStartTime = serverStartTime;
+            Players = players ?? Array.Empty<BattlePlayerSpawnInfo>();
         }
 
         public static BattleStartInfo FromPayload(BattleStartNotificationPayload payload)
         {
             if (payload == null)
             {
-                return new BattleStartInfo(string.Empty, string.Empty, 0);
+                return new BattleStartInfo(string.Empty, string.Empty, 0, null);
             }
 
-            return new BattleStartInfo(payload.battleId, payload.roomId, payload.serverStartTime);
+            BattlePlayerSpawnPayload[] source = payload.players ?? Array.Empty<BattlePlayerSpawnPayload>();
+            BattlePlayerSpawnInfo[] players = new BattlePlayerSpawnInfo[source.Length];
+
+            for (int i = 0; i < source.Length; i++)
+            {
+                players[i] = BattlePlayerSpawnInfo.FromPayload(source[i]);
+            }
+
+            return new BattleStartInfo(payload.battleId, payload.roomId, payload.serverStartTime, players);
+        }
+
+        // 找出本玩家的出生信息。找不到返回 false，调用方应回退到场景里的出生点。
+        public bool TryFindPlayer(string playerId, out BattlePlayerSpawnInfo spawn)
+        {
+            spawn = default;
+
+            if (string.IsNullOrWhiteSpace(playerId) || Players == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Players.Length; i++)
+            {
+                if (string.Equals(Players[i].PlayerId, playerId, StringComparison.OrdinalIgnoreCase))
+                {
+                    spawn = Players[i];
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    // 单个玩家的出生信息，已转换成 Unity 类型，供 BattleBootstrap 直接使用。
+    public readonly struct BattlePlayerSpawnInfo
+    {
+        public readonly string PlayerId;
+        public readonly string Nickname;
+        public readonly int SpawnIndex;
+        public readonly Vector3 Position;
+        public readonly Quaternion Rotation;
+
+        private BattlePlayerSpawnInfo(
+            string playerId,
+            string nickname,
+            int spawnIndex,
+            Vector3 position,
+            Quaternion rotation)
+        {
+            PlayerId = playerId ?? string.Empty;
+            Nickname = nickname ?? string.Empty;
+            SpawnIndex = spawnIndex;
+            Position = position;
+            Rotation = rotation;
+        }
+
+        public static BattlePlayerSpawnInfo FromPayload(BattlePlayerSpawnPayload payload)
+        {
+            if (payload == null)
+            {
+                return default;
+            }
+
+            Vector3 position = payload.position != null
+                ? new Vector3(payload.position.x, payload.position.y, payload.position.z)
+                : Vector3.zero;
+
+            return new BattlePlayerSpawnInfo(
+                payload.playerId,
+                payload.nickname,
+                payload.spawnIndex,
+                position,
+                Quaternion.Euler(0f, payload.yaw, 0f));
         }
     }
 

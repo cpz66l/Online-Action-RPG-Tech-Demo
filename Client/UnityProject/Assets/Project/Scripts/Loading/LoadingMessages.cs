@@ -82,5 +82,26 @@ namespace OnlineActionRpg.Client.Loading
         public string battleId;
         public string roomId;
         public long serverStartTime;
+
+        // 本场战斗的全体成员与各自的出生点。由服务端分配，客户端只负责把人摆到指定位置。
+        public BattlePlayerSpawnPayload[] players;
+    }
+
+    [Serializable]
+    public sealed class BattlePlayerSpawnPayload
+    {
+        public string playerId;
+        public string nickname;
+        public int spawnIndex;
+        public Vector3Payload position;
+        public float yaw;
+    }
+
+    [Serializable]
+    public sealed class Vector3Payload
+    {
+        public float x;
+        public float y;
+        public float z;
     }
 }
