@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using OnlineRpgServer.Account;
+using OnlineRpgServer.Battle;
 using OnlineRpgServer.Connection;
 using OnlineRpgServer.Room;
 using static OnlineRpgServer.Protocol.ProtocolErrors;
@@ -18,17 +19,20 @@ public sealed class MessageRouter
     private readonly AccountService _accountService;
     private readonly RoomService _roomService;
     private readonly ConnectionRegistry _connectionRegistry;
+    private readonly BattleService _battleService;
     private readonly ILogger<MessageRouter> _logger;
 
     public MessageRouter(
         AccountService accountService,
         RoomService roomService,
         ConnectionRegistry connectionRegistry,
+        BattleService battleService,
         ILogger<MessageRouter> logger)
     {
         _accountService = accountService;
         _roomService = roomService;
         _connectionRegistry = connectionRegistry;
+        _battleService = battleService;
         _logger = logger;
     }
 
@@ -531,7 +535,7 @@ public sealed class MessageRouter
     }
 
     //客户端加载完成请求的派发结果，成功时会广播房间状态和战斗开始通知
-    private static MessageDispatchResult CreateClientBattleReadyDispatchResult(
+    private MessageDispatchResult CreateClientBattleReadyDispatchResult(
         ProtocolEnvelope request,
         AccountService accountService,
         RoomService roomService)
@@ -580,13 +584,39 @@ public sealed class MessageRouter
 
         if (result.BattleStarted)
         {
+            // 全员就绪，真正的战斗从这里开始：创建实例、分配出生点、把名单一起下发。
+            // 出生点是服务端分配的，客户端只负责把人摆到指定坐标。
+            List<(string PlayerId, string Nickname)> members = result.Room.Players
+                .Select(player => (player.PlayerId, player.Nickname))
+                .ToList();
+
+            BattleInstance battle = _battleService.CreateBattle(
+                payload.BattleId,
+                payload.RoomId,
+                members);
+
             battleStartDispatch = new BattleStartDispatch(
                 result.Room,
                 new BattleStartNotificationPayload
                 {
                     BattleId = payload.BattleId,
                     RoomId = payload.RoomId,
-                    ServerStartTime = UnixTimeMilliseconds()
+                    ServerStartTime = UnixTimeMilliseconds(),
+                    Players = battle.GetPlayers()
+                        .Select(state => new BattlePlayerSpawnDto
+                        {
+                            PlayerId = state.PlayerId,
+                            Nickname = state.Nickname,
+                            SpawnIndex = state.SpawnIndex,
+                            Position = new BattleVector3Dto
+                            {
+                                X = state.Position.X,
+                                Y = state.Position.Y,
+                                Z = state.Position.Z
+                            },
+                            Yaw = state.Yaw
+                        })
+                        .ToList()
                 });
         }
 

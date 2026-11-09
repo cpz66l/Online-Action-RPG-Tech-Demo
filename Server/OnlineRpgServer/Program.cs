@@ -43,6 +43,7 @@ var messageRouter = new MessageRouter(
     accountService,
     roomService,
     connectionRegistry,
+    battleService,
     app.Services.GetRequiredService<ILogger<MessageRouter>>());
 
 // 广播层：唯一往连接上写业务通知的地方。迭代05 起，BattleService 的 Tick 也从这里广播。

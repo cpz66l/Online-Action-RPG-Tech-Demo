@@ -26,6 +26,12 @@ public sealed class BattleService : IDisposable
     private long _tickCount;
     private long _lastLoggedTick;
 
+    // 战斗实例表。CreateBattle 由连接线程写，FindBattle 将来由 Tick 线程读，因此加锁。
+    private readonly Dictionary<string, BattleInstance> _battlesById =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly object _battleGate = new();
+
     public BattleService(ILogger<BattleService> logger, ConnectionRegistry connectionRegistry)
     {
         _logger = logger;
@@ -60,6 +66,80 @@ public sealed class BattleService : IDisposable
         _timer = null;
 
         _logger.LogInformation("BattleService stopped. TotalTicks={TickCount}", TickCount);
+    }
+
+    // 创建战斗实例并分配出生点。
+    // 由"全员 BattleReady"那一刻调用；一个房间在一场战斗里只会走到这里一次。
+    public BattleInstance CreateBattle(
+        string battleId,
+        string roomId,
+        IReadOnlyList<(string PlayerId, string Nickname)> players)
+    {
+        List<BattlePlayerState> states = new(players.Count);
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            BattleSpawnTable.SpawnPoint spawn = BattleSpawnTable.Get(i);
+
+            states.Add(new BattlePlayerState(
+                players[i].PlayerId,
+                players[i].Nickname,
+                i,
+                spawn.Position,
+                spawn.Yaw));
+        }
+
+        if (players.Count > BattleSpawnTable.Count)
+        {
+            _logger.LogWarning(
+                "Battle {BattleId} has {PlayerCount} players but only {SpawnCount} spawn points; positions will overlap.",
+                battleId,
+                players.Count,
+                BattleSpawnTable.Count);
+        }
+
+        BattleInstance battle = new(battleId, roomId, states);
+
+        lock (_battleGate)
+        {
+            _battlesById[battleId] = battle;
+        }
+
+        _logger.LogInformation(
+            "Battle created. battleId={BattleId}, roomId={RoomId}, players={PlayerCount}, spawns=[{Spawns}]",
+            battleId,
+            roomId,
+            battle.PlayerCount,
+            string.Join(", ", states.Select(state => $"{state.PlayerId}->{state.SpawnIndex}")));
+
+        return battle;
+    }
+
+    public BattleInstance? FindBattle(string battleId)
+    {
+        if (string.IsNullOrWhiteSpace(battleId))
+        {
+            return null;
+        }
+
+        lock (_battleGate)
+        {
+            return _battlesById.TryGetValue(battleId, out BattleInstance? battle) ? battle : null;
+        }
+    }
+
+    // 战斗结束时清理实例。迭代05 只处理"玩家全部离开"，正式结算在迭代06。
+    public bool RemoveBattle(string battleId)
+    {
+        if (string.IsNullOrWhiteSpace(battleId))
+        {
+            return false;
+        }
+
+        lock (_battleGate)
+        {
+            return _battlesById.Remove(battleId);
+        }
     }
 
     private void OnTick(object? state)

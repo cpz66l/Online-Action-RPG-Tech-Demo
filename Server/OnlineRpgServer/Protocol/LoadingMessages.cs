@@ -72,4 +72,41 @@ public sealed class BattleStartNotificationPayload
 
     [JsonPropertyName("serverStartTime")]
     public required long ServerStartTime { get; init; }
+
+    // 本场战斗的全体成员与各自的出生点。
+    // 放进开战通知而不是单独加一条消息：客户端收到就能直接进场景摆人，不用多一次往返。
+    [JsonPropertyName("players")]
+    public required IReadOnlyList<BattlePlayerSpawnDto> Players { get; init; }
+}
+
+// 开战通知里的单个玩家出生信息。
+// 客户端用 playerId 认出自己，用 position / yaw 摆到服务端指定的位置。
+public sealed class BattlePlayerSpawnDto
+{
+    [JsonPropertyName("playerId")]
+    public required string PlayerId { get; init; }
+
+    [JsonPropertyName("nickname")]
+    public required string Nickname { get; init; }
+
+    [JsonPropertyName("spawnIndex")]
+    public required int SpawnIndex { get; init; }
+
+    [JsonPropertyName("position")]
+    public required BattleVector3Dto Position { get; init; }
+
+    [JsonPropertyName("yaw")]
+    public required float Yaw { get; init; }
+}
+
+public sealed class BattleVector3Dto
+{
+    [JsonPropertyName("x")]
+    public required float X { get; init; }
+
+    [JsonPropertyName("y")]
+    public required float Y { get; init; }
+
+    [JsonPropertyName("z")]
+    public required float Z { get; init; }
 }
