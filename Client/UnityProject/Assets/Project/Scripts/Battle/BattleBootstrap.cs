@@ -240,6 +240,7 @@ namespace OnlineActionRpg.Client.Battle
             Debug.Log($"Local player spawned. PlayerId={CurrentContext.LocalPlayerId}, " +
                       $"Source={spawnSource}, Position={spawnPosition}");
 
+            //先生成本地玩家，再生成远端玩家，避免远端玩家在本地玩家还没生成时就尝试锁定本地玩家。
             SpawnRemotePlayers();
         }
 

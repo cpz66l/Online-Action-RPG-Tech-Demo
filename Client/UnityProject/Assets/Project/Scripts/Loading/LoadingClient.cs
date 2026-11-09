@@ -414,6 +414,7 @@ namespace OnlineActionRpg.Client.Loading
             Players = players ?? Array.Empty<BattlePlayerSpawnInfo>();
         }
 
+        // 从服务器传来的 BattleStartNotificationPayload 组装 BattleStartInfo 实例。
         public static BattleStartInfo FromPayload(BattleStartNotificationPayload payload)
         {
             if (payload == null)

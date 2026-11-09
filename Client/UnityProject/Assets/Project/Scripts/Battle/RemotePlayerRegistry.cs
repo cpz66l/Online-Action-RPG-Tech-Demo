@@ -49,6 +49,7 @@ namespace OnlineActionRpg.Client.Battle
                 GameObject instance = UnityEngine.Object.Instantiate(prefab, spawn.Position, spawn.Rotation);
                 instance.name = $"RemotePlayer_{spawn.Nickname}";
 
+                //禁用掉本地玩家专用组件，否则远端玩家会跟着本地玩家一起走。
                 DisableLocalOnlyComponents(instance);
 
                 _byPlayerId[spawn.PlayerId] = instance;
@@ -58,6 +59,7 @@ namespace OnlineActionRpg.Client.Battle
             return spawned;
         }
 
+        // 查找远端玩家对象，找不到返回 null。
         public GameObject Find(string playerId)
         {
             if (string.IsNullOrWhiteSpace(playerId))
@@ -70,6 +72,7 @@ namespace OnlineActionRpg.Client.Battle
 
         public void Clear()
         {
+            // 销毁所有远端玩家对象实例。
             foreach (GameObject instance in _byPlayerId.Values)
             {
                 if (instance != null)
